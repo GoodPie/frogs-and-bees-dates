@@ -1,59 +1,19 @@
-This project was bootstrapped with
-[Create React App](https://github.com/facebook/create-react-app).
+[![Build Status](https://github.com/GoodPie/frogs-and-bees-dates/actions/workflows/firebase-hosting-merge.yml/badge.svg)](https://github.com/GoodPie/frogs-and-bees-dates/actions/workflows/firebase-hosting-merge.yml)\
 
-## Available Scripts
 
-In the project directory, you can run:
 
-### `yarn start`
+# Frog'n'Bee
 
-Runs the app in the development mode.<br /> Open
-[http://localhost:3000](http://localhost:3000) to view it in the browser.
+[Frog'n'Bee](https://frognbee.com)
 
-The page will reload if you make edits.<br /> You will also see any lint errors
-in the console.
+This application was designed to allow me and my partner to take the thinking out of dates. We can plot down some ideas at any time we think of something we want to do together and when it comes up to a date night or we are bored, we can go through our ideas.
 
-### `yarn test`
+## Initializing
 
-Launches the test runner in the interactive watch mode.<br /> See the section
-about
-[running tests](https://facebook.github.io/create-react-app/docs/running-tests)
-for more information.
+1. `yarn && yarn build`
 
-### `yarn build`
+## Some Notes
 
-Builds the app for production to the `build` folder.<br /> It correctly bundles
-React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br /> Your app is
-ready to be deployed!
-
-See the section about
-[deployment](https://facebook.github.io/create-react-app/docs/deployment) for
-more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can
-`eject` at any time. This command will remove the single build dependency from
-your project.
-
-Instead, it will copy all the configuration files and the transitive
-dependencies (webpack, Babel, ESLint, etc) right into your project so you have
-full control over them. All of the commands except `eject` will still work, but
-they will point to the copied scripts so you can tweak them. At this point
-you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for
-small and middle deployments, and you shouldn’t feel obligated to use this
-feature. However we understand that this tool wouldn’t be useful if you couldn’t
-customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the
-[Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+- This repository is public so that I can take advantage of some cool features on GitHub and some external tools
+- It is intended to be used by me and my partner and I have Firebase rules in place to prevent other users reading or writing
+- Frog'n'Bee was used because it's our two favourite creatures

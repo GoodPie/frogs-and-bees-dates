@@ -62,7 +62,7 @@ const InputAutocomplete = (props: IInputAutoCompleteProps) => {
     }
 
     return (
-        <Box width={"50%"}>
+        <Box width={"80%"}>
             {currentlySelected.length >= MAX_OPTIONS &&
                 <Center>
                     <Text size={"lg"} mb={4} colorScheme={"red"}>Only 10 filters at a time please 😘</Text>
@@ -93,7 +93,7 @@ const InputAutocomplete = (props: IInputAutoCompleteProps) => {
 
                     })}
 
-                    {searchInput.length <= 2 && props.options.filter((option) => !currentlySelected.includes(option)).slice(0, 20).map((option) => {
+                    {searchInput.length <= 2 && props.options.filter((option) => !currentlySelected.includes(option)).slice(0, 5).map((option) => {
                         if (currentlySelected.includes(option) === false) {
                             return <InputAutocompleteOption key={option} onClick={AddTag} text={option}
                                                             isSelected={false}/>

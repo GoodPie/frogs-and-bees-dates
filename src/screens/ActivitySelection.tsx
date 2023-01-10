@@ -80,7 +80,7 @@ const ActivitySelection = () => {
 
     const GetActivityFromTags = async (selectedTags: string[]) => {
         const queryClauses = [];
-        queryClauses.push(where("tags", "array-contains", selectedTags));
+        queryClauses.push(where("tags", "array-contains-any", selectedTags));
         setShowingCustomFilters(false);
         setActivityStep(2);
         await RunActivityQuery(queryClauses);
@@ -216,14 +216,14 @@ const ActivitySelection = () => {
                 <VStack spacing={6}>
                     {invalidResult &&
                         <VStack spacing={2}>
-                            <Heading colorScheme={"red"}>No Activities Found</Heading>
-                            <Heading size={"sm"}>Try using different filters</Heading>
+                            <Heading textAlign={"center"} colorScheme={"red"}>No Activities Found</Heading>
+                            <Heading textAlign={"center"} size={"sm"}>Try using different filters</Heading>
                         </VStack>
                     }
                     {!invalidResult &&
                         <VStack spacing={2}>
-                            <Heading>{selectedActivity.name}</Heading>
-                            <Heading size={"md"}>{selectedActivity.description}</Heading>
+                            <Heading textAlign={"center"}>{selectedActivity.name}</Heading>
+                            <Heading textAlign={"center"} size={"md"}>{selectedActivity.description}</Heading>
                         </VStack>
                     }
                     <Button onClick={ResetActivitySelection} leftIcon={<Icon as={BsArrowCounterclockwise}/>}

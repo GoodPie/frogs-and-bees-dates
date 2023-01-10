@@ -27,6 +27,7 @@ import {db} from "../FirebaseConfig";
 
 export interface IAddNewActivityProps {
     availableActivities: string[];
+    onAdded: () => void
 }
 
 
@@ -87,6 +88,8 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
         setActivityName("");
 
         onClose();
+
+        props.onAdded();
     }
 
     const OnNameChange = (e: ChangeEvent<HTMLInputElement>) => {

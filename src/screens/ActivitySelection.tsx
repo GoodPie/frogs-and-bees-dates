@@ -29,7 +29,10 @@ const ActivitySelection = () => {
     const [availableTags, setAvailableTags] = useState([] as string[]);
 
     useEffect(() => {
+        RefreshTags();
+    }, []);
 
+    const RefreshTags = () => {
         // Get all the available tags from Firebase
         try {
 
@@ -46,10 +49,11 @@ const ActivitySelection = () => {
             console.error(e);
         }
 
+    }
 
-    }, []);
+    const GetAnActivity = () => {
 
-
+    }
 
     /**
      * Renders the type of activity we would like to partake in
@@ -134,7 +138,7 @@ const ActivitySelection = () => {
             {activityStep === 1 && !showingCustomFilters && <RenderActivityTimeSelect/>}
             {showingCustomFilters && <InputAutocomplete options={availableTags}/>}
 
-            <AddNewActivity availableActivities={availableTags}/>
+            <AddNewActivity onAdded={RefreshTags} availableActivities={availableTags}/>
         </VStack>
 
     )

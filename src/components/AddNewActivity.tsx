@@ -25,7 +25,12 @@ import ActivityTime from "../enums/ActivityTime";
 import {collection, doc, getDoc, getDocs, setDoc} from "firebase/firestore";
 import {db} from "../FirebaseConfig";
 
-const AddNewActivity = () => {
+export interface IAddNewActivityProps {
+    availableActivities: string[];
+}
+
+
+const AddNewActivity = (props: IAddNewActivityProps) => {
 
     const {isOpen, onOpen, onClose} = useDisclosure();
     const [createStep, setCreateStep] = useState(0);
@@ -36,33 +41,7 @@ const AddNewActivity = () => {
     const [currentTag, setCurrentTag] = useState("");
     const [isAdding, setIsAdding] = useState(false);
 
-    const [availableTags, setAvailableTags] = useState([] as string[]);
 
-    useEffect(() => {
-
-        // Get all the available tags from Firebase
-        try {
-
-            const docRef = collection(db, "tags");
-            getDocs(docRef).then((querySnapshot) => {
-
-                const allTags: string[] = [];
-
-                querySnapshot.forEach((doc) => {
-                    allTags.push(doc.id as string);
-                })
-
-                setAvailableTags(allTags);
-                console.log(allTags)
-            });
-
-
-        } catch (e) {
-            console.error(e);
-        }
-
-
-    }, []);
 
 
     const AddActivity = async () => {

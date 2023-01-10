@@ -18,6 +18,8 @@ export const App = () => {
 
     const [isSignedIn, setIsSignedIn] = useState(!!(auth.currentUser ?? false));
 
+
+
     useEffect(() => {
         auth.onAuthStateChanged((authState) => {
             setIsSignedIn(!!authState);

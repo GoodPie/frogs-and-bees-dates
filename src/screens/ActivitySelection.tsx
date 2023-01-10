@@ -1,10 +1,13 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Button, Icon, VStack} from "@chakra-ui/react";
 import {RiRestaurant2Fill} from "react-icons/ri";
 import {MdLocalActivity} from "react-icons/md";
 import {WiSunrise, WiDaySunny, WiMoonrise} from "react-icons/wi";
 import {BsFilter} from "react-icons/bs";
 import AddNewActivity from "../components/AddNewActivity";
+import InputAutocomplete from "../components/InputAutocomplete";
+import {collection, getDocs} from "firebase/firestore";
+import {db} from "../FirebaseConfig";
 
 interface ActivityType {
     FOOD: 0,
@@ -23,6 +26,29 @@ const ActivitySelection = () => {
     const [currentFilters, setCurrentFilters] = useState({});
     const [showingCustomFilters, setShowingCustomFilters] = useState(false);
     const [activityStep, setActivityStep] = useState(0);
+    const [availableTags, setAvailableTags] = useState([] as string[]);
+
+    useEffect(() => {
+
+        // Get all the available tags from Firebase
+        try {
+
+            const docRef = collection(db, "tags");
+            getDocs(docRef).then((querySnapshot) => {
+                const allTags: string[] = [];
+                querySnapshot.forEach((doc) => {
+                    allTags.push(doc.id as string);
+                })
+                setAvailableTags(allTags);
+            });
+
+        } catch (e) {
+            console.error(e);
+        }
+
+
+    }, []);
+
 
 
     /**
@@ -56,7 +82,7 @@ const ActivitySelection = () => {
                     Activity
                 </Button>
 
-                <Button onClick={() => OnUseFilterClick()} w={"100%"} leftIcon={<Icon as={BsFilter}/>} colorScheme={"green"}
+                <Button onClick={() => setShowingCustomFilters(true)} w={"100%"} leftIcon={<Icon as={BsFilter}/>} colorScheme={"green"}
                         size={"lg"}>
                     Use Filters
                 </Button>
@@ -104,11 +130,11 @@ const ActivitySelection = () => {
 
     return (
         <VStack w={"80%"}>
-            {activityStep === 0 && <RenderActivityTypeSelect/>}
-            {activityStep === 1 && <RenderActivityTimeSelect/>}
-            {activityStep === 2 && <RenderActivityTimeSelect/>}
+            {activityStep === 0 && !showingCustomFilters && <RenderActivityTypeSelect/>}
+            {activityStep === 1 && !showingCustomFilters && <RenderActivityTimeSelect/>}
+            {showingCustomFilters && <InputAutocomplete options={availableTags}/>}
 
-            <AddNewActivity/>
+            <AddNewActivity availableActivities={availableTags}/>
         </VStack>
 
     )

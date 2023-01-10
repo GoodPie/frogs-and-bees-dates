@@ -3,7 +3,7 @@ import {Button, Heading, Icon, Spinner, VStack} from "@chakra-ui/react";
 import {RiRestaurant2Fill} from "react-icons/ri";
 import {MdLocalActivity} from "react-icons/md";
 import {WiDaySunny, WiMoonrise, WiSunrise} from "react-icons/wi";
-import {BsFilter, BsArrowLeft, BsArrowCounterclockwise} from "react-icons/bs";
+import {BsArrowCounterclockwise, BsArrowLeft, BsFilter} from "react-icons/bs";
 import AddNewActivity from "../components/AddNewActivity";
 import InputAutocomplete from "../components/InputAutocomplete";
 import {collection, getDocs, query, QueryFieldFilterConstraint, where} from "firebase/firestore";

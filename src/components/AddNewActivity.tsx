@@ -1,6 +1,7 @@
-import React, {ChangeEvent, KeyboardEvent, useEffect, useState} from "react";
+import React, {ChangeEvent, KeyboardEvent, useState} from "react";
 import {
-    Button, Flex, FormControl, FormLabel, HStack,
+    Button,
+    Flex,
     Icon,
     IconButton,
     Input,
@@ -10,8 +11,10 @@ import {
     ModalContent,
     ModalFooter,
     ModalHeader,
-    ModalOverlay, SimpleGrid, Tag, TagLabel,
-    Text, Textarea,
+    ModalOverlay,
+    Tag,
+    Text,
+    Textarea,
     useDisclosure,
     VStack
 } from "@chakra-ui/react";
@@ -22,7 +25,7 @@ import {RiRestaurant2Fill} from "react-icons/ri";
 import {MdLocalActivity} from "react-icons/md";
 import ActivityType from "../enums/ActivityType";
 import ActivityTime from "../enums/ActivityTime";
-import {collection, doc, getDoc, getDocs, setDoc} from "firebase/firestore";
+import {doc, setDoc} from "firebase/firestore";
 import {db} from "../FirebaseConfig";
 
 export interface IAddNewActivityProps {
@@ -202,7 +205,6 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
         )
     }
 
-
     return (
         <>
             <IconButton colorScheme={"green"} id={"add-activity-button"} aria-label={"Add new activity"} size={"lg"}
@@ -221,7 +223,8 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
                         {createStep === ActivitySteps.DESCRIPTION &&
                             <VStack>
                                 <Text>{activityName}</Text>
-                                <Textarea value={activityDescription} onChange={OnDescriptionChange} placeholder='Add some details'></Textarea>
+                                <Textarea value={activityDescription} onChange={OnDescriptionChange}
+                                          placeholder='Add some details'></Textarea>
                             </VStack>
                         }
                         {createStep === ActivitySteps.TYPE && <RenderActivityType/>}
@@ -245,11 +248,14 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
                     </ModalBody>
 
                     <ModalFooter>
-                        <Button display={createStep === ActivitySteps.NAME || createStep == ActivitySteps.DESCRIPTION ? "block" : "none"} onClick={GoToNextStep}
-                                rightIcon={<Icon as={BsArrowRight}/>} colorScheme='green'>
+                        <Button
+                            display={createStep === ActivitySteps.NAME || createStep === ActivitySteps.DESCRIPTION ? "block" : "none"}
+                            onClick={GoToNextStep}
+                            rightIcon={<Icon as={BsArrowRight}/>} colorScheme='green'>
                             Next
                         </Button>
-                        <Button isLoading={isAdding} display={createStep === ActivitySteps.TAGS ? "block" : "none"} onClick={AddActivity}
+                        <Button isLoading={isAdding} display={createStep === ActivitySteps.TAGS ? "block" : "none"}
+                                onClick={AddActivity}
                                 rightIcon={<Icon as={BsArrowRight}/>} colorScheme='green'>
                             Add Activity
                         </Button>

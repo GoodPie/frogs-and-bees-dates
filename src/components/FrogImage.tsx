@@ -1,5 +1,4 @@
 import React, {useState} from "react";
-import {css, jsx} from "@emotion/react";
 
 
 const FrogImage = () => {
@@ -8,11 +7,11 @@ const FrogImage = () => {
     // We will just use basic index to load them for now
     const MAX_FROG_IMAGES = 3;
 
-    const [index, setIndex] = useState(Math.floor(Math.random() * 3) + 1);
+    const [index] = useState(Math.floor(Math.random() * MAX_FROG_IMAGES) + 1);
 
     return (
         <div  id={"frog-image"}>
-            <img src={`imgs/frog_0${index}.png`} alt={"Frog Image Here"}/>
+            <img src={`imgs/frog_0${index}.png`} alt={"Frog Here"}/>
         </div>
     )
 

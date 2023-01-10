@@ -1,19 +1,5 @@
-import {
-    Badge,
-    Box,
-    Button, Center,
-    Flex,
-    Grid,
-    HStack,
-    Icon,
-    IconButton,
-    Input,
-    Select,
-    SimpleGrid,
-    Text,
-    VStack
-} from "@chakra-ui/react";
-import React, {ChangeEvent, EventHandler, useState} from "react";
+import {Badge, Box, Button, Center, Flex, HStack, Icon, Input, Text} from "@chakra-ui/react";
+import React, {ChangeEvent, useState} from "react";
 import {BsArrowRight} from "react-icons/bs";
 
 export interface IInputAutoCompleteProps {
@@ -86,18 +72,19 @@ const InputAutocomplete = (props: IInputAutoCompleteProps) => {
                     })}
 
                     {searchInput.length > 2 && props.options.map((option) => {
-                        if (option.toLowerCase().includes(searchInput.toLowerCase()) && currentlySelected.includes(option) === false) {
+                        if (option.toLowerCase().includes(searchInput.toLowerCase()) && !currentlySelected.includes(option)) {
                             return <InputAutocompleteOption key={option} onClick={AddTag} text={option}
                                                             isSelected={false}/>
                         }
-
+                        return null;
                     })}
 
                     {searchInput.length <= 2 && props.options.filter((option) => !currentlySelected.includes(option)).slice(0, 5).map((option) => {
-                        if (currentlySelected.includes(option) === false) {
+                        if (!currentlySelected.includes(option)) {
                             return <InputAutocompleteOption key={option} onClick={AddTag} text={option}
                                                             isSelected={false}/>
                         }
+                        return null;
                     })}
 
 

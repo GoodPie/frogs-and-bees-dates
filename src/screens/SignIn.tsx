@@ -1,8 +1,7 @@
 import {Button, Icon} from "@chakra-ui/react";
-import { signInWithPopup } from "firebase/auth";
+import {GoogleAuthProvider, signInWithPopup} from "firebase/auth";
 import {HiHeart} from "react-icons/hi";
 import {auth} from "../FirebaseConfig";
-import { GoogleAuthProvider } from "firebase/auth";
 
 
 const SignIn = () => {

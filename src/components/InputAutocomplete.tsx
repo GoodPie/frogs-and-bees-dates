@@ -40,7 +40,6 @@ const InputAutocomplete = (props: IInputAutoCompleteProps) => {
         if (currentlySelected.length < MAX_OPTIONS) {
             setCurrentlySelected([...currentlySelected, tag]);
         }
-
     }
 
     const RemoveTag = (tag: string) => {
@@ -55,10 +54,8 @@ const InputAutocomplete = (props: IInputAutoCompleteProps) => {
                 </Center>
             }
             <HStack mb={3} spacing={0}>
-
-
-                <Input roundedRight={0} type={"text"} onChange={UpdateSearchInput} value={searchInput}/>
-                <Button onClick={() => props.onSubmit(currentlySelected)} px={8} roundedLeft={0}
+                <Input placeholder={"Type here for more tags"} roundedRight={0} type={"text"} onChange={UpdateSearchInput} value={searchInput}/>
+                <Button disabled={currentlySelected.length === 0} onClick={() => props.onSubmit(currentlySelected)} px={8} roundedLeft={0}
                         rightIcon={<Icon as={BsArrowRight}/>} aria-label={"Search"} colorScheme={"green"}>Get
                     Activity</Button>
             </HStack>

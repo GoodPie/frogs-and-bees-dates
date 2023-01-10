@@ -1,7 +1,4 @@
-[![Build Status](https://github.com/GoodPie/frogs-and-bees-dates/actions/workflows/firebase-hosting-merge.yml/badge.svg)](https://github.com/GoodPie/frogs-and-bees-dates/actions/workflows/firebase-hosting-merge.yml)\
-
-
-
+[![Build Status](https://github.com/GoodPie/frogs-and-bees-dates/actions/workflows/firebase-hosting-merge.yml/badge.svg)](https://github.com/GoodPie/frogs-and-bees-dates/actions/workflows/firebase-hosting-merge.yml)
 # Frog'n'Bee
 
 [Frog'n'Bee](https://frognbee.com)

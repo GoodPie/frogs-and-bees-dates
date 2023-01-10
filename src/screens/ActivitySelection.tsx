@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import {Button, Icon, VStack} from "@chakra-ui/react";
+import {Button, Heading, Icon, Spinner, VStack} from "@chakra-ui/react";
 import {RiRestaurant2Fill} from "react-icons/ri";
 import {MdLocalActivity} from "react-icons/md";
 import {WiDaySunny, WiMoonrise, WiSunrise} from "react-icons/wi";
@@ -23,6 +23,8 @@ const ActivitySelection = () => {
     const [showingCustomFilters, setShowingCustomFilters] = useState(false);
     const [activityStep, setActivityStep] = useState(0);
     const [availableTags, setAvailableTags] = useState([] as string[]);
+    const [loadingResult, setIsLoadingResult] = useState(false);
+    const [selectedActivity, setSelectedActivity] = useState("");
 
     useEffect(() => {
         RefreshTags();
@@ -50,105 +52,113 @@ const ActivitySelection = () => {
 
     }
 
-    const GetAnActivity = async () => {
-        console.log(currentFilters)
+    const GetAnActivity = async (filters: IActivityFilters) => {
+        console.log(filters)
+        const queryClauses = [];
+        if (filters.time !== ActivityTime.ANYTIME) {
+            queryClauses.push(where("time", "==", filters.time as number));
+        }
+
+        queryClauses.push(where("type", "==", filters.type as number));
+
         // Filter based on our current selection
         const activityRef = collection(db, "activities");
-        const activityQuery = query(activityRef,
-            where("time", "==", currentFilters.time as number),
-            where("type", "==", currentFilters.type as number));
+        const activityQuery = query(activityRef, ...queryClauses);
 
         const querySnapshot = await getDocs(activityQuery);
-        querySnapshot.forEach((doc) => {
-            console.log(doc.id, " => ", doc.data());
-        });
-
-    }
-
-    /**
-     * Renders the type of activity we would like to partake in
-     */
-    const RenderActivityTypeSelect = () => {
-
-        const OnActivityTypeSelect = (activityType: ActivityType) => {
-
-            // Reset all filters
-            const filters = {type: activityType} as IActivityFilters;
-            setCurrentFilters(filters);
-
-            const nextStep = activityStep + 1;
-            setActivityStep(nextStep);
-        };
-
-        const OnUseFilterClick = () => {
-            setShowingCustomFilters(true);
+        if (querySnapshot.size > 0) {
+            // We have at least one activity
+            const randomIndex = Math.floor(Math.random() * querySnapshot.size);
+            const randomActivity = querySnapshot.docs[randomIndex];
+            console.log(randomActivity.data());
+            setSelectedActivity(randomActivity.data().name)
+        } else {
+            console.log("No activities found");
         }
 
-        return (
-            <>
-                <Button onClick={() => OnActivityTypeSelect(ActivityType.ACTIVITY)} leftIcon={<Icon as={RiRestaurant2Fill}/>} w={"100%"} colorScheme={"green"} variant={"outline"}
-                        size={"lg"}>
-                    Food
-                </Button>
 
-                <Button onClick={() => OnActivityTypeSelect(ActivityType.FOOD)} w={"100%"} leftIcon={<Icon as={MdLocalActivity}/>} colorScheme={"green"} variant={"outline"}
-                        size={"lg"}>
-                    Activity
-                </Button>
-
-                <Button onClick={() => setShowingCustomFilters(true)} w={"100%"} leftIcon={<Icon as={BsFilter}/>} colorScheme={"green"}
-                        size={"lg"}>
-                    Use Filters
-                </Button>
-            </>
-
-        )
+        setIsLoadingResult(false);
     }
 
-    /**
-     * Renders the time we want to take part in the activity
-     */
-    const RenderActivityTimeSelect = () => {
+    const OnActivityTimeSelect = async (activityTime: ActivityTime) => {
 
+        // Append to filters
+        const filters = {...currentFilters, time: activityTime};
+        await setCurrentFilters(filters);
 
-        const OnActivityTimeSelect = (activityTime: ActivityTime) => {
+        const nextStep = activityStep + 1;
+        await setActivityStep(nextStep);
 
-            // Append to filters
-            const filters = {...currentFilters, time: activityTime};
-            setCurrentFilters(filters);
-
-            const nextStep = activityStep + 1;
-            setActivityStep(nextStep);
-        }
-
-        return (
-            <>
-                <Button onClick={() => OnActivityTimeSelect(ActivityTime.MORNING)} leftIcon={<Icon as={WiSunrise}/>} w={"100%"} colorScheme={"green"} variant={"outline"}
-                        size={"lg"}>
-                    Morning
-                </Button>
-
-                <Button onClick={() => OnActivityTimeSelect(ActivityTime.AFTERNOON)} w={"100%"} leftIcon={<Icon as={WiDaySunny}/>} colorScheme={"green"} variant={"outline"}
-                        size={"lg"}>
-                    Noon
-                </Button>
-
-                <Button onClick={() => OnActivityTimeSelect(ActivityTime.EVENING)} w={"100%"} leftIcon={<Icon as={WiMoonrise}/>} colorScheme={"green"} variant={"outline"}
-                        size={"lg"}>
-                    Afternoon
-                </Button>
-            </>
-        )
+        await setIsLoadingResult(true);
+        await GetAnActivity(filters);
     }
+
+    const OnActivityTypeSelect = (activityType: ActivityType) => {
+
+        // Reset all filters
+        const filters = {type: activityType} as IActivityFilters;
+        setCurrentFilters(filters);
+
+        const nextStep = activityStep + 1;
+        setActivityStep(nextStep);
+    };
 
 
     return (
         <VStack w={"80%"}>
-            {activityStep === 0 && !showingCustomFilters && <RenderActivityTypeSelect/>}
-            {activityStep === 1 && !showingCustomFilters && <RenderActivityTimeSelect/>}
+            {activityStep === 0 && !showingCustomFilters &&
+                <>
+                    <Button onClick={() => OnActivityTypeSelect(ActivityType.FOOD)}
+                            leftIcon={<Icon as={RiRestaurant2Fill}/>} w={"100%"} colorScheme={"green"}
+                            variant={"outline"}
+                            size={"lg"}>
+                        Food
+                    </Button>
+
+                    <Button onClick={() => OnActivityTypeSelect(ActivityType.ACTIVITY)} w={"100%"}
+                            leftIcon={<Icon as={MdLocalActivity}/>} colorScheme={"green"} variant={"outline"}
+                            size={"lg"}>
+                        Activity
+                    </Button>
+
+                    <Button onClick={() => setShowingCustomFilters(true)} w={"100%"} leftIcon={<Icon as={BsFilter}/>}
+                            colorScheme={"green"}
+                            size={"lg"}>
+                        Use Filters
+                    </Button>
+                </>
+            }
+            {activityStep === 1 && !showingCustomFilters &&
+                <>
+                    <Button onClick={() => OnActivityTimeSelect(ActivityTime.MORNING)} leftIcon={<Icon as={WiSunrise}/>}
+                            w={"100%"} colorScheme={"green"} variant={"outline"}
+                            size={"lg"}>
+                        Morning
+                    </Button>
+
+                    <Button onClick={() => OnActivityTimeSelect(ActivityTime.AFTERNOON)} w={"100%"}
+                            leftIcon={<Icon as={WiDaySunny}/>} colorScheme={"green"} variant={"outline"}
+                            size={"lg"}>
+                        Afternoon
+                    </Button>
+
+                    <Button onClick={() => OnActivityTimeSelect(ActivityTime.EVENING)} w={"100%"}
+                            leftIcon={<Icon as={WiMoonrise}/>} colorScheme={"green"} variant={"outline"}
+                            size={"lg"}>
+                        Evening
+                    </Button>
+
+                    <Button onClick={() => OnActivityTimeSelect(ActivityTime.ANYTIME)} w={"100%"}
+                            colorScheme={"green"} variant={"outline"}
+                            size={"lg"}>
+                        Anytime
+                    </Button>
+                </>
+            }
             {showingCustomFilters && <InputAutocomplete options={availableTags}/>}
 
-            {activityStep === 2 && <Button onClick={GetAnActivity}>Get Activity</Button>}
+            {activityStep === 2 && loadingResult && <Spinner colorScheme={"green"}/>}
+            {activityStep === 2 && !loadingResult && <Heading>{selectedActivity}</Heading>}
 
             <AddNewActivity onAdded={RefreshTags} availableActivities={availableTags}/>
         </VStack>

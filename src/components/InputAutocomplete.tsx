@@ -2,13 +2,15 @@ import {Badge, Box, Button, Flex, Grid, HStack, Icon, IconButton, Input, Select,
 import React, {ChangeEvent, EventHandler, useState} from "react";
 import {BsArrowRight} from "react-icons/bs";
 export interface IInputAutoCompleteProps  {
-    options: string[]
+    options: string[];
+    onSubmit: (options: string[]) => void
 }
 
 interface IOption {
     text: string,
     isSelected?: boolean,
-    onClick: (tag: string) => void
+    onClick: (tag: string) => void;
+
 }
 
 const InputAutocompleteOption = (props: IOption) => {
@@ -42,7 +44,7 @@ const InputAutocomplete = (props: IInputAutoCompleteProps) => {
         <Box>
             <HStack mb={3} spacing={0}>
                 <Input roundedRight={0} type={"text"} onChange={UpdateSearchInput} value={searchInput} />
-                <Button px={8} roundedLeft={0} rightIcon={<Icon as={BsArrowRight} /> } aria-label={"Search"} colorScheme={"green"}>Get Activity</Button>
+                <Button onClick={() => props.onSubmit(currentlySelected)} px={8} roundedLeft={0} rightIcon={<Icon as={BsArrowRight} /> } aria-label={"Search"} colorScheme={"green"}>Get Activity</Button>
             </HStack>
 
             {

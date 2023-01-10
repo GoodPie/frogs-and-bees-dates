@@ -27,7 +27,8 @@ import {db} from "../FirebaseConfig";
 
 export interface IAddNewActivityProps {
     availableActivities: string[];
-    onAdded: () => void
+    onAdded: () => void;
+
 }
 
 

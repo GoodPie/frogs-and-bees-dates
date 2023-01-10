@@ -3,10 +3,10 @@ import {Button, Heading, Icon, Spinner, VStack} from "@chakra-ui/react";
 import {RiRestaurant2Fill} from "react-icons/ri";
 import {MdLocalActivity} from "react-icons/md";
 import {WiDaySunny, WiMoonrise, WiSunrise} from "react-icons/wi";
-import {BsFilter} from "react-icons/bs";
+import {BsFilter, BsArrowLeft, BsArrowCounterclockwise} from "react-icons/bs";
 import AddNewActivity from "../components/AddNewActivity";
 import InputAutocomplete from "../components/InputAutocomplete";
-import {collection, getDocs, query, where} from "firebase/firestore";
+import {collection, getDocs, query, QueryFieldFilterConstraint, where} from "firebase/firestore";
 import {db} from "../FirebaseConfig";
 import ActivityType from "../enums/ActivityType";
 import ActivityTime from "../enums/ActivityTime";
@@ -25,6 +25,7 @@ const ActivitySelection = () => {
     const [availableTags, setAvailableTags] = useState([] as string[]);
     const [loadingResult, setIsLoadingResult] = useState(false);
     const [selectedActivity, setSelectedActivity] = useState("");
+    const [invalidResult, setInvalidResult] = useState(false);
 
     useEffect(() => {
         RefreshTags();
@@ -52,47 +53,62 @@ const ActivitySelection = () => {
 
     }
 
-    const GetAnActivity = async (filters: IActivityFilters) => {
-        console.log(filters)
+    /**
+     * Gets the activities that match the current filters from Firebase
+     * @param filters
+     */
+    const GetAnActivityBasicFilters = async (filters: IActivityFilters) => {
+
         const queryClauses = [];
+
+        // Only apply a time filter if we're looking for something time specific
         if (filters.time !== ActivityTime.ANYTIME) {
             queryClauses.push(where("time", "==", filters.time as number));
         }
 
         queryClauses.push(where("type", "==", filters.type as number));
+        await RunActivityQuery(queryClauses);
+    }
+
+
+    const GetActivityFromTags = async (selectedTags: string[]) => {
+        const queryClauses = [];
+        queryClauses.push(where("tags", "array-contains-any", selectedTags));
+        setShowingCustomFilters(false);
+        setActivityStep(2);
+        await RunActivityQuery(queryClauses);
+    }
+
+    const RunActivityQuery = async (queryClauses: QueryFieldFilterConstraint[]) => {
+        setInvalidResult(false);
+        setIsLoadingResult(true);
 
         // Filter based on our current selection
         const activityRef = collection(db, "activities");
         const activityQuery = query(activityRef, ...queryClauses);
 
         const querySnapshot = await getDocs(activityQuery);
-        if (querySnapshot.size > 0) {
-            // We have at least one activity
-            const randomIndex = Math.floor(Math.random() * querySnapshot.size);
-            const randomActivity = querySnapshot.docs[randomIndex];
-            console.log(randomActivity.data());
-            setSelectedActivity(randomActivity.data().name)
-        } else {
-            console.log("No activities found");
+
+        if (querySnapshot.size === 0) {
+            setIsLoadingResult(false);
+            setInvalidResult(true);
+            return;
         }
 
-
+        // We have at least one activity
+        const randomIndex = Math.floor(Math.random() * querySnapshot.size);
+        const randomActivity = querySnapshot.docs[randomIndex];
+        console.log(randomActivity.data());
+        setSelectedActivity(randomActivity.data().name)
         setIsLoadingResult(false);
+
     }
 
-    const OnActivityTimeSelect = async (activityTime: ActivityTime) => {
-
-        // Append to filters
-        const filters = {...currentFilters, time: activityTime};
-        await setCurrentFilters(filters);
-
-        const nextStep = activityStep + 1;
-        await setActivityStep(nextStep);
-
-        await setIsLoadingResult(true);
-        await GetAnActivity(filters);
-    }
-
+    /**
+     * Select an activity type and apply it to the filters
+     * This will reset the filters as this is the first step
+     * @param activityType
+     */
     const OnActivityTypeSelect = (activityType: ActivityType) => {
 
         // Reset all filters
@@ -103,6 +119,29 @@ const ActivitySelection = () => {
         setActivityStep(nextStep);
     };
 
+    /**
+     * Select an activity time and apply it to the filters
+     * This will also trigger the activity selection as it's the last step
+     * @param activityTime
+     */
+    const OnActivityTimeSelect = async (activityTime: ActivityTime) => {
+
+        // Append to filters
+        const filters = {...currentFilters, time: activityTime};
+        await setCurrentFilters(filters);
+
+        const nextStep = activityStep + 1;
+        await setActivityStep(nextStep);
+
+        await setIsLoadingResult(true);
+        await GetAnActivityBasicFilters(filters);
+    }
+
+    const ResetActivitySelection = () => {
+        setActivityStep(0);
+        setSelectedActivity("");
+        setCurrentFilters({} as IActivityFilters);
+    }
 
     return (
         <VStack w={"80%"}>
@@ -149,16 +188,34 @@ const ActivitySelection = () => {
                     </Button>
 
                     <Button onClick={() => OnActivityTimeSelect(ActivityTime.ANYTIME)} w={"100%"}
-                            colorScheme={"green"} variant={"outline"}
+                            colorScheme={"green"} variant={"solid"}
                             size={"lg"}>
                         Anytime
                     </Button>
+
+                    <Button onClick={ResetActivitySelection} leftIcon={<Icon as={BsArrowLeft}/>} colorScheme={"green"}
+                            variant={"ghost"}>Go Back</Button>
                 </>
             }
-            {showingCustomFilters && <InputAutocomplete options={availableTags}/>}
+            {showingCustomFilters && <InputAutocomplete onSubmit={GetActivityFromTags} options={availableTags}/>}
 
             {activityStep === 2 && loadingResult && <Spinner colorScheme={"green"}/>}
-            {activityStep === 2 && !loadingResult && <Heading>{selectedActivity}</Heading>}
+            {activityStep === 2 && !loadingResult &&
+                <VStack spacing={6}>
+                    {invalidResult &&
+                        <VStack spacing={2}>
+                            <Heading colorScheme={"red"}>No Activities Found</Heading>
+                            <Heading size={"sm"}>Try using different filters</Heading>
+                        </VStack>
+                    }
+                    {!invalidResult &&
+                        <Heading>{selectedActivity}</Heading>
+                    }
+                    <Button onClick={ResetActivitySelection} leftIcon={<Icon as={BsArrowCounterclockwise}/>}
+                            colorScheme={"green"} variant={"solid"}>Reset</Button>
+                </VStack>
+            }
+
 
             <AddNewActivity onAdded={RefreshTags} availableActivities={availableTags}/>
         </VStack>

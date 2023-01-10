@@ -17,14 +17,21 @@ interface IActivityFilters {
     time?: ActivityTime
 }
 
+interface IActivityDetails {
+    name: string,
+    description: string
+}
+
 const ActivitySelection = () => {
+
+    const [availableTags, setAvailableTags] = useState([] as string[]);
 
     const [currentFilters, setCurrentFilters] = useState({} as IActivityFilters);
     const [showingCustomFilters, setShowingCustomFilters] = useState(false);
     const [activityStep, setActivityStep] = useState(0);
-    const [availableTags, setAvailableTags] = useState([] as string[]);
+
     const [loadingResult, setIsLoadingResult] = useState(false);
-    const [selectedActivity, setSelectedActivity] = useState("");
+    const [selectedActivity, setSelectedActivity] = useState({} as IActivityDetails);
     const [invalidResult, setInvalidResult] = useState(false);
 
     useEffect(() => {
@@ -63,7 +70,7 @@ const ActivitySelection = () => {
 
         // Only apply a time filter if we're looking for something time specific
         if (filters.time !== ActivityTime.ANYTIME) {
-            queryClauses.push(where("time", "==", filters.time as number));
+            queryClauses.push(where("time", "in", [filters.time as number, ActivityTime.ANYTIME]));
         }
 
         queryClauses.push(where("type", "==", filters.type as number));
@@ -73,7 +80,7 @@ const ActivitySelection = () => {
 
     const GetActivityFromTags = async (selectedTags: string[]) => {
         const queryClauses = [];
-        queryClauses.push(where("tags", "array-contains-any", selectedTags));
+        queryClauses.push(where("tags", "array-contains", selectedTags));
         setShowingCustomFilters(false);
         setActivityStep(2);
         await RunActivityQuery(queryClauses);
@@ -98,8 +105,13 @@ const ActivitySelection = () => {
         // We have at least one activity
         const randomIndex = Math.floor(Math.random() * querySnapshot.size);
         const randomActivity = querySnapshot.docs[randomIndex];
-        console.log(randomActivity.data());
-        setSelectedActivity(randomActivity.data().name)
+
+        const activityDetails = randomActivity.data();
+        setSelectedActivity({
+            name: activityDetails.name,
+            description: activityDetails.description ?? ""
+        })
+
         setIsLoadingResult(false);
 
     }
@@ -139,7 +151,7 @@ const ActivitySelection = () => {
 
     const ResetActivitySelection = () => {
         setActivityStep(0);
-        setSelectedActivity("");
+        setSelectedActivity({} as IActivityDetails);
         setCurrentFilters({} as IActivityFilters);
     }
 
@@ -209,7 +221,10 @@ const ActivitySelection = () => {
                         </VStack>
                     }
                     {!invalidResult &&
-                        <Heading>{selectedActivity}</Heading>
+                        <VStack spacing={2}>
+                            <Heading>{selectedActivity.name}</Heading>
+                            <Heading size={"md"}>{selectedActivity.description}</Heading>
+                        </VStack>
                     }
                     <Button onClick={ResetActivitySelection} leftIcon={<Icon as={BsArrowCounterclockwise}/>}
                             colorScheme={"green"} variant={"solid"}>Reset</Button>

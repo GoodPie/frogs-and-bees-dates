@@ -11,7 +11,7 @@ import {
     ModalFooter,
     ModalHeader,
     ModalOverlay, SimpleGrid, Tag, TagLabel,
-    Text,
+    Text, Textarea,
     useDisclosure,
     VStack
 } from "@chakra-ui/react";
@@ -28,30 +28,34 @@ import {db} from "../FirebaseConfig";
 export interface IAddNewActivityProps {
     availableActivities: string[];
     onAdded: () => void;
-
 }
 
+enum ActivitySteps {
+    NAME = 0,
+    DESCRIPTION = 1,
+    TYPE = 2,
+    TIME = 3,
+    TAGS = 4,
+}
 
 const AddNewActivity = (props: IAddNewActivityProps) => {
 
     const {isOpen, onOpen, onClose} = useDisclosure();
     const [createStep, setCreateStep] = useState(0);
     const [activityName, setActivityName] = useState("");
+    const [activityDescription, setActivityDescription] = useState("");
     const [activityType, setActivityType] = useState(ActivityType.NONE);
     const [activityTime, setActivityTime] = useState(ActivityTime.ANYTIME);
     const [activityTags, setActivityTags] = useState([] as string[]);
     const [currentTag, setCurrentTag] = useState("");
     const [isAdding, setIsAdding] = useState(false);
 
-
-
-
     const AddActivity = async () => {
 
         setIsAdding(true);
 
         try {
-           for (const tag of activityTags) {
+            for (const tag of activityTags) {
                 // Create the tag
                 await setDoc(doc(db, "tags", tag), {
                     name: tag,
@@ -63,24 +67,28 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
             console.error(e);
         }
 
-
-        const activity = {
-            name: activityName,
-            type: activityType,
-            time: activityTime,
-            tags: activityTags,
-        }
-
-
         try {
             // Add Activity to Firebase
+            const activity = {
+                name: activityName,
+                type: activityType,
+                time: activityTime,
+                tags: activityTags,
+                description: activityDescription
+            }
+
             await setDoc(doc(db, "activities", activityName), activity, {merge: true});
         } catch (e) {
             console.error(e);
         }
 
         setIsAdding(false);
+        ResetAddActivity();
 
+        props.onAdded();
+    }
+
+    const ResetAddActivity = () => {
         setCreateStep(0);
         setActivityType(ActivityType.NONE);
         setActivityTime(ActivityTime.ANYTIME);
@@ -89,12 +97,14 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
         setActivityName("");
 
         onClose();
-
-        props.onAdded();
     }
 
     const OnNameChange = (e: ChangeEvent<HTMLInputElement>) => {
         setActivityName(e.target.value);
+    }
+
+    const OnDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+        setActivityDescription(e.target.value);
     }
 
     const OnTagChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -205,17 +215,22 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
                     <ModalCloseButton/>
 
                     <ModalBody>
-                        {createStep === 0 &&
+                        {createStep === ActivitySteps.NAME &&
                             <Input value={activityName} onChange={OnNameChange} placeholder='Enter Activity Name'/>
                         }
-                        {createStep === 1 && <RenderActivityType/>}
-                        {createStep === 2 && <RenderActivityTime/>}
-                        {createStep === 3 &&
+                        {createStep === ActivitySteps.DESCRIPTION &&
+                            <VStack>
+                                <Text>{activityName}</Text>
+                                <Textarea value={activityDescription} onChange={OnDescriptionChange} placeholder='Add some details'></Textarea>
+                            </VStack>
+                        }
+                        {createStep === ActivitySteps.TYPE && <RenderActivityType/>}
+                        {createStep === ActivitySteps.TIME && <RenderActivityTime/>}
+                        {createStep === ActivitySteps.TAGS &&
                             <>
                                 <Input type='text' placeholder={"Add Some Extra Tags"} value={currentTag}
                                        onChange={OnTagChange} onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
                                     if (e.key === "Enter") OnTagAdd((e.target as HTMLInputElement).value);
-                                    console.log((e.target as HTMLInputElement).value);
                                 }
                                 }/>
 
@@ -230,11 +245,11 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
                     </ModalBody>
 
                     <ModalFooter>
-                        <Button display={createStep === 0 ? "block" : "none"} onClick={GoToNextStep}
+                        <Button display={createStep === ActivitySteps.NAME || createStep == ActivitySteps.DESCRIPTION ? "block" : "none"} onClick={GoToNextStep}
                                 rightIcon={<Icon as={BsArrowRight}/>} colorScheme='green'>
                             Next
                         </Button>
-                        <Button isLoading={isAdding} display={createStep === 3 ? "block" : "none"} onClick={AddActivity}
+                        <Button isLoading={isAdding} display={createStep === ActivitySteps.TAGS ? "block" : "none"} onClick={AddActivity}
                                 rightIcon={<Icon as={BsArrowRight}/>} colorScheme='green'>
                             Add Activity
                         </Button>

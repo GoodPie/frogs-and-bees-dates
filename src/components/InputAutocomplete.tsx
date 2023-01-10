@@ -1,7 +1,22 @@
-import {Badge, Box, Button, Flex, Grid, HStack, Icon, IconButton, Input, Select, SimpleGrid, VStack} from "@chakra-ui/react";
+import {
+    Badge,
+    Box,
+    Button, Center,
+    Flex,
+    Grid,
+    HStack,
+    Icon,
+    IconButton,
+    Input,
+    Select,
+    SimpleGrid,
+    Text,
+    VStack
+} from "@chakra-ui/react";
 import React, {ChangeEvent, EventHandler, useState} from "react";
 import {BsArrowRight} from "react-icons/bs";
-export interface IInputAutoCompleteProps  {
+
+export interface IInputAutoCompleteProps {
     options: string[];
     onSubmit: (options: string[]) => void
 }
@@ -15,7 +30,8 @@ interface IOption {
 
 const InputAutocompleteOption = (props: IOption) => {
     return (
-        <Badge onClick={() => props.onClick(props.text)} cursor={"pointer"} size={"lg"} p={2} colorScheme={"green"} variant={props.isSelected ?? false ? "solid" : "outline"} m={1}>
+        <Badge onClick={() => props.onClick(props.text)} cursor={"pointer"} size={"lg"} p={2} colorScheme={"green"}
+               variant={props.isSelected ?? false ? "solid" : "outline"} m={1}>
             {props.text}
         </Badge>
     )
@@ -23,6 +39,8 @@ const InputAutocompleteOption = (props: IOption) => {
 
 
 const InputAutocomplete = (props: IInputAutoCompleteProps) => {
+
+    const MAX_OPTIONS = 10;
 
     const [searchInput, setSearchInput] = useState("");
     const [currentlySelected, setCurrentlySelected] = useState([] as string[])
@@ -33,7 +51,10 @@ const InputAutocomplete = (props: IInputAutoCompleteProps) => {
     }
 
     const AddTag = (tag: string) => {
-        setCurrentlySelected([...currentlySelected, tag]);
+        if (currentlySelected.length < MAX_OPTIONS) {
+            setCurrentlySelected([...currentlySelected, tag]);
+        }
+
     }
 
     const RemoveTag = (tag: string) => {
@@ -41,25 +62,45 @@ const InputAutocomplete = (props: IInputAutoCompleteProps) => {
     }
 
     return (
-        <Box>
+        <Box width={"50%"}>
+            {currentlySelected.length >= MAX_OPTIONS &&
+                <Center>
+                    <Text size={"lg"} mb={4} colorScheme={"red"}>Only 10 filters at a time please 😘</Text>
+                </Center>
+            }
             <HStack mb={3} spacing={0}>
-                <Input roundedRight={0} type={"text"} onChange={UpdateSearchInput} value={searchInput} />
-                <Button onClick={() => props.onSubmit(currentlySelected)} px={8} roundedLeft={0} rightIcon={<Icon as={BsArrowRight} /> } aria-label={"Search"} colorScheme={"green"}>Get Activity</Button>
+
+
+                <Input roundedRight={0} type={"text"} onChange={UpdateSearchInput} value={searchInput}/>
+                <Button onClick={() => props.onSubmit(currentlySelected)} px={8} roundedLeft={0}
+                        rightIcon={<Icon as={BsArrowRight}/>} aria-label={"Search"} colorScheme={"green"}>Get
+                    Activity</Button>
             </HStack>
 
             {
                 <Flex wrap={"wrap"} justifyContent={"center"}>
 
                     {currentlySelected.map((option) => {
-                            return <InputAutocompleteOption key={option} onClick={RemoveTag} text={option} isSelected={true}/>
+                        return <InputAutocompleteOption key={option} onClick={RemoveTag} text={option}
+                                                        isSelected={true}/>
                     })}
 
                     {searchInput.length > 2 && props.options.map((option) => {
                         if (option.toLowerCase().includes(searchInput.toLowerCase()) && currentlySelected.includes(option) === false) {
-                            return <InputAutocompleteOption key={option} onClick={AddTag} text={option} isSelected={false}/>
+                            return <InputAutocompleteOption key={option} onClick={AddTag} text={option}
+                                                            isSelected={false}/>
                         }
 
                     })}
+
+                    {searchInput.length <= 2 && props.options.filter((option) => !currentlySelected.includes(option)).slice(0, 20).map((option) => {
+                        if (currentlySelected.includes(option) === false) {
+                            return <InputAutocompleteOption key={option} onClick={AddTag} text={option}
+                                                            isSelected={false}/>
+                        }
+                    })}
+
+
                 </Flex>
             }
         </Box>

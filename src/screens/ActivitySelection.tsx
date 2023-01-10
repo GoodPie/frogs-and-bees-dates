@@ -2,28 +2,24 @@ import {useEffect, useState} from "react";
 import {Button, Icon, VStack} from "@chakra-ui/react";
 import {RiRestaurant2Fill} from "react-icons/ri";
 import {MdLocalActivity} from "react-icons/md";
-import {WiSunrise, WiDaySunny, WiMoonrise} from "react-icons/wi";
+import {WiDaySunny, WiMoonrise, WiSunrise} from "react-icons/wi";
 import {BsFilter} from "react-icons/bs";
 import AddNewActivity from "../components/AddNewActivity";
 import InputAutocomplete from "../components/InputAutocomplete";
-import {collection, getDocs} from "firebase/firestore";
+import {collection, getDocs, query, where} from "firebase/firestore";
 import {db} from "../FirebaseConfig";
+import ActivityType from "../enums/ActivityType";
+import ActivityTime from "../enums/ActivityTime";
 
-interface ActivityType {
-    FOOD: 0,
-    ACTIVITY: 1
+
+interface IActivityFilters {
+    type?: ActivityType,
+    time?: ActivityTime
 }
-
-interface ActivityTime  {
-    MORNING: 0,
-    NOON: 1,
-    AFTERNOON: 2
-}
-
 
 const ActivitySelection = () => {
 
-    const [currentFilters, setCurrentFilters] = useState({});
+    const [currentFilters, setCurrentFilters] = useState({} as IActivityFilters);
     const [showingCustomFilters, setShowingCustomFilters] = useState(false);
     const [activityStep, setActivityStep] = useState(0);
     const [availableTags, setAvailableTags] = useState([] as string[]);
@@ -32,6 +28,9 @@ const ActivitySelection = () => {
         RefreshTags();
     }, []);
 
+    /**
+     * Refreshes all the tags to be used throughout the app
+     */
     const RefreshTags = () => {
         // Get all the available tags from Firebase
         try {
@@ -51,7 +50,18 @@ const ActivitySelection = () => {
 
     }
 
-    const GetAnActivity = () => {
+    const GetAnActivity = async () => {
+        console.log(currentFilters)
+        // Filter based on our current selection
+        const activityRef = collection(db, "activities");
+        const activityQuery = query(activityRef,
+            where("time", "==", currentFilters.time as number),
+            where("type", "==", currentFilters.type as number));
+
+        const querySnapshot = await getDocs(activityQuery);
+        querySnapshot.forEach((doc) => {
+            console.log(doc.id, " => ", doc.data());
+        });
 
     }
 
@@ -60,10 +70,10 @@ const ActivitySelection = () => {
      */
     const RenderActivityTypeSelect = () => {
 
-        const OnActivityTypeSelect = (activityType: number) => {
+        const OnActivityTypeSelect = (activityType: ActivityType) => {
 
             // Reset all filters
-            const filters = {activityType};
+            const filters = {type: activityType} as IActivityFilters;
             setCurrentFilters(filters);
 
             const nextStep = activityStep + 1;
@@ -76,12 +86,12 @@ const ActivitySelection = () => {
 
         return (
             <>
-                <Button onClick={() => OnActivityTypeSelect(0)} leftIcon={<Icon as={RiRestaurant2Fill}/>} w={"100%"} colorScheme={"green"} variant={"outline"}
+                <Button onClick={() => OnActivityTypeSelect(ActivityType.ACTIVITY)} leftIcon={<Icon as={RiRestaurant2Fill}/>} w={"100%"} colorScheme={"green"} variant={"outline"}
                         size={"lg"}>
                     Food
                 </Button>
 
-                <Button onClick={() => OnActivityTypeSelect(1)} w={"100%"} leftIcon={<Icon as={MdLocalActivity}/>} colorScheme={"green"} variant={"outline"}
+                <Button onClick={() => OnActivityTypeSelect(ActivityType.FOOD)} w={"100%"} leftIcon={<Icon as={MdLocalActivity}/>} colorScheme={"green"} variant={"outline"}
                         size={"lg"}>
                     Activity
                 </Button>
@@ -101,10 +111,10 @@ const ActivitySelection = () => {
     const RenderActivityTimeSelect = () => {
 
 
-        const OnActivityTimeSelect = (activityTime: number) => {
+        const OnActivityTimeSelect = (activityTime: ActivityTime) => {
 
             // Append to filters
-            const filters = {...currentFilters, activityTime};
+            const filters = {...currentFilters, time: activityTime};
             setCurrentFilters(filters);
 
             const nextStep = activityStep + 1;
@@ -113,17 +123,17 @@ const ActivitySelection = () => {
 
         return (
             <>
-                <Button onClick={() => OnActivityTimeSelect(0)} leftIcon={<Icon as={WiSunrise}/>} w={"100%"} colorScheme={"green"} variant={"outline"}
+                <Button onClick={() => OnActivityTimeSelect(ActivityTime.MORNING)} leftIcon={<Icon as={WiSunrise}/>} w={"100%"} colorScheme={"green"} variant={"outline"}
                         size={"lg"}>
                     Morning
                 </Button>
 
-                <Button onClick={() => OnActivityTimeSelect(1)} w={"100%"} leftIcon={<Icon as={WiDaySunny}/>} colorScheme={"green"} variant={"outline"}
+                <Button onClick={() => OnActivityTimeSelect(ActivityTime.AFTERNOON)} w={"100%"} leftIcon={<Icon as={WiDaySunny}/>} colorScheme={"green"} variant={"outline"}
                         size={"lg"}>
                     Noon
                 </Button>
 
-                <Button onClick={() => OnActivityTimeSelect(2)} w={"100%"} leftIcon={<Icon as={WiMoonrise}/>} colorScheme={"green"} variant={"outline"}
+                <Button onClick={() => OnActivityTimeSelect(ActivityTime.EVENING)} w={"100%"} leftIcon={<Icon as={WiMoonrise}/>} colorScheme={"green"} variant={"outline"}
                         size={"lg"}>
                     Afternoon
                 </Button>
@@ -137,6 +147,8 @@ const ActivitySelection = () => {
             {activityStep === 0 && !showingCustomFilters && <RenderActivityTypeSelect/>}
             {activityStep === 1 && !showingCustomFilters && <RenderActivityTimeSelect/>}
             {showingCustomFilters && <InputAutocomplete options={availableTags}/>}
+
+            {activityStep === 2 && <Button onClick={GetAnActivity}>Get Activity</Button>}
 
             <AddNewActivity onAdded={RefreshTags} availableActivities={availableTags}/>
         </VStack>

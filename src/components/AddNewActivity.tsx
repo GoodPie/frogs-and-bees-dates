@@ -22,7 +22,7 @@ import {AiOutlinePlus} from "react-icons/ai";
 import {BsArrowRight} from "react-icons/bs";
 import {WiDaySunny, WiMoonrise, WiSunrise} from "react-icons/wi";
 import {RiRestaurant2Fill} from "react-icons/ri";
-import {MdLocalActivity} from "react-icons/md";
+import {MdLocalActivity, MdLocalMovies} from "react-icons/md";
 import ActivityType from "../enums/ActivityType";
 import ActivityTime from "../enums/ActivityTime";
 import {doc, setDoc} from "firebase/firestore";
@@ -167,6 +167,13 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
                         colorScheme={"green"} variant={"outline"}
                         size={"lg"}>
                     Activity
+                </Button>
+
+                <Button onClick={() => OnActivityTypeSelected(ActivityType.MOVIE)} w={"100%"}
+                        leftIcon={<Icon as={MdLocalMovies}/>}
+                        colorScheme={"green"} variant={"outline"}
+                        size={"lg"}>
+                    Movie
                 </Button>
             </VStack>
         )

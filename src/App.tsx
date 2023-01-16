@@ -12,7 +12,7 @@ import {ColorModeSwitcher} from "./ColorModeSwitcher";
 
 export const App = () => {
 
-    const [isSignedIn, setIsSignedIn] = useState(!!(auth.currentUser ?? false));
+    const [isSignedIn, setIsSignedIn] = useState(!!(auth.currentUser ?? true));
 
 
     useEffect(() => {

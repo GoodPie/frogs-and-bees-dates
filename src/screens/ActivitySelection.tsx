@@ -10,6 +10,7 @@ import {collection, getDocs, query, QueryFieldFilterConstraint, where} from "fir
 import {db} from "../FirebaseConfig";
 import ActivityType from "../enums/ActivityType";
 import ActivityTime from "../enums/ActivityTime";
+import {FaMoneyBillAlt} from "react-icons/fa";
 
 
 interface IActivityFilters {
@@ -182,6 +183,13 @@ const ActivitySelection = () => {
                             colorScheme={"green"} variant={"outline"}
                             size={"lg"}>
                         Movie
+                    </Button>
+
+                    <Button onClick={() => OnActivityTypeSelect(ActivityType.BIG)} w={"100%"}
+                            leftIcon={<Icon as={FaMoneyBillAlt}/>}
+                            colorScheme={"green"} variant={"outline"}
+                            size={"lg"}>
+                        Bougie Ballers
                     </Button>
 
                     <Button onClick={() => setShowingCustomFilters(true)} w={"100%"} leftIcon={<Icon as={BsFilter}/>}

@@ -27,6 +27,7 @@ import ActivityType from "../enums/ActivityType";
 import ActivityTime from "../enums/ActivityTime";
 import {doc, setDoc} from "firebase/firestore";
 import {db} from "../FirebaseConfig";
+import {FaMoneyBillAlt} from "react-icons/fa";
 
 export interface IAddNewActivityProps {
     availableActivities: string[];
@@ -174,6 +175,13 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
                         colorScheme={"green"} variant={"outline"}
                         size={"lg"}>
                     Movie
+                </Button>
+
+                <Button onClick={() => OnActivityTypeSelected(ActivityType.BIG)} w={"100%"}
+                        leftIcon={<Icon as={FaMoneyBillAlt}/>}
+                        colorScheme={"green"} variant={"outline"}
+                        size={"lg"}>
+                    Bougie Ballers
                 </Button>
             </VStack>
         )

@@ -1,7 +1,7 @@
-import {useEffect, useState} from "react";
-import {Button, Heading, Icon, Spinner, VStack} from "@chakra-ui/react";
+import React, {useEffect, useState} from "react";
+import {Button, Heading, HStack, Icon, Spinner, VStack} from "@chakra-ui/react";
 import {RiRestaurant2Fill} from "react-icons/ri";
-import {MdLocalActivity} from "react-icons/md";
+import {MdLocalActivity, MdLocalMovies} from "react-icons/md";
 import {WiDaySunny, WiMoonrise, WiSunrise} from "react-icons/wi";
 import {BsArrowCounterclockwise, BsArrowLeft, BsFilter} from "react-icons/bs";
 import AddNewActivity from "../components/AddNewActivity";
@@ -121,7 +121,7 @@ const ActivitySelection = () => {
      * This will reset the filters as this is the first step
      * @param activityType
      */
-    const OnActivityTypeSelect = (activityType: ActivityType) => {
+    const OnActivityTypeSelect = async (activityType: ActivityType) => {
 
         // Reset all filters
         const filters = {type: activityType} as IActivityFilters;
@@ -155,6 +155,11 @@ const ActivitySelection = () => {
         setCurrentFilters({} as IActivityFilters);
     }
 
+    const GetNewActivityBasedOnExisting = async () => {
+        await setIsLoadingResult(true);
+        await GetAnActivityBasicFilters(currentFilters);
+    }
+
     return (
         <VStack w={"80%"}>
             {activityStep === 0 && !showingCustomFilters &&
@@ -170,6 +175,13 @@ const ActivitySelection = () => {
                             leftIcon={<Icon as={MdLocalActivity}/>} colorScheme={"green"} variant={"outline"}
                             size={"lg"}>
                         Activity
+                    </Button>
+
+                    <Button onClick={() => OnActivityTypeSelect(ActivityType.MOVIE)} w={"100%"}
+                            leftIcon={<Icon as={MdLocalMovies}/>}
+                            colorScheme={"green"} variant={"outline"}
+                            size={"lg"}>
+                        Movie
                     </Button>
 
                     <Button onClick={() => setShowingCustomFilters(true)} w={"100%"} leftIcon={<Icon as={BsFilter}/>}
@@ -226,8 +238,15 @@ const ActivitySelection = () => {
                             <Heading textAlign={"center"} size={"md"}>{selectedActivity.description}</Heading>
                         </VStack>
                     }
-                    <Button onClick={ResetActivitySelection} leftIcon={<Icon as={BsArrowCounterclockwise}/>}
-                            colorScheme={"green"} variant={"solid"}>Reset</Button>
+
+                    <HStack>
+                        <Button onClick={ResetActivitySelection}
+                                colorScheme={"green"} variant={"outline"}>Reset</Button>
+
+                        <Button onClick={GetNewActivityBasedOnExisting} leftIcon={<Icon as={BsArrowCounterclockwise}/>}
+                                colorScheme={"green"} variant={"solid"}>Refresh</Button>
+                    </HStack>
+
                 </VStack>
             }
 

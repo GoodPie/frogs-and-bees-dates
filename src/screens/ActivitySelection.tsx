@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from "react";
-import {Button, Heading, HStack, Icon, Spinner, VStack} from "@chakra-ui/react";
+import {Box, Button, Heading, HStack, Icon, Spinner, VStack} from "@chakra-ui/react";
 import {RiRestaurant2Fill} from "react-icons/ri";
 import {MdLocalActivity, MdLocalMovies} from "react-icons/md";
 import {WiDaySunny, WiMoonrise, WiSunrise} from "react-icons/wi";
-import {BsArrowCounterclockwise, BsArrowLeft, BsFilter} from "react-icons/bs";
+import {BsArrowCounterclockwise, BsArrowLeft, BsFilter, BsPlus} from "react-icons/bs";
 import AddNewActivity from "../components/AddNewActivity";
 import InputAutocomplete from "../components/InputAutocomplete";
 import {collection, getDocs, query, QueryFieldFilterConstraint, where} from "firebase/firestore";
@@ -78,7 +78,10 @@ const ActivitySelection = () => {
         await RunActivityQuery(queryClauses);
     }
 
-
+    /**
+     * Gets the activities that match the current filters from Firebase
+     * @param selectedTags
+     */
     const GetActivityFromTags = async (selectedTags: string[]) => {
         const queryClauses = [];
         queryClauses.push(where("tags", "array-contains-any", selectedTags));
@@ -87,6 +90,10 @@ const ActivitySelection = () => {
         await RunActivityQuery(queryClauses);
     }
 
+    /**
+     * Runs the query to get the activity from Firebase
+     * @param queryClauses
+     */
     const RunActivityQuery = async (queryClauses: QueryFieldFilterConstraint[]) => {
         setInvalidResult(false);
         setIsLoadingResult(true);
@@ -161,6 +168,12 @@ const ActivitySelection = () => {
         await GetAnActivityBasicFilters(currentFilters);
     }
 
+    const AddActivityToCalendar = async () => {
+
+
+
+    }
+
     return (
         <VStack w={"80%"}>
             {activityStep === 0 && !showingCustomFilters &&
@@ -232,8 +245,15 @@ const ActivitySelection = () => {
             {showingCustomFilters && <InputAutocomplete onSubmit={GetActivityFromTags} options={availableTags}/>}
 
             {activityStep === 2 && loadingResult && <Spinner colorScheme={"green"}/>}
-            {activityStep === 2 && !loadingResult &&
+            {activityStep === 2 && !loadingResult && <>
+
+                <HStack w={"100"}>
+
+                </HStack>
+
                 <VStack spacing={6}>
+
+
                     {invalidResult &&
                         <VStack spacing={2}>
                             <Heading textAlign={"center"} colorScheme={"red"}>No Activities Found</Heading>
@@ -247,22 +267,28 @@ const ActivitySelection = () => {
                         </VStack>
                     }
 
-                    <HStack>
-                        <Button onClick={ResetActivitySelection}
-                                colorScheme={"green"} variant={"outline"}>Reset</Button>
 
-                        <Button onClick={GetNewActivityBasedOnExisting} leftIcon={<Icon as={BsArrowCounterclockwise}/>}
-                                colorScheme={"green"} variant={"solid"}>Refresh</Button>
+                    <HStack>
+                        <Button onClick={GetNewActivityBasedOnExisting}
+                                colorScheme={"green"} variant={"outline"}><Icon as={BsArrowCounterclockwise}/></Button>
+
+                        <Button onClick={GetNewActivityBasedOnExisting} leftIcon={<Icon as={BsPlus}/>}
+                                colorScheme={"green"} variant={"solid"}>Add to Calendar</Button>
                     </HStack>
 
+                    <Button onClick={ResetActivitySelection}
+                            colorScheme={"green"} variant={"ghost"}>Reset</Button>
+
+
                 </VStack>
+            </>
             }
 
 
             <AddNewActivity onAdded={RefreshTags} availableActivities={availableTags}/>
         </VStack>
 
-    )
+    );
 
 
 }

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Heading, HStack, Icon, Spinner, VStack} from "@chakra-ui/react";
+import {Box, Button, Heading, HStack, Icon, IconButton, Spinner, VStack} from "@chakra-ui/react";
 import {RiRestaurant2Fill} from "react-icons/ri";
 import {MdLocalActivity, MdLocalMovies} from "react-icons/md";
 import {WiDaySunny, WiMoonrise, WiSunrise} from "react-icons/wi";
@@ -11,6 +11,7 @@ import {db} from "../FirebaseConfig";
 import ActivityType from "../enums/ActivityType";
 import ActivityTime from "../enums/ActivityTime";
 import {FaMoneyBillAlt} from "react-icons/fa";
+import {AiTwotoneCalendar} from "react-icons/ai";
 
 
 interface IActivityFilters {
@@ -23,7 +24,11 @@ interface IActivityDetails {
     description: string
 }
 
-const ActivitySelection = () => {
+interface IActivitySelectionProps {
+    setShowCalendar: () => void
+}
+
+const ActivitySelection = (props: IActivitySelectionProps) => {
 
     const [availableTags, setAvailableTags] = useState([] as string[]);
 
@@ -286,6 +291,8 @@ const ActivitySelection = () => {
 
 
             <AddNewActivity onAdded={RefreshTags} availableActivities={availableTags}/>
+
+
         </VStack>
 
     );

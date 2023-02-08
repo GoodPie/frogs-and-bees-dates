@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Heading, HStack, Icon, IconButton, Spinner, VStack} from "@chakra-ui/react";
+import {Button, Heading, HStack, Icon, Spinner, VStack} from "@chakra-ui/react";
 import {RiRestaurant2Fill} from "react-icons/ri";
 import {MdLocalActivity, MdLocalMovies} from "react-icons/md";
 import {WiDaySunny, WiMoonrise, WiSunrise} from "react-icons/wi";
@@ -11,7 +11,7 @@ import {db} from "../FirebaseConfig";
 import ActivityType from "../enums/ActivityType";
 import ActivityTime from "../enums/ActivityTime";
 import {FaMoneyBillAlt} from "react-icons/fa";
-import {AiTwotoneCalendar} from "react-icons/ai";
+import IActivityDetails from "../interfaces/IActivityDetails";
 
 
 interface IActivityFilters {
@@ -19,16 +19,7 @@ interface IActivityFilters {
     time?: ActivityTime
 }
 
-interface IActivityDetails {
-    name: string,
-    description: string
-}
-
-interface IActivitySelectionProps {
-    setShowCalendar: () => void
-}
-
-const ActivitySelection = (props: IActivitySelectionProps) => {
+const ActivitySelection = () => {
 
     const [availableTags, setAvailableTags] = useState([] as string[]);
 
@@ -162,22 +153,24 @@ const ActivitySelection = (props: IActivitySelectionProps) => {
         await GetAnActivityBasicFilters(filters);
     }
 
+    /**
+     * Resets all the filters to nothing
+     */
     const ResetActivitySelection = () => {
         setActivityStep(0);
         setSelectedActivity({} as IActivityDetails);
         setCurrentFilters({} as IActivityFilters);
     }
 
+    /**
+     * Fetches a new activity based on the current filters
+     */
     const GetNewActivityBasedOnExisting = async () => {
         await setIsLoadingResult(true);
         await GetAnActivityBasicFilters(currentFilters);
     }
 
-    const AddActivityToCalendar = async () => {
 
-
-
-    }
 
     return (
         <VStack w={"80%"}>
@@ -265,6 +258,7 @@ const ActivitySelection = (props: IActivitySelectionProps) => {
                             <Heading textAlign={"center"} size={"sm"}>Try using different filters</Heading>
                         </VStack>
                     }
+
                     {!invalidResult &&
                         <VStack spacing={2}>
                             <Heading textAlign={"center"}>{selectedActivity.name}</Heading>

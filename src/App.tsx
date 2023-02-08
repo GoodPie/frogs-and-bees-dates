@@ -32,14 +32,13 @@ export const App = () => {
         <ChakraProvider theme={theme}>
             <ColorModeSwitcher/>
             <div className={"content-container"}>
-
-
-                {!isSignedIn ? <SignIn/> :isViewingCalendar ? <ViewCalendar/> : <ActivitySelection setShowCalendar={ToggleCalendar}/> }
-
+                {!isSignedIn ? <SignIn/> :isViewingCalendar ? <ViewCalendar/> : <ActivitySelection/> }
             </div>
 
             <FrogImage/>
-            <IconButton style={{position: "absolute", right: "4", top: "4"}} aria-label={"View Calendar"} icon={<Icon as={AiTwotoneCalendar} />} onClick={ToggleCalendar} />
+            <div style={{position: "absolute", right: 8, top: 8}}>
+                <IconButton  aria-label={"View Calendar"} icon={<Icon as={AiTwotoneCalendar} />} onClick={ToggleCalendar} />
+            </div>
         </ChakraProvider>
     )
 }

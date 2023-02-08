@@ -1,9 +1,41 @@
+
 const ViewCalendar = () => {
 
+    /**
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [events, setEvents] = useState<ICalendarActivity[]>([]);
+    const [currentDate, setCurrentDate] = useState(new Date())
+
+    useEffect(() => {
+
+    }, [events]);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const GoToNextDate = () => {
+
+        // Sort the events by the date, ascending
+        const sortedEvents = events.sort((a, b) => {
+           return new Date(a.date).getTime() - new Date(b.date).getTime();
+        });
+
+        // Find the next event
+        const nextEvent = sortedEvents.find(e => new Date(e.date).getTime() > currentDate.getTime());
+
+        // If there is a next event, set the current date to the next event
+        if (nextEvent) {
+            setCurrentDate(new Date(nextEvent.date));
+        }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const GoToPreviousDate = () => {
+
+    }
+    **/
+
     return (
-        <iframe
-            src="https://calendar.google.com/calendar/embed?height=600&wkst=2&bgcolor=%237CB342&ctz=Australia%2FPerth&showNav=1&showPrint=0&showTabs=0&showCalendars=0&showTitle=1&showTz=0&title=Frog'n'Bee&src=ZmFtaWx5MTU3MDU4Nzk0MDI5MjA0OTY5NDNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=ZW4uYXVzdHJhbGlhbiNob2xpZGF5QGdyb3VwLnYuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&color=%23A79B8E&color=%23009688"
-            style={{borderWidth: 0}} width="800" height="600" frameBorder="0" scrolling="no"></iframe>
+        <h1>Viewing Calendar</h1>
+
     )
 
 

@@ -39,6 +39,15 @@ export const App = () => {
             <div style={{position: "absolute", right: 8, top: 8}}>
                 <IconButton  aria-label={"View Calendar"} icon={<Icon as={AiTwotoneCalendar} />} onClick={ToggleCalendar} />
             </div>
+
+
+            <div style={{position: "absolute", left: 0, right: 0, bottom: 8}}>
+                <div style={{display: "flex", justifyContent: "center"}}>
+                    <a target="_blank" href={"/FNB-Privacy-Policy.pdf"} rel="noreferrer">Privacy Policy</a>
+                </div>
+
+            </div>
+
         </ChakraProvider>
     )
 }

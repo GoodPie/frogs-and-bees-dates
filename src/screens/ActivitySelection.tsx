@@ -1,18 +1,16 @@
-import React, {useEffect, useState} from "react";
 import {Button, Heading, HStack, Icon, Spinner, VStack} from "@chakra-ui/react";
-import {RiRestaurant2Fill} from "react-icons/ri";
+import {collection, getDocs, query, QueryFieldFilterConstraint, where} from "firebase/firestore";
+import React, {useEffect, useState} from "react";
+import {BsArrowCounterclockwise, BsFilter, BsPlus} from "react-icons/bs";
+import {FaMoneyBillAlt} from "react-icons/fa";
 import {MdLocalActivity, MdLocalMovies} from "react-icons/md";
-import {WiDaySunny, WiMoonrise, WiSunrise} from "react-icons/wi";
-import {BsArrowCounterclockwise, BsArrowLeft, BsFilter, BsPlus} from "react-icons/bs";
+import {RiRestaurant2Fill} from "react-icons/ri";
 import AddNewActivity from "../components/AddNewActivity";
 import InputAutocomplete from "../components/InputAutocomplete";
-import {collection, getDocs, query, QueryFieldFilterConstraint, where} from "firebase/firestore";
-import {db} from "../FirebaseConfig";
-import ActivityType from "../enums/ActivityType";
 import ActivityTime from "../enums/ActivityTime";
-import {FaMoneyBillAlt} from "react-icons/fa";
+import ActivityType from "../enums/ActivityType";
+import {db} from "../FirebaseConfig";
 import IActivityDetails from "../interfaces/IActivityDetails";
-
 
 interface IActivityFilters {
     type?: ActivityType,
@@ -128,30 +126,15 @@ const ActivitySelection = () => {
     const OnActivityTypeSelect = async (activityType: ActivityType) => {
 
         // Reset all filters
-        const filters = {type: activityType} as IActivityFilters;
+        const filters = {type: activityType, time: ActivityTime.ANYTIME} as IActivityFilters;
         setCurrentFilters(filters);
+        
 
         const nextStep = activityStep + 1;
         setActivityStep(nextStep);
-    };
-
-    /**
-     * Select an activity time and apply it to the filters
-     * This will also trigger the activity selection as it's the last step
-     * @param activityTime
-     */
-    const OnActivityTimeSelect = async (activityTime: ActivityTime) => {
-
-        // Append to filters
-        const filters = {...currentFilters, time: activityTime};
-        await setCurrentFilters(filters);
-
-        const nextStep = activityStep + 1;
-        await setActivityStep(nextStep);
-
         await setIsLoadingResult(true);
         await GetAnActivityBasicFilters(filters);
-    }
+    };
 
     /**
      * Resets all the filters to nothing
@@ -210,40 +193,11 @@ const ActivitySelection = () => {
                     </Button>
                 </>
             }
-            {activityStep === 1 && !showingCustomFilters &&
-                <>
-                    <Button onClick={() => OnActivityTimeSelect(ActivityTime.MORNING)} leftIcon={<Icon as={WiSunrise}/>}
-                            w={"100%"} colorScheme={"green"} variant={"outline"}
-                            size={"lg"}>
-                        Morning
-                    </Button>
 
-                    <Button onClick={() => OnActivityTimeSelect(ActivityTime.AFTERNOON)} w={"100%"}
-                            leftIcon={<Icon as={WiDaySunny}/>} colorScheme={"green"} variant={"outline"}
-                            size={"lg"}>
-                        Afternoon
-                    </Button>
-
-                    <Button onClick={() => OnActivityTimeSelect(ActivityTime.EVENING)} w={"100%"}
-                            leftIcon={<Icon as={WiMoonrise}/>} colorScheme={"green"} variant={"outline"}
-                            size={"lg"}>
-                        Evening
-                    </Button>
-
-                    <Button onClick={() => OnActivityTimeSelect(ActivityTime.ANYTIME)} w={"100%"}
-                            colorScheme={"green"} variant={"solid"}
-                            size={"lg"}>
-                        Anytime
-                    </Button>
-
-                    <Button onClick={ResetActivitySelection} leftIcon={<Icon as={BsArrowLeft}/>} colorScheme={"green"}
-                            variant={"ghost"}>Go Back</Button>
-                </>
-            }
             {showingCustomFilters && <InputAutocomplete onSubmit={GetActivityFromTags} options={availableTags}/>}
 
-            {activityStep === 2 && loadingResult && <Spinner colorScheme={"green"}/>}
-            {activityStep === 2 && !loadingResult && <>
+            {activityStep === 1 && loadingResult && <Spinner colorScheme={"green"}/>}
+            {activityStep === 1 && !loadingResult && <>
 
                 <HStack w={"100"}>
 

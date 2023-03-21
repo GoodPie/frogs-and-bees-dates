@@ -1,4 +1,3 @@
-import React, {ChangeEvent, KeyboardEvent, useState} from "react";
 import {
     Button,
     Flex,
@@ -18,16 +17,16 @@ import {
     useDisclosure,
     VStack
 } from "@chakra-ui/react";
+import {doc, setDoc} from "firebase/firestore";
+import React, {ChangeEvent, KeyboardEvent, useState} from "react";
 import {AiOutlinePlus} from "react-icons/ai";
 import {BsArrowRight} from "react-icons/bs";
-import {WiDaySunny, WiMoonrise, WiSunrise} from "react-icons/wi";
-import {RiRestaurant2Fill} from "react-icons/ri";
-import {MdLocalActivity, MdLocalMovies} from "react-icons/md";
-import ActivityType from "../enums/ActivityType";
-import ActivityTime from "../enums/ActivityTime";
-import {doc, setDoc} from "firebase/firestore";
-import {db} from "../FirebaseConfig";
 import {FaMoneyBillAlt} from "react-icons/fa";
+import {MdLocalActivity, MdLocalMovies} from "react-icons/md";
+import {RiRestaurant2Fill} from "react-icons/ri";
+import ActivityTime from "../enums/ActivityTime";
+import ActivityType from "../enums/ActivityType";
+import {db} from "../FirebaseConfig";
 
 export interface IAddNewActivityProps {
     availableActivities: string[];
@@ -38,8 +37,7 @@ enum ActivitySteps {
     NAME = 0,
     DESCRIPTION = 1,
     TYPE = 2,
-    TIME = 3,
-    TAGS = 4,
+    TAGS = 3,
 }
 
 const AddNewActivity = (props: IAddNewActivityProps) => {
@@ -131,17 +129,10 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
 
     const OnActivityTypeSelected = (type: ActivityType) => {
         setActivityType(type);
+        setActivityTime(ActivityTime.ANYTIME);
         GoToNextStep();
     }
 
-    /**
-     * Set the time of the activity
-     * @param time Time enum of the activity
-     */
-    const OnActivityTimeSelected = (time: ActivityTime) => {
-        setActivityTime(time);
-        GoToNextStep();
-    }
 
     /**
      * Go to the next step
@@ -187,39 +178,6 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
         )
     }
 
-    const RenderActivityTime = () => {
-        return (
-            <VStack>
-                <Text fontSize='md'>Best Time For the Activity?</Text>
-                <Button onClick={() => OnActivityTimeSelected(ActivityTime.MORNING)} leftIcon={<Icon as={WiSunrise}/>}
-                        w={"100%"}
-                        colorScheme={"green"} variant={"outline"}
-                        size={"lg"}>
-                    Morning
-                </Button>
-
-                <Button onClick={() => OnActivityTimeSelected(ActivityTime.AFTERNOON)} w={"100%"}
-                        leftIcon={<Icon as={WiDaySunny}/>}
-                        colorScheme={"green"} variant={"outline"}
-                        size={"lg"}>
-                    Afternoon
-                </Button>
-
-                <Button onClick={() => OnActivityTimeSelected(ActivityTime.EVENING)} w={"100%"}
-                        leftIcon={<Icon as={WiMoonrise}/>}
-                        colorScheme={"green"} variant={"outline"}
-                        size={"lg"}>
-                    Evening
-                </Button>
-
-                <Button onClick={() => OnActivityTimeSelected(ActivityTime.ANYTIME)} w={"100%"} colorScheme={"green"}
-                        size={"lg"}>
-                    Anytime
-                </Button>
-            </VStack>
-        )
-    }
-
     return (
         <>
             <IconButton colorScheme={"green"} id={"add-activity-button"} aria-label={"Add new activity"} size={"lg"}
@@ -243,7 +201,6 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
                             </VStack>
                         }
                         {createStep === ActivitySteps.TYPE && <RenderActivityType/>}
-                        {createStep === ActivitySteps.TIME && <RenderActivityTime/>}
                         {createStep === ActivitySteps.TAGS &&
                             <>
                                 <Input type='text' placeholder={"Add Some Extra Tags"} value={currentTag}

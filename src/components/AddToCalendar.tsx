@@ -1,4 +1,4 @@
-import React from "react";
+import React, {ChangeEvent, useState} from "react";
 import {
     Button,
     Icon,
@@ -14,34 +14,74 @@ import {
     useDisclosure, VStack,
 } from "@chakra-ui/react";
 import {AiOutlinePlus} from "react-icons/ai";
+import {IAddNewActivityProps} from "./AddNewActivity";
+import {BsPlus} from "react-icons/bs";
+import {addDoc, collection, doc, setDoc} from "firebase/firestore";
+import {db} from "../FirebaseConfig";
+
+interface IAddToCalendarProps {
+    activityName: string
+    activityDescription: string
+
+}
 
 
-
-const AddToCalendar = () => {
+const AddToCalendar = (props: IAddToCalendarProps) => {
 
     const {isOpen, onOpen, onClose} = useDisclosure();
 
+    // Form details
+    const [activityName, setActivityName] = useState(props.activityName);
+    const [activityDescription, setActivityDescription] = useState(props.activityDescription)
+    const [calendarDate, setCalendarDate] = useState("")
+
+    const AddCalendarEvent = async () => {
+        try {
+
+            const calendarEvent = {
+                date: new Date(calendarDate).valueOf() / 1000,
+                activityName,
+                activityDescription
+            }
+
+            const newEventRef = collection(db, "calendarEvents");
+            await addDoc(newEventRef, calendarEvent);
+            onClose();
+        } catch (e) {
+            console.error(e);
+        }
+
+
+    }
+
+
+    const OnDateChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setCalendarDate(e.target.value);
+    }
+
+
     return (
         <>
-            <IconButton colorScheme={"green"} id={"add-activity-button"} aria-label={"Add new activity"} size={"lg"}
-                        icon={<Icon as={AiOutlinePlus}/>} onClick={onOpen}/>
+            <Button onClick={onOpen} leftIcon={<Icon as={BsPlus}/>}
+                    colorScheme={"green"} variant={"solid"}>Add to Calendar</Button>
 
             <Modal isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay/>
                 <ModalContent>
-                    <ModalHeader>Add to Calendar</ModalHeader>
+                    <ModalHeader>Add <strong>{props.activityName}</strong> to the calendar</ModalHeader>
                     <ModalCloseButton/>
 
                     <ModalBody>
-                        <VStack>
+                        <VStack alignItems={"left"} justifyContent={"start"}>
+
                             <Text>Choose a Date:</Text>
-                            <Input type={"date"}/>
+                            <Input type={"date"} value={calendarDate} onChange={OnDateChange}/>
                         </VStack>
                     </ModalBody>
 
                     <ModalFooter>
                         <Button variant={"ghost"} colorScheme={"green"}>Close</Button>
-                        <Button colorScheme={"green"}>Add to Calendar</Button>
+                        <Button colorScheme={"green"} onClick={AddCalendarEvent}>Add to Calendar</Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

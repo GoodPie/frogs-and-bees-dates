@@ -32,7 +32,7 @@ export const App = () => {
         <ChakraProvider theme={theme}>
             <ColorModeSwitcher/>
             <div className={"content-container"}>
-                {!isSignedIn ? <SignIn/> :isViewingCalendar ? <ViewCalendar/> : <ActivitySelection/> }
+                {!isSignedIn ? <SignIn/> : isViewingCalendar ? <ViewCalendar/> : <ActivitySelection/> }
             </div>
 
             <FrogImage/>
@@ -41,7 +41,7 @@ export const App = () => {
             </div>
 
 
-            <div style={{position: "absolute", left: 0, right: 0, bottom: 8}}>
+            <div style={{position: "absolute", left: 0, right: 0, bottom: 16}}>
                 <div style={{display: "flex", justifyContent: "center"}}>
                     <a target="_blank" href={"/FNB-Privacy-Policy.pdf"} rel="noreferrer">Privacy Policy</a>
                 </div>

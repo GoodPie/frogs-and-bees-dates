@@ -1,4 +1,5 @@
 interface IActivityDetails {
+
     name: string,
     description: string,
     date?: Date

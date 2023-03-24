@@ -11,8 +11,8 @@ import ActivityTime from "../enums/ActivityTime";
 import ActivityType from "../enums/ActivityType";
 import {db} from "../FirebaseConfig";
 import IActivityDetails from "../interfaces/IActivityDetails";
+
 import AddToCalendar from "../components/AddToCalendar";
-import {useElementScroll} from "framer-motion";
 
 interface IActivityFilters {
     type?: ActivityType,
@@ -34,11 +34,6 @@ const ActivitySelection = () => {
     useEffect(() => {
         RefreshTags();
     }, []);
-
-
-
-
-
 
 
     /**
@@ -136,6 +131,7 @@ const ActivitySelection = () => {
         // Reset all filters
         const filters = {type: activityType, time: ActivityTime.ANYTIME} as IActivityFilters;
         setCurrentFilters(filters);
+        
 
 
         const nextStep = activityStep + 1;

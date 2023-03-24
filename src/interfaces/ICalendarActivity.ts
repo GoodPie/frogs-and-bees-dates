@@ -1,9 +1,13 @@
-import IActivityDetails from "./IActivityDetails";
+interface ICalendarActivity  {
+    id?: string,
+    date: number,
+    activityName: string,
+    activityDesc: string
+    done?: boolean,
 
-interface ICalendarActivity extends IActivityDetails {
-
-    date: Date
+    onEventMarkedAsDone?: () => void
 
 }
+
 
 export default ICalendarActivity;

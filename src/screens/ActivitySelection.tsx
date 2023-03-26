@@ -1,7 +1,7 @@
 import {Button, Heading, HStack, Icon, Spinner, VStack} from "@chakra-ui/react";
 import {collection, getDocs, query, QueryFieldFilterConstraint, where} from "firebase/firestore";
 import React, {useEffect, useState} from "react";
-import {BsArrowCounterclockwise, BsFilter, BsPlus} from "react-icons/bs";
+import {BsArrowCounterclockwise, BsFilter} from "react-icons/bs";
 import {FaMoneyBillAlt} from "react-icons/fa";
 import {MdLocalActivity, MdLocalMovies} from "react-icons/md";
 import {RiRestaurant2Fill} from "react-icons/ri";
@@ -9,7 +9,7 @@ import AddNewActivity from "../components/AddNewActivity";
 import InputAutocomplete from "../components/InputAutocomplete";
 import ActivityTime from "../enums/ActivityTime";
 import ActivityType from "../enums/ActivityType";
-import {db} from "../FirebaseConfig";
+import {db, RegisterFirebaseToken} from "../FirebaseConfig";
 import IActivityDetails from "../interfaces/IActivityDetails";
 
 import AddToCalendar from "../components/AddToCalendar";
@@ -32,6 +32,7 @@ const ActivitySelection = () => {
     const [invalidResult, setInvalidResult] = useState(false);
 
     useEffect(() => {
+
         RefreshTags();
     }, []);
 
@@ -55,7 +56,6 @@ const ActivitySelection = () => {
         } catch (e) {
             console.error(e);
         }
-
     }
 
     /**

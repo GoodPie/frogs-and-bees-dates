@@ -1,9 +1,10 @@
 // Import the functions you need from the SDKs you need
 import {initializeApp} from "firebase/app";
-import {getAnalytics} from "firebase/analytics";
+import {getAnalytics, logEvent } from "firebase/analytics";
 import {getAuth} from "firebase/auth";
-import {getMessaging} from "firebase/messaging";
-import {getFirestore} from "firebase/firestore";
+import {getMessaging, getToken} from "firebase/messaging";
+import {doc, getFirestore, setDoc} from "firebase/firestore";
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -19,6 +20,9 @@ const firebaseConfig = {
     measurementId: "G-3GB33SBLYM"
 };
 
+
+const firebaseVapidKey = "BLcNj9ILfRYiDJdVTri47hAal9tKXqJx1WmqVb2KdSZoFsuaZI8IEDPPVrpzAUea5oxmmE_9BhzfF3_ynrPXcmc";
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
@@ -30,6 +34,9 @@ export const db = getFirestore(app);
 
 export const cloudMessaging = getMessaging(app);
 
+/**
+ * Requests permissions to send out notifications
+ */
 export const RequestNotificationPermission = async () => {
     console.debug('Requesting notification permission...');
     const permission = await Notification.requestPermission()
@@ -39,5 +46,41 @@ export const RequestNotificationPermission = async () => {
         });
 
     return permission === 'granted';
+}
+
+export const RegisterFirebaseToken = async () => {
+
+    const permissionGranted = await RequestNotificationPermission();
+    if (!permissionGranted) {
+        logEvent(analytics, 'notification_permission_denied', {
+            message: 'User denied notification permission'
+        });
+        return;
+    }
+
+    const currentToken = await getToken(cloudMessaging, { vapidKey: firebaseVapidKey })
+        .catch((err) => console.error("Error getting token", err));
+
+    if (currentToken) {
+        // Send the token to firebase firestore
+        console.debug("Got token", currentToken);
+
+        const userId = auth.currentUser?.uid;
+        if (!userId) {
+            setTimeout(() => {
+                RegisterFirebaseToken();
+            }, 1000);
+            return;
+        }
+
+
+        console.debug("Logging token to server...")
+        await setDoc(doc(db, "tokens", userId), {"token": currentToken});
+
+
+    } else {
+        console.log('No registration token available. Request permission to generate one.');
+    }
+
 
 }

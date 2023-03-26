@@ -3,7 +3,7 @@ import {collection, getDocs, orderBy, query, where} from "firebase/firestore";
 import {db} from "../FirebaseConfig";
 import ICalendarActivity from "../interfaces/ICalendarActivity";
 import CalendarEvent from "../components/CalendarEvent";
-import {Heading, HStack, Stack, VStack} from "@chakra-ui/react";
+import {Heading, Stack, VStack} from "@chakra-ui/react";
 import dayjs from "dayjs";
 
 const ViewCalendar = () => {
@@ -13,8 +13,7 @@ const ViewCalendar = () => {
 
     useEffect(() => {
         RefreshEvents();
-
-    }, []);
+    });
 
 
     const RefreshEvents = () => {
@@ -35,9 +34,7 @@ const ViewCalendar = () => {
                             model.id = doc.id;
                             events.push(model)
                         }
-
                     });
-
                     setCalendarEvents(events);
                 } else {
 

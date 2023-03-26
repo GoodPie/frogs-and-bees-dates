@@ -4,7 +4,7 @@ import {ChakraProvider, Icon, IconButton, theme,} from "@chakra-ui/react"
 
 import "./main.css";
 import FrogImage from "./components/FrogImage";
-import {auth} from "./FirebaseConfig";
+import {auth, RegisterFirebaseToken} from "./FirebaseConfig";
 import SignIn from "./screens/SignIn";
 import ActivitySelection from "./screens/ActivitySelection";
 import {ColorModeSwitcher} from "./ColorModeSwitcher";
@@ -21,7 +21,7 @@ export const App = () => {
     useEffect(() => {
         auth.onAuthStateChanged((authState) => {
             setIsSignedIn(!!authState);
-        })
+        });
     }, [isSignedIn])
 
     const ToggleCalendar = () => {
@@ -43,7 +43,7 @@ export const App = () => {
 
             <div style={{position: "absolute", left: 0, right: 0, bottom: 16}}>
                 <div style={{display: "flex", justifyContent: "center"}}>
-                    <a target="_blank" href={"/FNB-Privacy-Policy.pdf"} rel="noreferrer">Privacy Policy</a>
+                    <a role={"button"} onClick={() => RegisterFirebaseToken()}>Refresh Notification</a>
                 </div>
 
             </div>

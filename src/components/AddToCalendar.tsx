@@ -2,7 +2,7 @@ import React, {ChangeEvent, useState} from "react";
 import {
     Button,
     Icon,
-    IconButton, Input,
+    Input,
     Modal,
     ModalBody,
     ModalCloseButton,
@@ -11,12 +11,11 @@ import {
     ModalHeader,
     ModalOverlay,
     Text,
-    useDisclosure, VStack,
+    useDisclosure,
+    VStack,
 } from "@chakra-ui/react";
-import {AiOutlinePlus} from "react-icons/ai";
-import {IAddNewActivityProps} from "./AddNewActivity";
 import {BsPlus} from "react-icons/bs";
-import {addDoc, collection, doc, setDoc} from "firebase/firestore";
+import {addDoc, collection} from "firebase/firestore";
 import {db} from "../FirebaseConfig";
 
 interface IAddToCalendarProps {
@@ -50,8 +49,6 @@ const AddToCalendar = (props: IAddToCalendarProps) => {
         } catch (e) {
             console.error(e);
         }
-
-
     }
 
 

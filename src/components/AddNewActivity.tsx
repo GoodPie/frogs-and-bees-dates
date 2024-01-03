@@ -33,6 +33,14 @@ export interface IAddNewActivityProps {
     onAdded: () => void;
 }
 
+interface ICreateActivity {
+    name: string;
+    description: string;
+    type: ActivityType | null;
+    time: ActivityTime;
+    tags: string[];
+}
+
 enum ActivitySteps {
     NAME = 0,
     DESCRIPTION = 1,
@@ -43,21 +51,28 @@ enum ActivitySteps {
 const AddNewActivity = (props: IAddNewActivityProps) => {
 
     const {isOpen, onOpen, onClose} = useDisclosure();
+
     const [createStep, setCreateStep] = useState(0);
-    const [activityName, setActivityName] = useState("");
-    const [activityDescription, setActivityDescription] = useState("");
-    const [activityType, setActivityType] = useState(ActivityType.NONE);
-    const [activityTime, setActivityTime] = useState(ActivityTime.ANYTIME);
-    const [activityTags, setActivityTags] = useState([] as string[]);
-    const [currentTag, setCurrentTag] = useState("");
+
+    const [newActivity, setNewActivity] = useState({
+        name: "",
+        description: "",
+        type: null,
+        time: ActivityTime.ANYTIME,
+        tags: []
+    } as ICreateActivity);
+    const [currentTag, setCurrentTag] = useState(""); // Used for custom tag inputs
     const [isAdding, setIsAdding] = useState(false);
 
+    /**
+     * Add the activity to Firebase
+     */
     const AddActivity = async () => {
 
         setIsAdding(true);
 
         try {
-            for (const tag of activityTags) {
+            for (const tag of newActivity.tags) {
                 // Create the tag
                 await setDoc(doc(db, "tags", tag), {
                     name: tag,
@@ -70,16 +85,7 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
         }
 
         try {
-            // Add Activity to Firebase
-            const activity = {
-                name: activityName,
-                type: activityType,
-                time: activityTime,
-                tags: activityTags,
-                description: activityDescription
-            }
-
-            await setDoc(doc(db, "activities", activityName), activity, {merge: true});
+            await setDoc(doc(db, "activities", newActivity.name), newActivity, {merge: true});
         } catch (e) {
             console.error(e);
         }
@@ -92,44 +98,65 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
 
     const ResetAddActivity = () => {
         setCreateStep(0);
-        setActivityType(ActivityType.NONE);
-        setActivityTime(ActivityTime.ANYTIME);
-        setActivityTags([]);
-        setCurrentTag("");
-        setActivityName("");
-
+        setNewActivity({
+            name: "",
+            description: "",
+            type: null,
+            time: ActivityTime.ANYTIME,
+            tags: []
+        } as ICreateActivity);
         onClose();
     }
 
     const OnNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-        setActivityName(e.target.value);
+        setNewActivity((prev) => {
+            return {...prev, name: e.target.value}
+        });
     }
 
     const OnDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-        setActivityDescription(e.target.value);
+        setNewActivity((prev) => {
+            return {...prev, description: e.target.value}
+        });
     }
 
     const OnTagChange = (e: ChangeEvent<HTMLInputElement>) => {
         setCurrentTag(e.target.value);
     }
 
+    /**
+     * When enter is pushed when entering tags, a new tag will be added to the list of tags
+     * @param tag Tag to be added
+     */
     const OnTagAdd = (tag: string) => {
         if (!tag) return;
-        if (activityTags.map(t => t.toLowerCase()).includes(tag.toLowerCase())) return;
+        if (newActivity.tags.map(t => t.toLowerCase()).includes(tag.toLowerCase())) return;
 
-        const newTags = [...activityTags, tag];
-        setActivityTags(newTags);
+        const newTags = [...newActivity.tags, tag];
+        setNewActivity((prev) => {
+            return {...prev, tags: newTags}
+        })
         setCurrentTag("");
     }
 
     const OnTagRemove = (tag: string) => {
-        const newTags = activityTags.filter(t => t !== tag);
-        setActivityTags(newTags);
+        const newTags = newActivity.tags.filter(t => t !== tag);
+        setNewActivity((prev) => {
+            return {...prev, tags: newTags}
+        })
     }
 
+    /**
+     * Set the activity type
+     * Set the time to ANYTIME all the time as we no longer want to use the time feature
+     * @param type type of activity
+     */
     const OnActivityTypeSelected = (type: ActivityType) => {
-        setActivityType(type);
-        setActivityTime(ActivityTime.ANYTIME);
+
+        setNewActivity((prev) => {
+            return {...prev, type, time: ActivityTime.ANYTIME}
+        });
+
         GoToNextStep();
     }
 
@@ -191,12 +218,12 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
 
                     <ModalBody>
                         {createStep === ActivitySteps.NAME &&
-                            <Input value={activityName} onChange={OnNameChange} placeholder='Enter Activity Name'/>
+                            <Input value={newActivity.name} onChange={OnNameChange} placeholder='Enter Activity Name'/>
                         }
                         {createStep === ActivitySteps.DESCRIPTION &&
                             <VStack>
-                                <Text>{activityName}</Text>
-                                <Textarea value={activityDescription} onChange={OnDescriptionChange}
+                                <Text>{newActivity.name}</Text>
+                                <Textarea value={newActivity.description} onChange={OnDescriptionChange}
                                           placeholder='Add some details'></Textarea>
                             </VStack>
                         }
@@ -205,12 +232,14 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
                             <>
                                 <Input type='text' placeholder={"Add Some Extra Tags"} value={currentTag}
                                        onChange={OnTagChange} onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
-                                    if (e.key === "Enter") OnTagAdd((e.target as HTMLInputElement).value);
+                                    if (e.key === "Enter") {
+                                        OnTagAdd((e.target as HTMLInputElement).value);
+                                    }
                                 }
                                 }/>
 
                                 <Flex wrap={"wrap"} mt={4}>
-                                    {activityTags.map((tag) => {
+                                    {newActivity.tags.map((tag) => {
                                         return <Tag onClick={() => OnTagRemove(tag)} cursor={"pointer"}
                                                     colorScheme={"green"} mx={1} my={1}>{tag}</Tag>
                                     })}

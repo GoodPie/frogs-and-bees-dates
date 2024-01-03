@@ -1,5 +1,5 @@
 import {Button, Heading, HStack, Icon, Spinner, VStack} from "@chakra-ui/react";
-import {collection, getDocs, query, QueryFieldFilterConstraint, where} from "firebase/firestore";
+import {collection, deleteDoc, getDocs, query, QueryFieldFilterConstraint, where} from "firebase/firestore";
 import React, {useEffect, useState} from "react";
 import {BsArrowCounterclockwise, BsFilter} from "react-icons/bs";
 import {FaMoneyBillAlt} from "react-icons/fa";
@@ -9,7 +9,7 @@ import AddNewActivity from "../components/AddNewActivity";
 import InputAutocomplete from "../components/InputAutocomplete";
 import ActivityTime from "../enums/ActivityTime";
 import ActivityType from "../enums/ActivityType";
-import {db, RegisterFirebaseToken} from "../FirebaseConfig";
+import {db} from "../FirebaseConfig";
 import IActivityDetails from "../interfaces/IActivityDetails";
 
 import AddToCalendar from "../components/AddToCalendar";
@@ -29,10 +29,16 @@ const ActivitySelection = () => {
 
     const [loadingResult, setIsLoadingResult] = useState(false);
     const [selectedActivity, setSelectedActivity] = useState({} as IActivityDetails);
+
+    const [activities, setActivities] = useState({
+        allActivities: [] as IActivityDetails[],
+        alreadySelectedActivities: [] as IActivityDetails[]
+    });
+
+
     const [invalidResult, setInvalidResult] = useState(false);
 
     useEffect(() => {
-
         RefreshTags();
     }, []);
 
@@ -92,33 +98,89 @@ const ActivitySelection = () => {
      * @param queryClauses
      */
     const RunActivityQuery = async (queryClauses: QueryFieldFilterConstraint[]) => {
+
         setInvalidResult(false);
         setIsLoadingResult(true);
 
-        // Filter based on our current selection
-        const activityRef = collection(db, "activities");
-        const activityQuery = query(activityRef, ...queryClauses);
+        let allActivities = activities.allActivities;
 
-        const querySnapshot = await getDocs(activityQuery);
+        // First check that we haven't already loaded the activities
+        if (allActivities.length === 0) {
+            const activityRef = collection(db, "activities");
+            const activityQuery = query(activityRef, ...queryClauses);
 
-        if (querySnapshot.size === 0) {
+            const querySnapshot = await getDocs(activityQuery);
+
+
+            querySnapshot.forEach((doc) => {
+                allActivities.push(doc.data() as IActivityDetails);
+            })
+
+            setActivities({
+                allActivities: allActivities,
+                alreadySelectedActivities: []
+            });
+
+        }
+
+        // No activities
+        if (allActivities.length === 0) {
             setIsLoadingResult(false);
             setInvalidResult(true);
             return;
         }
 
-        // We have at least one activity
-        const randomIndex = Math.floor(Math.random() * querySnapshot.size);
-        const randomActivity = querySnapshot.docs[randomIndex];
 
-        const activityDetails = randomActivity.data();
+
+        // We have at least one activity
+        const randomIndex = Math.floor(Math.random() * activities.allActivities.length);
+        const randomActivity = activities.allActivities.splice(randomIndex, 1)[0];
+        activities.alreadySelectedActivities.push(randomActivity);
+
+        // If we've used all the activities, reset
+        if (activities.allActivities.length === 0) {
+            setActivities({
+                allActivities: activities.alreadySelectedActivities,
+                alreadySelectedActivities: []
+            });
+        }
+
         setSelectedActivity({
-            name: activityDetails.name,
-            description: activityDetails.description ?? ""
+            name: randomActivity.name,
+            description: randomActivity.description ?? ""
         })
 
         setIsLoadingResult(false);
 
+    }
+
+    /**
+     * Removes an activity from Firebase
+     * @param name The name of the activity to remove
+     */
+    const RemoveActivity = (name: string) => {
+
+        // Alert and ask if we want to remove
+        const remove = window.confirm("Are you sure you want to remove: " + name);
+        if (!remove) return;
+
+        // Remove the given activity from Firebase
+        const activityRef = collection(db, "activities");
+        const nameQuery = where("name", "==", name);
+
+        getDocs(query(activityRef, nameQuery)).then((querySnapshot) => {
+            querySnapshot.forEach(async (doc) => {
+                await deleteDoc(doc.ref);
+            })
+        });
+
+        // Clear the activities to force a new load
+        setActivities({
+            allActivities: [],
+            alreadySelectedActivities: []
+        });
+
+        GetNewActivityBasedOnExisting();
     }
 
     /**
@@ -131,7 +193,6 @@ const ActivitySelection = () => {
         // Reset all filters
         const filters = {type: activityType, time: ActivityTime.ANYTIME} as IActivityFilters;
         setCurrentFilters(filters);
-        
 
 
         const nextStep = activityStep + 1;
@@ -145,6 +206,13 @@ const ActivitySelection = () => {
      */
     const ResetActivitySelection = () => {
         setActivityStep(0);
+
+        // Reset all the activities
+        setActivities({
+            allActivities: [],
+            alreadySelectedActivities: []
+        });
+
         setSelectedActivity({} as IActivityDetails);
         setCurrentFilters({} as IActivityFilters);
     }
@@ -224,15 +292,20 @@ const ActivitySelection = () => {
 
 
                     <HStack>
-                        <Button onClick={GetNewActivityBasedOnExisting}
-                                colorScheme={"green"} variant={"outline"}><Icon as={BsArrowCounterclockwise}/></Button>
+                        <Button onClick={() => RemoveActivity(selectedActivity.name)}
+                                colorScheme={"red"} variant={"outline"}>- Remove</Button>
 
                         <AddToCalendar activityDescription={selectedActivity.description}
                                        activityName={selectedActivity.name}/>
+
+                        <Button onClick={GetNewActivityBasedOnExisting}
+                                colorScheme={"green"} variant={"outline"}><Icon as={BsArrowCounterclockwise}/></Button>
+
+
                     </HStack>
 
                     <Button onClick={ResetActivitySelection}
-                            colorScheme={"green"} variant={"ghost"}>Reset</Button>
+                            colorScheme={"green"} variant={"ghost"}>Return Home</Button>
 
 
                 </VStack>

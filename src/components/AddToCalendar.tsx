@@ -29,9 +29,6 @@ const AddToCalendar = (props: IAddToCalendarProps) => {
 
     const {isOpen, onOpen, onClose} = useDisclosure();
 
-    // Form details
-    const [activityName, setActivityName] = useState(props.activityName);
-    const [activityDescription, setActivityDescription] = useState(props.activityDescription)
     const [calendarDate, setCalendarDate] = useState("")
 
     const AddCalendarEvent = async () => {
@@ -39,8 +36,8 @@ const AddToCalendar = (props: IAddToCalendarProps) => {
 
             const calendarEvent = {
                 date: new Date(calendarDate).valueOf() / 1000,
-                activityName,
-                activityDescription
+                activityName: props.activityName,
+                activityDescription: props.activityDescription
             }
 
             const newEventRef = collection(db, "calendarEvents");
@@ -51,11 +48,9 @@ const AddToCalendar = (props: IAddToCalendarProps) => {
         }
     }
 
-
     const OnDateChange = (e: ChangeEvent<HTMLInputElement>) => {
         setCalendarDate(e.target.value);
     }
-
 
     return (
         <>

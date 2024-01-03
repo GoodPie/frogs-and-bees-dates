@@ -1,7 +1,7 @@
 import ICalendarActivity from "../interfaces/ICalendarActivity";
 import {Box, Button, Heading, Text, VStack} from "@chakra-ui/react";
 import React from "react";
-import {collection, doc, updateDoc} from "firebase/firestore";
+import { doc, updateDoc} from "firebase/firestore";
 import {db} from "../FirebaseConfig";
 
 

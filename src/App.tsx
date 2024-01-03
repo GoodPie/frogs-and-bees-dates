@@ -1,6 +1,6 @@
 import * as React from "react"
 import {useEffect, useState} from "react"
-import {ChakraProvider, Icon, IconButton, theme,} from "@chakra-ui/react"
+import {Button, ChakraProvider, Icon, IconButton, theme,} from "@chakra-ui/react"
 
 import "./main.css";
 import FrogImage from "./components/FrogImage";
@@ -43,7 +43,7 @@ export const App = () => {
 
             <div style={{position: "absolute", left: 0, right: 0, bottom: 16}}>
                 <div style={{display: "flex", justifyContent: "center"}}>
-                    <a role={"button"} onClick={() => RegisterFirebaseToken()}>Refresh Notification</a>
+                    <Button variant={"ghost"} role={"button"} onClick={() => RegisterFirebaseToken()}>Refresh Notification</Button>
                 </div>
 
             </div>

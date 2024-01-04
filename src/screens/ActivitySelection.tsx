@@ -1,12 +1,11 @@
 import {Button, Heading, HStack, Icon, Spinner, VStack} from "@chakra-ui/react";
 import {collection, deleteDoc, getDocs, query, QueryFieldFilterConstraint, where} from "firebase/firestore";
 import React, {useEffect, useState} from "react";
-import {BsArrowCounterclockwise, BsFilter} from "react-icons/bs";
+import {BsArrowCounterclockwise} from "react-icons/bs";
 import {FaMoneyBillAlt} from "react-icons/fa";
 import {MdLocalActivity, MdLocalMovies} from "react-icons/md";
 import {RiRestaurant2Fill} from "react-icons/ri";
 import AddNewActivity from "../components/AddNewActivity";
-import InputAutocomplete from "../components/InputAutocomplete";
 import ActivityTime from "../enums/ActivityTime";
 import ActivityType from "../enums/ActivityType";
 import {db} from "../FirebaseConfig";
@@ -24,7 +23,6 @@ const ActivitySelection = () => {
     const [availableTags, setAvailableTags] = useState([] as string[]);
 
     const [currentFilters, setCurrentFilters] = useState({} as IActivityFilters);
-    const [showingCustomFilters, setShowingCustomFilters] = useState(false);
     const [activityStep, setActivityStep] = useState(0);
 
     const [loadingResult, setIsLoadingResult] = useState(false);
@@ -78,18 +76,6 @@ const ActivitySelection = () => {
         }
 
         queryClauses.push(where("type", "==", filters.type as number));
-        await RunActivityQuery(queryClauses);
-    }
-
-    /**
-     * Gets the activities that match the current filters from Firebase
-     * @param selectedTags
-     */
-    const GetActivityFromTags = async (selectedTags: string[]) => {
-        const queryClauses = [];
-        queryClauses.push(where("tags", "array-contains-any", selectedTags));
-        setShowingCustomFilters(false);
-        setActivityStep(2);
         await RunActivityQuery(queryClauses);
     }
 
@@ -227,7 +213,7 @@ const ActivitySelection = () => {
 
     return (
         <VStack w={"80%"}>
-            {activityStep === 0 && !showingCustomFilters &&
+            {activityStep === 0 &&
                 <>
                     <Button onClick={() => OnActivityTypeSelect(ActivityType.FOOD)}
                             leftIcon={<Icon as={RiRestaurant2Fill}/>} w={"100%"} colorScheme={"green"}
@@ -256,15 +242,8 @@ const ActivitySelection = () => {
                         Bougie Ballers
                     </Button>
 
-                    <Button onClick={() => setShowingCustomFilters(true)} w={"100%"} leftIcon={<Icon as={BsFilter}/>}
-                            colorScheme={"green"}
-                            size={"lg"}>
-                        Use Filters
-                    </Button>
                 </>
             }
-
-            {showingCustomFilters && <InputAutocomplete onSubmit={GetActivityFromTags} options={availableTags}/>}
 
             {activityStep === 1 && loadingResult && <Spinner colorScheme={"green"}/>}
             {activityStep === 1 && !loadingResult && <>

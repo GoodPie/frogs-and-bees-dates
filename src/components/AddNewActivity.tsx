@@ -5,12 +5,6 @@ import {
     IconButton,
     Input,
     Dialog,
-    DialogBody,
-    DialogCloseTrigger,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogBackdrop,
     Tag,
     Text,
     Textarea,
@@ -50,7 +44,7 @@ enum ActivitySteps {
 
 const AddNewActivity = (props: IAddNewActivityProps) => {
 
-    const { isOpen, onOpen, onClose } = useDisclosure();
+    const { open, onOpen, onClose } = useDisclosure();
 
     const [createStep, setCreateStep] = useState(0);
 
@@ -203,16 +197,20 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
 
     return (
         <>
-            <IconButton colorScheme={"green"} id={"add-activity-button"} aria-label={"Add new activity"} size={"lg"}
-                icon={<Icon as={AiOutlinePlus} />} onClick={onOpen} />
+            <IconButton colorPalette={"green"} id={"add-activity-button"} aria-label={"Add new activity"} size={"lg"}
+                onClick={onOpen}>
+                <Icon as={AiOutlinePlus} />
+            </IconButton>
 
-            <Dialog.Root isOpen={isOpen} onClose={onClose}>
-                <DialogBackdrop />
-                <DialogContent>
-                    <DialogHeader>Create Activity</DialogHeader>
-                    <DialogCloseTrigger />
+            <Dialog.Root open={open} onOpenChange={(next) => { if(!next) onClose(); }}>
+                <Dialog.Backdrop />
+                <Dialog.Content>
+                    <Dialog.Header>
+                        <Dialog.Title>Create Activity</Dialog.Title>
+                    </Dialog.Header>
+                    <Dialog.CloseTrigger />
 
-                    <DialogBody>
+                    <Dialog.Body>
                         {createStep === ActivitySteps.NAME &&
                             <Input value={newActivity.name} onChange={OnNameChange} placeholder='Enter Activity Name' />
                         }
@@ -236,29 +234,31 @@ const AddNewActivity = (props: IAddNewActivityProps) => {
 
                                 <Flex wrap={"wrap"} mt={4}>
                                     {newActivity.tags.map((tag) => {
-                                        return <Tag onClick={() => OnTagRemove(tag)} cursor={"pointer"}
-                                            colorScheme={"green"} mx={1} my={1}>{tag}</Tag>
+                                        return <Tag.Root onClick={() => OnTagRemove(tag)} cursor={"pointer"}
+                                            colorPalette={"green"} mx={1} my={1} key={tag}>
+                                            <Tag.Label>{tag}</Tag.Label>
+                                        </Tag.Root>
                                     })}
                                 </Flex>
                             </>
                         }
-                    </DialogBody>
+                    </Dialog.Body>
 
-                    <DialogFooter>
+                    <Dialog.Footer>
                         <Button
                             display={createStep === ActivitySteps.NAME || createStep === ActivitySteps.DESCRIPTION ? "block" : "none"}
                             onClick={GoToNextStep}
-                            rightIcon={<Icon as={BsArrowRight} />} colorScheme='green'>
-                            Next
+                            colorPalette='green'>
+                            Next <Icon as={BsArrowRight} />
                         </Button>
-                        <Button isLoading={isAdding} display={createStep === ActivitySteps.TAGS ? "block" : "none"}
+                        <Button loading={isAdding} display={createStep === ActivitySteps.TAGS ? "block" : "none"}
                             onClick={AddActivity}
-                            rightIcon={<Icon as={BsArrowRight} />} colorScheme='green'>
-                            Add Activity
+                            colorPalette='green'>
+                            Add Activity <Icon as={BsArrowRight} />
                         </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                    </Dialog.Footer>
+                </Dialog.Content>
+            </Dialog.Root>
         </>
     )
 }

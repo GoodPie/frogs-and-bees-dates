@@ -1,15 +1,9 @@
-import React, {ChangeEvent, useState} from "react";
+import React, { ChangeEvent, useState } from "react";
 import {
     Button,
     Icon,
     Input,
     Dialog,
-    DialogBody,
-    DialogCloseTrigger,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogBackdrop,
     Text,
     useDisclosure,
     VStack,
@@ -27,7 +21,7 @@ interface IAddToCalendarProps {
 
 const AddToCalendar = (props: IAddToCalendarProps) => {
 
-    const {isOpen, onOpen, onClose} = useDisclosure();
+    const { open, onOpen, onClose } = useDisclosure();
 
     const [calendarDate, setCalendarDate] = useState("")
 
@@ -54,29 +48,31 @@ const AddToCalendar = (props: IAddToCalendarProps) => {
 
     return (
         <>
-            <Button onClick={onOpen} leftIcon={<Icon as={BsPlus}/>}
-                    colorScheme={"green"} variant={"solid"}>Add to Calendar</Button>
+            <Button onClick={onOpen} colorPalette={"green"} variant={"solid"}>
+                <Icon as={BsPlus} /> Add to Calendar
+            </Button>
 
-            <Dialog isOpen={isOpen} onClose={onClose}>
-                <DialogBackdrop/>
-                <DialogContent>
-                    <DialogHeader>Add <strong>{props.activityName}</strong> to the calendar</DialogHeader>
-                    <DialogCloseTrigger/>
+            <Dialog.Root open={open} onOpenChange={(next) => { if(!next) onClose(); }}>
+                <Dialog.Backdrop />
+                <Dialog.Content>
+                    <Dialog.Header>
+                        <Dialog.Title>Add <strong>{props.activityName}</strong> to the calendar</Dialog.Title>
+                    </Dialog.Header>
+                    <Dialog.CloseTrigger />
 
-                    <DialogBody>
-                        <VStack alignItems={"left"} justifyContent={"start"}>
-
+                    <Dialog.Body>
+                        <VStack alignItems={"flex-start"} justifyContent={"start"}>
                             <Text>Choose a Date:</Text>
-                            <Input type={"date"} value={calendarDate} onChange={OnDateChange}/>
+                            <Input type={"date"} value={calendarDate} onChange={OnDateChange} />
                         </VStack>
-                    </DialogBody>
+                    </Dialog.Body>
 
-                    <DialogFooter>
-                        <Button variant={"ghost"} colorScheme={"green"}>Close</Button>
-                        <Button colorScheme={"green"} onClick={AddCalendarEvent}>Add to Calendar</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                    <Dialog.Footer>
+                        <Button variant={"ghost"} colorPalette={"green"} onClick={onClose}>Close</Button>
+                        <Button colorPalette={"green"} onClick={AddCalendarEvent}>Add to Calendar</Button>
+                    </Dialog.Footer>
+                </Dialog.Content>
+            </Dialog.Root>
         </>
     )
 }

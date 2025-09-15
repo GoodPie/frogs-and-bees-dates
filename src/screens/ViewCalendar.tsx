@@ -46,7 +46,7 @@ const ViewCalendar = () => {
     return (
         <VStack h={"50vh"} overflow={"auto"} p={10}>
 
-            <Stack spacing={4} justifyContent={"center"} flexWrap={"wrap"}>
+            <Stack gap={4} justifyContent={"center"} flexWrap={"wrap"}>
                 {calendarEvents.map(ce => {
                     return <CalendarEvent id={ce.id} activityName={ce.activityName} date={ce.date}
                                           activityDesc={ce.activityDesc} onEventMarkedAsDone={RefreshEvents}/>

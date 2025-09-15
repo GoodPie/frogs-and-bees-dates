@@ -1,5 +1,5 @@
 import {Badge, Box, Button, Center, Flex, HStack, Icon, Input, Text} from "@chakra-ui/react";
-import React, {ChangeEvent, useState} from "react";
+import {ChangeEvent, useState} from "react";
 import {BsArrowRight} from "react-icons/bs";
 
 export interface IInputAutoCompleteProps {
@@ -48,16 +48,25 @@ const InputAutocomplete = (props: IInputAutoCompleteProps) => {
 
     return (
         <Box width={"80%"}>
-            {currentlySelected.length >= MAX_OPTIONS &&
+            {currentlySelected.length >= MAX_OPTIONS && (
                 <Center>
-                    <Text size={"lg"} mb={4} colorScheme={"red"}>Only 10 filters at a time please 😘</Text>
+                    <Text fontSize={"lg"} mb={4} color={"red.500"}>Only 10 filters at a time please 😘</Text>
                 </Center>
-            }
-            <HStack mb={3} spacing={0}>
+            )}
+            <HStack mb={3} gap={0}>
                 <Input placeholder={"Type here for more tags"} roundedRight={0} type={"text"} onChange={UpdateSearchInput} value={searchInput}/>
-                <Button disabled={currentlySelected.length === 0} onClick={() => props.onSubmit(currentlySelected)} px={8} roundedLeft={0}
-                        rightIcon={<Icon as={BsArrowRight}/>} aria-label={"Search"} colorScheme={"green"}>Get
-                    Activity</Button>
+                <Button
+                    disabled={currentlySelected.length === 0}
+                    onClick={() => props.onSubmit(currentlySelected)}
+                    px={8}
+                    roundedLeft={0}
+                    aria-label={"Search"}
+                    colorScheme={"green"}
+                    gap={2}
+                >
+                    Get Activity
+                    <Icon as={BsArrowRight} aria-hidden={"true"} />
+                </Button>
             </HStack>
 
             {

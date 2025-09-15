@@ -22,8 +22,6 @@ exports.OnEventAdded = functions.firestore
         topic: "events",
       };
 
-      console.debug("Payload: ", payload);
-
       return admin.messaging().send(payload);
     } catch (e) {
       console.error("Error on event added: ", e);

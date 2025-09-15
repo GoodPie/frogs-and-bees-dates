@@ -1,6 +1,6 @@
 import * as React from "react"
 import {useEffect, useState} from "react"
-import {Button, ChakraProvider, Icon, IconButton, theme,} from "@chakra-ui/react"
+import {Button, ChakraProvider, defaultSystem, IconButton} from "@chakra-ui/react"
 
 import "./main.css";
 import FrogImage from "./components/FrogImage";
@@ -29,21 +29,24 @@ export const App = () => {
     }
 
     return (
-        <ChakraProvider theme={theme}>
+        <ChakraProvider value={defaultSystem}>
             <ColorModeSwitcher/>
             <div className={"content-container"}>
-                {!isSignedIn ? <SignIn/> : isViewingCalendar ? <ViewCalendar/> : <ActivitySelection/> }
+                {!isSignedIn ? <SignIn/> : isViewingCalendar ? <ViewCalendar/> : <ActivitySelection/>}
             </div>
 
             <FrogImage/>
             <div style={{position: "absolute", right: 8, top: 8}}>
-                <IconButton  aria-label={"View Calendar"} icon={<Icon as={AiTwotoneCalendar} />} onClick={ToggleCalendar} />
+                <IconButton aria-label={"View Calendar"} onClick={ToggleCalendar}>
+                    <AiTwotoneCalendar/>
+                </IconButton>
             </div>
 
 
             <div style={{position: "absolute", left: 0, right: 0, bottom: 16}}>
                 <div style={{display: "flex", justifyContent: "center"}}>
-                    <Button variant={"ghost"} role={"button"} onClick={() => RegisterFirebaseToken()}>Refresh Notification</Button>
+                    <Button variant={"ghost"} role={"button"} onClick={() => RegisterFirebaseToken()}>Refresh
+                        Notification</Button>
                 </div>
 
             </div>

@@ -3,13 +3,13 @@ import {
     Button,
     Icon,
     Input,
-    Modal,
-    ModalBody,
-    ModalCloseButton,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
-    ModalOverlay,
+    Dialog,
+    DialogBody,
+    DialogCloseTrigger,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogBackdrop,
     Text,
     useDisclosure,
     VStack,
@@ -57,26 +57,26 @@ const AddToCalendar = (props: IAddToCalendarProps) => {
             <Button onClick={onOpen} leftIcon={<Icon as={BsPlus}/>}
                     colorScheme={"green"} variant={"solid"}>Add to Calendar</Button>
 
-            <Modal isOpen={isOpen} onClose={onClose}>
-                <ModalOverlay/>
-                <ModalContent>
-                    <ModalHeader>Add <strong>{props.activityName}</strong> to the calendar</ModalHeader>
-                    <ModalCloseButton/>
+            <Dialog isOpen={isOpen} onClose={onClose}>
+                <DialogBackdrop/>
+                <DialogContent>
+                    <DialogHeader>Add <strong>{props.activityName}</strong> to the calendar</DialogHeader>
+                    <DialogCloseTrigger/>
 
-                    <ModalBody>
+                    <DialogBody>
                         <VStack alignItems={"left"} justifyContent={"start"}>
 
                             <Text>Choose a Date:</Text>
                             <Input type={"date"} value={calendarDate} onChange={OnDateChange}/>
                         </VStack>
-                    </ModalBody>
+                    </DialogBody>
 
-                    <ModalFooter>
+                    <DialogFooter>
                         <Button variant={"ghost"} colorScheme={"green"}>Close</Button>
                         <Button colorScheme={"green"} onClick={AddCalendarEvent}>Add to Calendar</Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     )
 }

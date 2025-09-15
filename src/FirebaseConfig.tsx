@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import {initializeApp} from "firebase/app";
-import {getAnalytics, logEvent } from "firebase/analytics";
+import {getAnalytics, logEvent} from "firebase/analytics";
 import {getAuth} from "firebase/auth";
 import {getMessaging, getToken} from "firebase/messaging";
 import {doc, getFirestore, setDoc} from "firebase/firestore";
@@ -58,7 +58,7 @@ export const RegisterFirebaseToken = async () => {
         return;
     }
 
-    const currentToken = await getToken(cloudMessaging, { vapidKey: firebaseVapidKey })
+    const currentToken = await getToken(cloudMessaging, {vapidKey: firebaseVapidKey})
         .catch((err) => console.error("Error getting token", err));
 
     if (currentToken) {
@@ -73,11 +73,7 @@ export const RegisterFirebaseToken = async () => {
             return;
         }
 
-
-        console.debug("Logging token to server...")
         await setDoc(doc(db, "tokens", userId), {"token": currentToken});
-
-
     } else {
         console.log('No registration token available. Request permission to generate one.');
     }

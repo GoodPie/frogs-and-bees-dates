@@ -1,3 +1,4 @@
+import { vi } from 'vitest'
 import IActivityDetails from '../src/interfaces/IActivityDetails'
 import ICalendarActivity from '../src/interfaces/ICalendarActivity'
 import ActivityType from '../src/enums/ActivityType'

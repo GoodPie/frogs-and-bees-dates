@@ -23,6 +23,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
+    "test:coverage:validate": "vitest --coverage --run && echo 'Coverage validation passed!'",
     "test:ui": "vitest --ui"
   },
   "eslintConfig": {

@@ -2,6 +2,7 @@ import { JSDOM } from "jsdom"
 import ResizeObserver from "resize-observer-polyfill"
 import { vi, beforeEach } from "vitest"
 import { firebaseMocks, resetFirebaseMocks } from "./src/__mocks__/firebase"
+import '@testing-library/jest-dom'
 
 const { window } = new JSDOM()
 

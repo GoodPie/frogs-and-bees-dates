@@ -21,7 +21,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "test:ui": "vitest --ui"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -48,6 +50,7 @@
     "@types/react": "^18.0.9",
     "@types/react-dom": "^18.0.4",
     "@vitejs/plugin-react": "^5.0.2",
+    "@vitest/coverage-v8": "3.2.4",
     "jsdom": "^27.0.0",
     "resize-observer-polyfill": "^1.5.1",
     "typescript": "^5.9.2",

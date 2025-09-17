@@ -1,5 +1,7 @@
+import { useState, useCallback } from 'react';
 import { auth } from "../FirebaseConfig";
 import { toaster } from "../components/ui/toaster";
+import { GoogleAuthProvider, signInWithPopup, User } from 'firebase/auth';
 
 // Initialize a single provider instance
 const provider = new GoogleAuthProvider();

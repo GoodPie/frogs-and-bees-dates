@@ -25,6 +25,21 @@ window.Element.prototype.scrollIntoView = () => {}
 // requestAnimationFrame mock
 window.requestAnimationFrame = (cb: FrameRequestCallback) => setTimeout(cb, 1000 / 60)
 
+// matchMedia mock (used by some UI libs / Chakra / media queries)
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation((query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(), // deprecated
+    removeListener: vi.fn(), // deprecated
+    dispatchEvent: vi.fn(),
+  })),
+});
+
 // URL object mock
 window.URL.createObjectURL = () => "https://i.pravatar.cc/300"
 window.URL.revokeObjectURL = () => {}

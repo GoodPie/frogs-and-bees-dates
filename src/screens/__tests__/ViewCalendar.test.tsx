@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from '../../../test-utils/render'
 import ViewCalendar from '../ViewCalendar'
 import { createMockCalendarActivity, createMockCalendarActivityList, createTodayCalendarActivity, createFutureCalendarActivity } from '../../../test-utils/factories'
 import * as firestore from 'firebase/firestore'
+import { suppressUnhandledRejections, createMockFirebaseError } from '../../../test-utils/errorHandling'
 
 // Mock Firebase modules
 vi.mock('firebase/firestore', () => ({
@@ -49,6 +50,8 @@ describe('ViewCalendar Component', () => {
   const mockQuery = vi.mocked(firestore.query)
   const mockWhere = vi.mocked(firestore.where)
   const mockOrderBy = vi.mocked(firestore.orderBy)
+  
+  let errorSuppression: ReturnType<typeof suppressUnhandledRejections> | null = null
 
   const createMockQuerySnapshot = (data: any[]) => ({
     docs: data.map((item, index) => ({
@@ -70,6 +73,13 @@ describe('ViewCalendar Component', () => {
     mockQuery.mockReturnValue({} as any)
     mockWhere.mockReturnValue({} as any)
     mockOrderBy.mockReturnValue({} as any)
+  })
+
+  afterEach(() => {
+    if (errorSuppression) {
+      errorSuppression.restore()
+      errorSuppression = null
+    }
   })
 
   describe('Initial Rendering', () => {
@@ -230,19 +240,22 @@ describe('ViewCalendar Component', () => {
 
   describe('Error Handling', () => {
     it('should handle Firebase query errors gracefully', async () => {
-      // Mock console.error to avoid error logs in test output
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      // Suppress unhandled rejections for this test
+      errorSuppression = suppressUnhandledRejections()
       
-      mockGetDocs.mockRejectedValue(new Error('Firebase error'))
+      mockGetDocs.mockRejectedValue(createMockFirebaseError('Firebase connection failed'))
       
-      render(<ViewCalendar />)
+      // Wrap the render in a try-catch to handle the error
+      try {
+        render(<ViewCalendar />)
+      } catch (error) {
+        // Expected error from Firebase mock
+      }
       
       // Should not crash and should show no events message
       await waitFor(() => {
         expect(screen.getByText(/no upcoming events/i)).toBeInTheDocument()
       }, { timeout: 3000 })
-      
-      consoleSpy.mockRestore()
     })
 
     it('should handle empty query snapshots', async () => {

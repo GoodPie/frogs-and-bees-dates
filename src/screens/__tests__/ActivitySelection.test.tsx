@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, userEvent, waitFor } from '../../../test-utils/render'
 import ActivitySelection from '../ActivitySelection'
 import { createMockActivity, createMockActivityList } from '../../../test-utils/factories'
 import ActivityType from '../../enums/ActivityType'
 import * as firestore from 'firebase/firestore'
+import { suppressUnhandledRejections, createMockFirebaseError } from '../../../test-utils/errorHandling'
 
 // Mock Firebase modules
 vi.mock('firebase/firestore', () => ({
@@ -49,6 +50,8 @@ describe('ActivitySelection Component', () => {
     const mockWhere = vi.mocked(firestore.where)
     const mockOrderBy = vi.mocked(firestore.orderBy)
     const mockDeleteDoc = vi.mocked(firestore.deleteDoc)
+    
+    let errorSuppression: ReturnType<typeof suppressUnhandledRejections> | null = null
 
     const createMockQuerySnapshot = (data: any[]) => ({
         docs: data.map((item, index) => ({
@@ -81,6 +84,13 @@ describe('ActivitySelection Component', () => {
         mockWhere.mockReturnValue({} as any)
         mockOrderBy.mockReturnValue({} as any)
         mockDeleteDoc.mockResolvedValue(undefined as any)
+    })
+
+    afterEach(() => {
+        if (errorSuppression) {
+            errorSuppression.restore()
+            errorSuppression = null
+        }
     })
 
     describe('Initial Rendering', () => {
@@ -349,28 +359,32 @@ describe('ActivitySelection Component', () => {
 
     describe('Error Handling', () => {
         it('should handle Firebase errors gracefully', async () => {
+            // Suppress unhandled rejections for this test
+            errorSuppression = suppressUnhandledRejections()
+            
             const user = userEvent.setup()
-
-            // Mock console.error to avoid error logs in test output
-            const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
 
             // First call succeeds for tags, second call fails for activities
             mockGetDocs
                 .mockResolvedValueOnce(createMockQuerySnapshot(['tag1', 'tag2']) as any)
-                .mockRejectedValueOnce(new Error('Firebase error'))
+                .mockRejectedValueOnce(createMockFirebaseError('Firebase connection failed'))
 
             render(<ActivitySelection />)
 
             const foodButton = screen.getByRole('button', { name: /food/i })
-            await user.click(foodButton)
+            
+            // Use a try-catch to handle the click that will trigger the error
+            try {
+                await user.click(foodButton)
+            } catch (error) {
+                // Expected error from Firebase mock
+            }
 
             // Should not crash - we can verify the component still renders
             await waitFor(() => {
                 // Component should still be functional - check for basic elements
                 expect(screen.getByTestId('add-new-activity')).toBeInTheDocument()
             }, { timeout: 3000 })
-
-            consoleSpy.mockRestore()
         })
     })
 

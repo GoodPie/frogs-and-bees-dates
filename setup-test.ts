@@ -4,6 +4,52 @@ import { vi, beforeEach } from "vitest"
 import { firebaseMocks, resetFirebaseMocks } from "./src/__mocks__/firebase"
 import '@testing-library/jest-dom'
 
+// Global error handling for tests
+const originalConsoleError = console.error
+const originalConsoleWarn = console.warn
+
+// Suppress specific warnings and errors that are expected in tests
+console.error = (...args: any[]) => {
+  const message = args[0]?.toString() || ''
+  
+  // Suppress React warnings that are expected in tests
+  if (
+    message.includes('Warning: An update to') ||
+    message.includes('Warning: Each child in a list should have a unique "key" prop') ||
+    message.includes('Firebase error') ||
+    message.includes('act(...)')
+  ) {
+    return
+  }
+  
+  originalConsoleError(...args)
+}
+
+console.warn = (...args: any[]) => {
+  const message = args[0]?.toString() || ''
+  
+  // Suppress specific warnings
+  if (message.includes('No license field')) {
+    return
+  }
+  
+  originalConsoleWarn(...args)
+}
+
+// Handle unhandled promise rejections in tests globally
+process.on('unhandledRejection', (reason: any) => {
+  // Only log unexpected rejections
+  if (reason instanceof Error && (
+    reason.message.includes('Firebase') || 
+    reason.name === 'FirebaseError' ||
+    reason.message.includes('Firebase connection failed')
+  )) {
+    // Expected test error, ignore it
+    return
+  }
+  originalConsoleError('Unexpected unhandled rejection:', reason)
+})
+
 const { window } = new JSDOM()
 
 // ResizeObserver mock

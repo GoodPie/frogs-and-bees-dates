@@ -137,7 +137,7 @@ describe('CalendarEvent', () => {
       
       // Should be one of the predefined colors (converted to RGB)
       const expectedColors = ['#F0F7EE', '#C4D7F2', '#AFDEDC', '#776871']
-      const rgbColors = expectedColors.map(hex => {
+      const _rgbColors = expectedColors.map(hex => {
         // Convert hex to RGB for comparison (browsers might return RGB format)
         const r = parseInt(hex.slice(1, 3), 16)
         const g = parseInt(hex.slice(3, 5), 16)

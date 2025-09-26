@@ -242,8 +242,8 @@ describe('AddNewActivity Component', () => {
     })
 
     it('should not add empty tags', async () => {
-      const tagInput = screen.getByPlaceholderText('Add Some Extra Tags')
-      
+      const _tagInput = screen.getByPlaceholderText('Add Some Extra Tags')
+
       await user.keyboard('{Enter}')
       
       // Should not show any tags
@@ -313,26 +313,29 @@ describe('AddNewActivity Component', () => {
       const addActivityButton = screen.getByRole('button', { name: /add activity/i })
       await user.click(addActivityButton)
       
+      // Wait for Firebase operations to complete
       await waitFor(() => {
-        // Should save each tag
-        expect(firebaseMocks.setDoc).toHaveBeenCalledWith(
-          expect.anything(),
-          {
-            name: 'romantic',
-            createdOn: expect.any(Date)
-          },
-          { merge: true }
-        )
-        
-        expect(firebaseMocks.setDoc).toHaveBeenCalledWith(
-          expect.anything(),
-          {
-            name: 'outdoor',
-            createdOn: expect.any(Date)
-          },
-          { merge: true }
-        )
+        expect(firebaseMocks.setDoc).toHaveBeenCalled()
       })
+
+      // Verify each tag was saved correctly
+      expect(firebaseMocks.setDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        {
+          name: 'romantic',
+          createdOn: expect.any(Date)
+        },
+        { merge: true }
+      )
+
+      expect(firebaseMocks.setDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        {
+          name: 'outdoor',
+          createdOn: expect.any(Date)
+        },
+        { merge: true }
+      )
     })
 
     it('should call onAdded callback after successful save', async () => {

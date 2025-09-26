@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, userEvent, waitFor } from '../../../test-utils/render'
+import { render, screen, userEvent, waitFor } from '../../../test-utils'
 import ActivitySelection from '../ActivitySelection'
-import { createMockActivity, createMockActivityList } from '../../../test-utils/factories'
+import { createMockActivity, createMockActivityList } from '../../../test-utils'
 import ActivityType from '../../enums/ActivityType'
 import * as firestore from 'firebase/firestore'
 import { suppressUnhandledRejections, createMockFirebaseError } from '../../../test-utils/errorHandling'
@@ -22,7 +22,7 @@ vi.mock('../../FirebaseConfig', () => ({
 
 // Mock the AddNewActivity and AddToCalendar components
 vi.mock('../../components/AddNewActivity', () => ({
-    default: ({ onAdded, availableActivities }: any) => (
+    default: ({ onAdded: _onAdded, availableActivities }: any) => (
         <div data-testid="add-new-activity">
             Add New Activity Mock - Tags: {availableActivities?.length || 0}
         </div>
@@ -30,7 +30,7 @@ vi.mock('../../components/AddNewActivity', () => ({
 }))
 
 vi.mock('../../components/AddToCalendar', () => ({
-    default: ({ activityName, activityDescription }: any) => (
+    default: ({ activityName, activityDescription: _activityDescription }: any) => (
         <button data-testid="add-to-calendar">
             Add to Calendar: {activityName}
         </button>
@@ -213,11 +213,9 @@ describe('ActivitySelection Component', () => {
 
             const foodButton = screen.getByRole('button', { name: /food/i })
             await user.click(foodButton)
+            expect(screen.getByText('Test Restaurant')).toBeInTheDocument()
+            expect(screen.getByText('Great Italian food')).toBeInTheDocument()
 
-            await waitFor(() => {
-                expect(screen.getByText('Test Restaurant')).toBeInTheDocument()
-                expect(screen.getByText('Great Italian food')).toBeInTheDocument()
-            })
         })
 
         it('should show "No Activities Found" when no activities match filters', async () => {

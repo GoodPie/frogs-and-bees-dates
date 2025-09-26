@@ -10,7 +10,7 @@ export const mockUser = {
 
 // Mock Firebase Auth
 export const mockAuth = {
-  currentUser: null,
+  currentUser: null as any,
   onAuthStateChanged: vi.fn(),
   signOut: vi.fn(),
 };

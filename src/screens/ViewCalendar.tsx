@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {collection, getDocs, orderBy, query, where} from "firebase/firestore";
-import {db} from "../FirebaseConfig";
+import {db} from "@/FirebaseConfig";
 import ICalendarActivity from "../interfaces/ICalendarActivity";
 import CalendarEvent from "../components/CalendarEvent";
 import {Heading, Stack, VStack} from "@chakra-ui/react";
@@ -19,7 +19,7 @@ const ViewCalendar = () => {
     const RefreshEvents = () => {
         const startDate = dayjs().startOf("day").toDate().valueOf() / 1000;
 
-        let calendarQuery = query(calendarRef,
+        const calendarQuery = query(calendarRef,
             where("date", ">=", startDate),
             orderBy("date"))
 

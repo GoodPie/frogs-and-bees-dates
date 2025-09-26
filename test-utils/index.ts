@@ -1,3 +1,5 @@
+import {expect, MockedFunction, vi} from "vitest"
+
 // Re-export all test utilities for easy importing
 export * from './render'
 export * from './factories'
@@ -38,6 +40,6 @@ export const waitForElement = async (getElement: () => HTMLElement | null, timeo
 // Mock function helpers
 export const createMockFunction = <T extends (...args: any[]) => any>(
   implementation?: T
-): vi.MockedFunction<T> => {
-  return vi.fn(implementation) as vi.MockedFunction<T>
+): MockedFunction<T> => {
+  return vi.fn(implementation) as MockedFunction<T>
 }

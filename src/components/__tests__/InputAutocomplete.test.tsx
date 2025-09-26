@@ -199,7 +199,7 @@ describe('InputAutocomplete', () => {
     })
 
     it('should not call onSubmit when no tags are selected', async () => {
-      const user = userEvent.setup()
+      const _user = userEvent.setup()
       render(<InputAutocomplete {...defaultProps} />)
       
       const submitButton = screen.getByRole('button', { name: /search/i })

@@ -8,7 +8,7 @@ admin.initializeApp({
 
 exports.OnEventAdded = functions.firestore
   .document("calendarEvents/{calendarId}")
-  .onCreate((snap, context) => {
+  .onCreate((snap) => {
     try {
       const data = snap.data();
       const name = data.activityName;
@@ -33,7 +33,7 @@ exports.OnEventAdded = functions.firestore
 
 exports.OnTokenAdded = functions.firestore
   .document("tokens/{userId}")
-  .onCreate((snap, context) => {
+  .onCreate((snap) => {
     // Get the token from the document snapshot
     const token = snap.data().token;
     console.debug("Token: ", token);

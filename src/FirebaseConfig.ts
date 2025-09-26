@@ -75,7 +75,7 @@ export const RegisterFirebaseToken = async () => {
 
         await setDoc(doc(db, "tokens", userId), {"token": currentToken});
     } else {
-        console.log('No registration token available. Request permission to generate one.');
+        console.debug('No registration token available. Request permission to generate one.');
     }
 
 

@@ -88,7 +88,7 @@ const ActivitySelection = () => {
         setInvalidResult(false);
         setIsLoadingResult(true);
 
-        let allActivities = activities.allActivities;
+        const allActivities = activities.allActivities;
 
         // First check that we haven't already loaded the activities
         if (allActivities.length === 0) {

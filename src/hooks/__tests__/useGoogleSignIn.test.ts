@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 
+// Import after mocking
+import { useGoogleSignIn } from '../useGoogleSignIn';
+import { signInWithPopup } from 'firebase/auth';
+import { toaster } from '../../components/ui/toaster';
+
 // Mock the toaster
 vi.mock('../../components/ui/toaster', () => ({
   toaster: {
@@ -20,11 +25,6 @@ vi.mock('firebase/auth', () => ({
 vi.mock('../../FirebaseConfig', () => ({
   auth: {},
 }));
-
-// Import after mocking
-import { useGoogleSignIn } from '../useGoogleSignIn';
-import { signInWithPopup } from 'firebase/auth';
-import { toaster } from '../../components/ui/toaster';
 
 // Create mock user
 const mockUser = {

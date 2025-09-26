@@ -1,6 +1,6 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import {render, screen} from '@testing-library/react';
+import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest';
 import FrogImage from '../FrogImage';
 
 describe('FrogImage Component', () => {
@@ -16,19 +16,19 @@ describe('FrogImage Component', () => {
 
     describe('Rendering', () => {
         it('should render without crashing', () => {
-            render(<FrogImage />);
+            render(<FrogImage/>);
             const frogImageDiv = screen.getByRole('img');
             expect(frogImageDiv).toBeInTheDocument();
         });
 
         it('should render with correct container id', () => {
-            const { container } = render(<FrogImage />);
-            const frogImageDiv = container.querySelector('#frog-image');
+            render(<FrogImage/>);
+            const frogImageDiv = screen.getByTestId('frog-image');
             expect(frogImageDiv).toBeInTheDocument();
         });
 
         it('should render image with correct alt text', () => {
-            render(<FrogImage />);
+            render(<FrogImage/>);
             const image = screen.getByAltText('Frog Here');
             expect(image).toBeInTheDocument();
         });
@@ -39,7 +39,7 @@ describe('FrogImage Component', () => {
             // Mock Math.random to return 0
             vi.spyOn(Math, 'random').mockReturnValue(0);
 
-            render(<FrogImage />);
+            render(<FrogImage/>);
             const image = screen.getByRole('img') as HTMLImageElement;
             expect(image.src).toContain('imgs/frog_01.png');
         });
@@ -48,7 +48,7 @@ describe('FrogImage Component', () => {
             // Mock Math.random to return 0.5 (should result in index 2)
             vi.spyOn(Math, 'random').mockReturnValue(0.5);
 
-            render(<FrogImage />);
+            render(<FrogImage/>);
             const image = screen.getByRole('img') as HTMLImageElement;
             expect(image.src).toContain('imgs/frog_02.png');
         });
@@ -57,7 +57,7 @@ describe('FrogImage Component', () => {
             // Mock Math.random to return 0.99 (should result in index 3)
             vi.spyOn(Math, 'random').mockReturnValue(0.99);
 
-            render(<FrogImage />);
+            render(<FrogImage/>);
             const image = screen.getByRole('img') as HTMLImageElement;
             expect(image.src).toContain('imgs/frog_03.png');
         });
@@ -65,7 +65,7 @@ describe('FrogImage Component', () => {
 
     describe('Image Path Generation', () => {
         it('should generate correct image path format', () => {
-            render(<FrogImage />);
+            render(<FrogImage/>);
             const image = screen.getByRole('img') as HTMLImageElement;
 
             // Should match the pattern imgs/frog_0X.png where X is 1, 2, or 3
@@ -79,18 +79,18 @@ describe('FrogImage Component', () => {
             // 0.333... - 0.666... -> floor(1-1.999) + 1 = 1 + 1 = 2  
             // 0.666... - 0.999... -> floor(2-2.999) + 1 = 2 + 1 = 3
             const testCases = [
-                { random: 0, expected: 'frog_01.png' },
-                { random: 0.32, expected: 'frog_01.png' },
-                { random: 0.33, expected: 'frog_01.png' },
-                { random: 0.34, expected: 'frog_02.png' },
-                { random: 0.65, expected: 'frog_02.png' },
-                { random: 0.67, expected: 'frog_03.png' },
-                { random: 0.99, expected: 'frog_03.png' }
+                {random: 0, expected: 'frog_01.png'},
+                {random: 0.32, expected: 'frog_01.png'},
+                {random: 0.33, expected: 'frog_01.png'},
+                {random: 0.34, expected: 'frog_02.png'},
+                {random: 0.65, expected: 'frog_02.png'},
+                {random: 0.67, expected: 'frog_03.png'},
+                {random: 0.99, expected: 'frog_03.png'}
             ];
 
-            testCases.forEach(({ random, expected }) => {
+            testCases.forEach(({random, expected}) => {
                 vi.spyOn(Math, 'random').mockReturnValue(random);
-                const { unmount } = render(<FrogImage />);
+                const {unmount} = render(<FrogImage/>);
                 const image = screen.getByRole('img') as HTMLImageElement;
                 expect(image.src).toContain(expected);
                 unmount();
@@ -106,18 +106,19 @@ describe('FrogImage Component', () => {
 
             testValues.forEach((randomValue) => {
                 vi.spyOn(Math, 'random').mockReturnValue(randomValue);
-                const { unmount } = render(<FrogImage />);
+                const {unmount} = render(<FrogImage/>);
                 const image = screen.getByRole('img') as HTMLImageElement;
 
                 // Extract the index from the src attribute
                 const srcMatch = image.src.match(/frog_0(\d)\.png$/);
                 expect(srcMatch).toBeTruthy();
 
-                if (srcMatch) {
-                    const index = parseInt(srcMatch[1], 10);
-                    expect(index).toBeGreaterThanOrEqual(1);
-                    expect(index).toBeLessThanOrEqual(3);
-                }
+                if (!srcMatch) throw new Error('Failed to match frog_0X.png');
+
+                const index = parseInt(srcMatch[1], 10);
+                expect(index).toBeGreaterThanOrEqual(1);
+                expect(index).toBeLessThanOrEqual(3);
+
 
                 unmount();
                 vi.restoreAllMocks();
@@ -128,7 +129,7 @@ describe('FrogImage Component', () => {
             // Test edge case where Math.random returns 0
             vi.spyOn(Math, 'random').mockReturnValue(0);
 
-            render(<FrogImage />);
+            render(<FrogImage/>);
             const image = screen.getByRole('img') as HTMLImageElement;
 
             // Should not contain frog_00.png or any negative index
@@ -140,7 +141,7 @@ describe('FrogImage Component', () => {
             // Test edge case where Math.random returns close to 1
             vi.spyOn(Math, 'random').mockReturnValue(0.999999);
 
-            render(<FrogImage />);
+            render(<FrogImage/>);
             const image = screen.getByRole('img') as HTMLImageElement;
 
             // Should not contain frog_04.png or higher
@@ -154,12 +155,12 @@ describe('FrogImage Component', () => {
             // Mock Math.random to return a specific value
             vi.spyOn(Math, 'random').mockReturnValue(0.5);
 
-            const { rerender } = render(<FrogImage />);
+            const {rerender} = render(<FrogImage/>);
             const initialImage = screen.getByRole('img') as HTMLImageElement;
             const initialSrc = initialImage.src;
 
             // Re-render the component
-            rerender(<FrogImage />);
+            rerender(<FrogImage/>);
             const rerenderedImage = screen.getByRole('img') as HTMLImageElement;
 
             // The image source should remain the same because useState preserves the initial value
@@ -169,13 +170,13 @@ describe('FrogImage Component', () => {
 
     describe('Accessibility', () => {
         it('should have proper alt text for screen readers', () => {
-            render(<FrogImage />);
+            render(<FrogImage/>);
             const image = screen.getByRole('img');
             expect(image).toHaveAttribute('alt', 'Frog Here');
         });
 
         it('should be accessible via getByRole', () => {
-            render(<FrogImage />);
+            render(<FrogImage/>);
             const image = screen.getByRole('img');
             expect(image).toBeInTheDocument();
             expect(image.tagName).toBe('IMG');

@@ -1,6 +1,4 @@
-importScripts('/__/firebase/9.2.0/firebase-app-compat.js');
-importScripts('/__/firebase/9.2.0/firebase-messaging-compat.js');
-importScripts('/__/firebase/init.js');
+import firebase from "firebase/compat";
 
 firebase.initializeApp({
     apiKey: "AIzaSyCOR1-dWbW9u4MXiyrRkp12P7EB0Zb6Ud0",
@@ -15,7 +13,6 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function(payload) {
-    console.log('[firebase-messaging-sw.js] PAYLOAD NOTIFICATION: ', payload.notification);
 
     // Customize notification here
     const notificationTitle = payload.notification.title;

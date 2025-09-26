@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach as _beforeEach, afterEach as _afterEach } from 'vitest';
 
 // We need to mock the serviceWorker module since it depends on browser APIs
 vi.mock('../serviceWorker', () => ({

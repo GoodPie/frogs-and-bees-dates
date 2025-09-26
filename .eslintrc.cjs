@@ -1,10 +1,13 @@
 module.exports = {
+  root: true,
+  env: {
+    browser: true,
+    es2022: true,
+    node: true,
+  },
   extends: [
     'react-app',
     'react-app/jest',
-  ],
-  plugins: [
-    'testing-library',
   ],
   overrides: [
     // Test files configuration
@@ -14,9 +17,6 @@ module.exports = {
         '**/?(*.)+(spec|test).[jt]s?(x)',
         'setup-test.ts',
         'test-utils/**/*.[jt]s?(x)',
-      ],
-      extends: [
-        'plugin:testing-library/react',
       ],
       rules: {
         // Enforce test coverage practices
@@ -46,6 +46,8 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
         'import/no-anonymous-default-export': 'off',
+        // Allow var in global type declarations for mock files
+        'no-var': 'off',
       },
     },
   ],
@@ -64,7 +66,7 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     
     // Prevent common testing pitfalls
-    'no-console': ['warn', { allow: ['warn', 'error'] }],
+    'no-console': ['warn', { allow: ['warn', 'error', 'debug'] }],
   },
   settings: {
     'testing-library/custom-renders': ['render'],

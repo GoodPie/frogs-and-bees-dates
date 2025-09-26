@@ -1,0 +1,26 @@
+# Build outputs
+build/
+dist/
+coverage/
+
+# Dependencies
+node_modules/
+
+# Firebase
+.firebase/
+functions/lib/
+
+# Generated files
+*.tsbuildinfo
+
+# Service workers (external libraries)
+public/firebase-messaging-sw.js
+public/service-worker.js
+
+# Build artifacts
+build/
+dist/
+
+# IDE files
+.vscode/
+.idea/

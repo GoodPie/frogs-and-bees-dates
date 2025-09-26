@@ -21,9 +21,23 @@
     "jsx": "react-jsx",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    // Additional options for better test coverage analysis
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
   },
   "include": [
-    "src"
-, "setupTests.ts"  ]
+    "src",
+    "setup-test.ts",
+    "test-utils/**/*",
+    "**/__mocks__/**/*",
+    "**/__tests__/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "build",
+    "functions",
+    "coverage"
+  ]
 }

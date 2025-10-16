@@ -10,4 +10,4 @@ interface ICalendarActivity  {
 }
 
 
-export default ICalendarActivity;
+export type {ICalendarActivity};

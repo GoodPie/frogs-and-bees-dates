@@ -1,7 +1,9 @@
 import { useState, useCallback } from 'react';
 import { auth } from "../FirebaseConfig";
 import { toaster } from "../components/ui/toaster";
-import { GoogleAuthProvider, signInWithPopup, User } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, type User } from 'firebase/auth';
+import type { FirebaseError } from "firebase/app";
+
 
 // Initialize a single provider instance
 const provider = new GoogleAuthProvider();
@@ -40,9 +42,15 @@ export const useGoogleSignIn = (): UseGoogleSignInResult => {
                 return null;
             }
             return user;
-        } catch (err: any) {
-            const description = mapErrorCode(err?.code);
-            toaster.create({ type: "error", title: "Sign-in error", description });
+        } catch (err: Error | FirebaseError | unknown) {
+            if (err instanceof Error) {
+                console.error("Error signing in with Google:", err.message);
+                const description = mapErrorCode((err as FirebaseError).code);
+                toaster.create({ type: "error", title: "Sign-in error", description });
+            } else {
+                console.error("Unknown error signing in with Google:", err);
+            }
+
             return null;
         } finally {
             setLoading(false);

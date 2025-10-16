@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import  {useState} from "react";
 
 // Define the frog images in the public/imgs directory
 // We will just use basic index to load them for now

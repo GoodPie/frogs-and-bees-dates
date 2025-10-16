@@ -1,10 +1,10 @@
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {collection, getDocs, orderBy, query, where} from "firebase/firestore";
-import {db} from "@/FirebaseConfig";
-import ICalendarActivity from "../interfaces/ICalendarActivity";
+import type {ICalendarActivity} from "../interfaces/ICalendarActivity";
 import CalendarEvent from "../components/CalendarEvent";
 import {Heading, Stack, VStack} from "@chakra-ui/react";
 import dayjs from "dayjs";
+import {db} from "../FirebaseConfig.ts";
 
 const ViewCalendar = () => {
 
@@ -36,8 +36,6 @@ const ViewCalendar = () => {
                         }
                     });
                     setCalendarEvents(events);
-                } else {
-
                 }
 
             })

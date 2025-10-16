@@ -1,4 +1,4 @@
-enum ActivityType {
+export enum ActivityType {
     NONE = -1,
     FOOD = 0,
     ACTIVITY = 1,

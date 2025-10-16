@@ -12,7 +12,7 @@ import {
     VStack
 } from "@chakra-ui/react";
 import { doc, setDoc } from "firebase/firestore";
-import React, { ChangeEvent, KeyboardEvent, useState } from "react";
+import  {type ChangeEvent, type KeyboardEvent, useState } from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BsArrowRight } from "react-icons/bs";
 import { FaMoneyBillAlt } from "react-icons/fa";

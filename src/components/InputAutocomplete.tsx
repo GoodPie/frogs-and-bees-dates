@@ -1,5 +1,5 @@
 import {Badge, Box, Button, Center, Flex, HStack, Icon, Input, Text} from "@chakra-ui/react";
-import {ChangeEvent, useState} from "react";
+import {type ChangeEvent, useState} from "react";
 import {BsArrowRight} from "react-icons/bs";
 
 export interface IInputAutoCompleteProps {

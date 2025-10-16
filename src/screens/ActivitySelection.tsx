@@ -1,6 +1,6 @@
 import {Button, Heading, HStack, Icon, Spinner, VStack} from "@chakra-ui/react";
 import {collection, deleteDoc, getDocs, query, QueryFieldFilterConstraint, where} from "firebase/firestore";
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {BsArrowCounterclockwise} from "react-icons/bs";
 import {FaMoneyBillAlt} from "react-icons/fa";
 import {MdLocalActivity, MdLocalMovies} from "react-icons/md";
@@ -9,7 +9,7 @@ import AddNewActivity from "../components/AddNewActivity";
 import ActivityTime from "../enums/ActivityTime";
 import ActivityType from "../enums/ActivityType";
 import {db} from "../FirebaseConfig";
-import IActivityDetails from "../interfaces/IActivityDetails";
+import type {IActivityDetails} from "../interfaces/IActivityDetails";
 
 import AddToCalendar from "../components/AddToCalendar";
 
@@ -117,7 +117,6 @@ const ActivitySelection = () => {
         }
 
 
-
         // We have at least one activity
         const randomIndex = Math.floor(Math.random() * activities.allActivities.length);
         const randomActivity = activities.allActivities.splice(randomIndex, 1)[0];
@@ -216,29 +215,31 @@ const ActivitySelection = () => {
             {activityStep === 0 &&
                 <>
                     <Button onClick={() => OnActivityTypeSelect(ActivityType.FOOD)}
-                            leftIcon={<Icon as={RiRestaurant2Fill}/>} w={"100%"} colorScheme={"green"}
+                            w={"100%"} colorScheme={"green"}
                             variant={"outline"}
                             size={"lg"}>
+                        <Icon as={RiRestaurant2Fill}/>
                         Food
                     </Button>
 
                     <Button onClick={() => OnActivityTypeSelect(ActivityType.ACTIVITY)} w={"100%"}
-                            leftIcon={<Icon as={MdLocalActivity}/>} colorScheme={"green"} variant={"outline"}
+                            colorScheme={"green"} variant={"outline"}
                             size={"lg"}>
+                        <Icon as={MdLocalActivity}/>
                         Activity
                     </Button>
 
                     <Button onClick={() => OnActivityTypeSelect(ActivityType.MOVIE)} w={"100%"}
-                            leftIcon={<Icon as={MdLocalMovies}/>}
                             colorScheme={"green"} variant={"outline"}
                             size={"lg"}>
+                        <Icon as={MdLocalMovies}/>
                         Movie
                     </Button>
 
                     <Button onClick={() => OnActivityTypeSelect(ActivityType.BIG)} w={"100%"}
-                            leftIcon={<Icon as={FaMoneyBillAlt}/>}
                             colorScheme={"green"} variant={"outline"}
                             size={"lg"}>
+                        <Icon as={FaMoneyBillAlt}/>
                         Bougie Ballers
                     </Button>
 
@@ -248,27 +249,22 @@ const ActivitySelection = () => {
             {activityStep === 1 && loadingResult && <Spinner colorScheme={"green"}/>}
             {activityStep === 1 && !loadingResult && <>
 
-                <HStack w={"100"}>
+                <HStack w={"100"}></HStack>
 
-                </HStack>
-
-                <VStack spacing={6}>
-
-
+                <VStack gap={6}>
                     {invalidResult &&
-                        <VStack spacing={2}>
+                        <VStack gap={2}>
                             <Heading textAlign={"center"} colorScheme={"red"}>No Activities Found</Heading>
                             <Heading textAlign={"center"} size={"sm"}>Try using different filters</Heading>
                         </VStack>
                     }
 
                     {!invalidResult &&
-                        <VStack spacing={2}>
+                        <VStack gap={2}>
                             <Heading textAlign={"center"}>{selectedActivity.name}</Heading>
                             <Heading textAlign={"center"} size={"md"}>{selectedActivity.description}</Heading>
                         </VStack>
                     }
-
 
                     <HStack>
                         <Button onClick={() => RemoveActivity(selectedActivity.name)}
@@ -280,21 +276,14 @@ const ActivitySelection = () => {
                         <Button onClick={GetNewActivityBasedOnExisting}
                                 colorScheme={"green"} variant={"outline"}><Icon as={BsArrowCounterclockwise}/></Button>
 
-
                     </HStack>
-
                     <Button onClick={ResetActivitySelection}
                             colorScheme={"green"} variant={"ghost"}>Return Home</Button>
-
-
                 </VStack>
             </>
             }
-
             <AddNewActivity onAdded={RefreshTags} availableActivities={availableTags}/>
-
         </VStack>
-
     );
 
 

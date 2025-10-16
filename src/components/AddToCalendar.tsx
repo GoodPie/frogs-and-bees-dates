@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from "react";
+import {type ChangeEvent, useState } from "react";
 import {
     Button,
     Icon,

@@ -1,21 +1,24 @@
 import * as React from "react"
 import * as ReactDOM from "react-dom/client"
-import { App } from "./App"
+import {App} from "./App"
 import reportWebVitals from "./reportWebVitals"
 import * as serviceWorker from "./serviceWorker"
-import { Provider } from "./components/ui/provider"
+import {Provider} from "./components/ui/provider"
+import {createRoot} from "react-dom/client";
+import {StrictMode} from "react";
 
 
 const container = document.getElementById("root")
 if (!container) throw new Error('Failed to find the root element');
 const root = ReactDOM.createRoot(container)
 
-root.render(
-  <React.StrictMode>
-    <Provider>
-      <App />
-    </Provider>
-  </React.StrictMode>,
+
+createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+        <Provider>
+            <App/>
+        </Provider>
+    </StrictMode>,
 )
 
 // If you want your app to work offline and load faster, you can change

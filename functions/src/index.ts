@@ -1,20 +1,24 @@
-import * as functions from "firebase-functions";
-import * as admin from "firebase-admin";
+import {onDocumentCreated} from "firebase-functions/v2/firestore";
+import {initializeApp} from "firebase-admin/app";
+import {getMessaging} from "firebase-admin/messaging";
+import {logger} from "firebase-functions/v2";
 
-admin.initializeApp({
-  credential: admin.credential.applicationDefault(),
-});
+initializeApp();
 
-
-exports.OnEventAdded = functions.firestore
-  .document("calendarEvents/{calendarId}")
-  .onCreate((snap) => {
+export const onEventAdded = onDocumentCreated(
+  "calendarEvents/{calendarId}",
+  async (event) => {
     try {
-      const data = snap.data();
+      const data = event.data?.data();
+      if (!data) {
+        logger.warn("No data in document");
+        return;
+      }
+
       const name = data.activityName;
 
       // Send notification
-      const payload = {
+      const message = {
         notification: {
           title: `${name}`,
           body: "A new event was added to the calendar",
@@ -22,21 +26,33 @@ exports.OnEventAdded = functions.firestore
         topic: "events",
       };
 
-      return admin.messaging().send(payload);
+      await getMessaging().send(message);
+      logger.info(`Notification sent for event: ${name}`);
     } catch (e) {
-      console.error("Error on event added: ", e);
+      logger.error("Error on event added:", e);
+      throw e;
     }
+  }
+);
 
-    return null;
-  });
+export const onTokenAdded = onDocumentCreated(
+  "tokens/{userId}",
+  async (event) => {
+    try {
+      const data = event.data?.data();
+      if (!data) {
+        logger.warn("No data in document");
+        return;
+      }
 
+      const token = data.token;
+      logger.debug("Token:", token);
 
-exports.OnTokenAdded = functions.firestore
-  .document("tokens/{userId}")
-  .onCreate((snap) => {
-    // Get the token from the document snapshot
-    const token = snap.data().token;
-    console.debug("Token: ", token);
-
-    return admin.messaging().subscribeToTopic(token, "events");
-  });
+      await getMessaging().subscribeToTopic(token, "events");
+      logger.info(`Token subscribed to events topic: ${token}`);
+    } catch (e) {
+      logger.error("Error on token added:", e);
+      throw e;
+    }
+  }
+);

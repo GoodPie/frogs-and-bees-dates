@@ -39,11 +39,13 @@ export const App = () => {
             </div>
 
             <FrogImage/>
-            <div style={{position: "absolute", right: 8, top: 8}}>
-                <IconButton aria-label={"View Calendar"} onClick={ToggleCalendar}>
-                    <AiTwotoneCalendar/>
-                </IconButton>
-            </div>
+            {isSignedIn &&
+                <div style={{position: "absolute", right: 8, top: 8}}>
+                    <IconButton aria-label={"View Calendar"} onClick={ToggleCalendar}>
+                        <AiTwotoneCalendar/>
+                    </IconButton>
+                </div>
+            }
 
             {isSignedIn &&
                 <div style={{position: "absolute", left: 0, right: 0, bottom: 16}}>

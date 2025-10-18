@@ -45,14 +45,15 @@ export const App = () => {
                 </IconButton>
             </div>
 
-            <div style={{position: "absolute", left: 0, right: 0, bottom: 16}}>
-                <div style={{display: "flex", justifyContent: "center"}}>
-                    <Button variant={"ghost"} onClick={() => RegisterFirebaseToken()}>
-                        Refresh Notification
-                    </Button>
+            {isSignedIn &&
+                <div style={{position: "absolute", left: 0, right: 0, bottom: 16}}>
+                    <div style={{display: "flex", justifyContent: "center"}}>
+                        <Button variant={"ghost"} onClick={() => RegisterFirebaseToken()}>
+                            Refresh Notification
+                        </Button>
+                    </div>
                 </div>
-
-            </div>
+            }
 
         </ChakraProvider>
     )

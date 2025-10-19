@@ -30,7 +30,6 @@ export const App = () => {
         setIsViewingCalendar(!isViewingCalendar);
     }
 
-
     return (
         <ChakraProvider value={defaultSystem}>
             <ColorModeSwitcher/>

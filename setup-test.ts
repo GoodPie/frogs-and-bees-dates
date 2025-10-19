@@ -162,6 +162,16 @@ Object.defineProperty(window, 'Notification', {
   },
 });
 
+// React Router mocks for navigation and location hooks
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: vi.fn(() => vi.fn()),
+    useLocation: vi.fn(() => ({ pathname: '/', state: {} })),
+  };
+});
+
 // Expose Firebase mocks globally for test assertions
 Object.assign(global, {
   window,

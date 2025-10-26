@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
     Box, Button, Heading, Input, Textarea, VStack, HStack, Text, Spinner,
-    Tabs, TabList, TabPanels, Tab, TabPanel, NumberInput,
+    Tabs, TabList, TabPanels, NumberInput,
 } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AiOutlineArrowLeft, AiOutlineSave } from 'react-icons/ai';
@@ -11,8 +11,8 @@ import { IngredientInput } from '@/components/IngredientInput';
 import { InstructionInput } from '@/components/InstructionInput';
 import { NutritionInput } from '@/components/NutritionInput';
 import { ImageUpload } from '@/components/ImageUpload';
-import { IRecipe } from '@/interfaces/IRecipe';
-import { IRecipeNutrition } from '@/interfaces/IRecipeNutrition';
+import type {IRecipe} from '@/interfaces/IRecipe';
+import type {IRecipeNutrition} from '@/interfaces/IRecipeNutrition';
 import { timeToISO8601, iso8601ToMinutes } from '@/utils/durationFormat';
 import { getRecipeViewRoute } from '@/routing/routes';
 

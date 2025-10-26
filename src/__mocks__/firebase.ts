@@ -44,13 +44,31 @@ export const mockUser: User = {
     },
     email: 'test@example.com' };
 
+// Store current auth state for mocking
+let currentMockUser: User | null = mockUser;
+
 const mockAuth = {
-  currentUser: mockUser,
+  get currentUser() {
+    return currentMockUser;
+  },
+  set currentUser(user: User | null) {
+    currentMockUser = user;
+  },
   app: {},
 };
 
 // Mock Firestore objects
 const mockFirestore = {};
+
+// Store auth state change callbacks for testing
+let authStateCallbacks: Array<(user: User | null) => void> = [];
+
+// Helper to control mock auth state in tests
+export const setMockAuthUser = (user: User | null) => {
+  currentMockUser = user;
+  // Trigger all registered callbacks
+  authStateCallbacks.forEach(callback => callback(user));
+};
 
 // Firebase v9 modular SDK mocks
 export const firebaseMocks = {
@@ -63,8 +81,14 @@ export const firebaseMocks = {
   getAuth: vi.fn(() => mockAuth),
   signInWithPopup: vi.fn(() => Promise.resolve({ user: mockUser })),
   onAuthStateChanged: vi.fn((_auth: Auth, callback: (user: User | null) => void): Unsubscribe => {
-    callback(mockAuth.currentUser);
-    return vi.fn(); // Unsubscribe function
+    // Register callback for later triggering
+    authStateCallbacks.push(callback);
+    // Immediately call with current state
+    callback(currentMockUser);
+    return vi.fn(() => {
+      // Remove callback on unsubscribe
+      authStateCallbacks = authStateCallbacks.filter(cb => cb !== callback);
+    });
   }),
   googleAuthProvider: {
     setCustomParameters: vi.fn(),
@@ -95,7 +119,8 @@ export const firebaseMocks = {
 
 // Reset all mocks to initial state
 export const resetFirebaseMocks = () => {
-  mockAuth.currentUser = mockUser;
+  currentMockUser = mockUser;
+  authStateCallbacks = [];
 
   Object.values(firebaseMocks).forEach((mock) => {
     if (typeof mock === 'function' && 'mockClear' in mock) {

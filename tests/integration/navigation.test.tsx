@@ -1,12 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { renderWithRouter } from '../utils/routing-test-utils';
 import { AppRouter } from '@/routing/AppRouter';
+import { setMockAuthUser, mockUser } from '@/__mocks__/firebase';
 
 describe('URL Navigation Integration', () => {
   beforeEach(() => {
     // Reset auth state before each test
-    (auth as any).currentUser = null;
+    setMockAuthUser(null);
   });
 
   describe('Direct URL access', () => {
@@ -19,35 +20,40 @@ describe('URL Navigation Integration', () => {
       expect(screen.queryByText(/sign/i)).toBeTruthy();
     });
 
-    it('loads activities screen when accessing /activities while authenticated', () => {
+    it('loads activities screen when accessing /activities while authenticated', async () => {
       // Mock authenticated user
-      (auth as any).currentUser = { uid: 'test-user', email: 'test@example.com' };
+      setMockAuthUser(mockUser);
 
       renderWithRouter(<AppRouter />, {
         initialEntries: ['/activities']
       });
 
-      // Activities screen should render (not redirected to signin)
-      // Component loads successfully without signin screen
-      expect(screen.queryByText(/sign in/i)).not.toBeInTheDocument();
+      // Wait for auth to initialize and component to render
+      await waitFor(() => {
+        // Check for activity category buttons (unique to activities screen)
+        expect(screen.getByText('Food')).toBeInTheDocument();
+      });
     });
 
-    it('loads calendar screen when accessing /calendar while authenticated', () => {
+    it('loads calendar screen when accessing /calendar while authenticated', async () => {
       // Mock authenticated user
-      (auth as any).currentUser = { uid: 'test-user', email: 'test@example.com' };
+      setMockAuthUser(mockUser);
 
       renderWithRouter(<AppRouter />, {
         initialEntries: ['/calendar']
       });
 
-      // Calendar screen should render
-      expect(screen.queryByText(/sign in/i)).not.toBeInTheDocument();
+      // Wait for auth to initialize and component to render
+      await waitFor(() => {
+        // Calendar screen shows "No Upcoming Events" when empty
+        expect(screen.getByText(/no upcoming events/i)).toBeInTheDocument();
+      });
     });
   });
 
   describe('Browser history navigation', () => {
     it('supports browser back button navigation', () => {
-      (auth as any).currentUser = { uid: 'test-user', email: 'test@example.com' };
+      setMockAuthUser(mockUser);
 
       // Navigate through multiple screens
       const { container } = renderWithRouter(<AppRouter />, {
@@ -71,18 +77,22 @@ describe('URL Navigation Integration', () => {
       expect(screen.queryByText(/404|not found/i)).not.toBeInTheDocument();
     });
 
-    it('redirects root path to /activities for authenticated users', () => {
+    it('redirects root path to /activities for authenticated users', async () => {
+      setMockAuthUser(mockUser);
 
       renderWithRouter(<AppRouter />, {
         initialEntries: ['/']
       });
 
       // Should redirect to activities
-      expect(screen.queryByText(/sign in/i)).not.toBeInTheDocument();
+      await waitFor(() => {
+        const foodButtons = screen.getAllByText('Food');
+        expect(foodButtons.length).toBeGreaterThan(0);
+      });
     });
 
     it('redirects undefined routes to signin for unauthenticated users', () => {
-      auth.currentUser = null;
+      setMockAuthUser(null);
 
       renderWithRouter(<AppRouter />, {
         initialEntries: ['/invalid-path']

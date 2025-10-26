@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { auth } from '@/FirebaseConfig';
+import { onAuthStateChanged } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 
 export interface UseAuthResult {
@@ -9,7 +10,7 @@ export interface UseAuthResult {
 
 /**
  * Custom hook to manage Firebase authentication state
- * Provides loading state to prevent routing decisions before auth initialises
+ * Provides loading state to prevent routing decisions before auth initializes
  */
 export function useAuth(): UseAuthResult {
   const [user, setUser] = useState<User | null>(null);
@@ -18,7 +19,7 @@ export function useAuth(): UseAuthResult {
   useEffect(() => {
     // onAuthStateChanged fires immediately with current state
     // then fires again whenever auth state changes
-    const unsubscribe = auth.onAuthStateChanged((authUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (authUser) => {
       setUser(authUser);
       setLoading(false);
     });

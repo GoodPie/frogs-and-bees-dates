@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
     Box, Button, Heading, Input, Textarea, VStack, HStack, Text,
-    Tabs, TabList, TabPanels, NumberInput,
+    Tabs, NumberInput,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { AiOutlineArrowLeft, AiOutlineSave } from 'react-icons/ai';
@@ -10,8 +10,8 @@ import { IngredientInput } from '@/components/IngredientInput';
 import { InstructionInput } from '@/components/InstructionInput';
 import { NutritionInput } from '@/components/NutritionInput';
 import { ImageUpload } from '@/components/ImageUpload';
-import { IRecipe } from '@/interfaces/IRecipe';
-import { IRecipeNutrition } from '@/interfaces/IRecipeNutrition';
+import type {IRecipe} from '@/interfaces/IRecipe';
+import type {IRecipeNutrition} from '@/interfaces/IRecipeNutrition';
 import { timeToISO8601 } from '@/utils/durationFormat';
 import { ROUTES, getRecipeViewRoute } from '@/routing/routes';
 
@@ -82,11 +82,10 @@ const AddRecipe = () => {
                 {/* Header */}
                 <HStack justifyContent="space-between">
                     <Button
-                        leftIcon={<AiOutlineArrowLeft />}
                         variant="ghost"
                         onClick={() => navigate(ROUTES.RECIPES)}
                     >
-                        Back to Recipes
+                        <AiOutlineArrowLeft /> Back to Recipes
                     </Button>
                     <Heading size="2xl">Add New Recipe</Heading>
                     <Box width="120px" /> {/* Spacer for alignment */}
@@ -99,16 +98,14 @@ const AddRecipe = () => {
                 )}
 
                 <Tabs.Root defaultValue="basic">
-                    <TabList>
+                    <Tabs.List>
                         <Tabs.Trigger value="basic">Basic Info</Tabs.Trigger>
                         <Tabs.Trigger value="ingredients">Ingredients</Tabs.Trigger>
                         <Tabs.Trigger value="instructions">Instructions</Tabs.Trigger>
                         <Tabs.Trigger value="time">Time & Yield</Tabs.Trigger>
                         <Tabs.Trigger value="categorization">Categories</Tabs.Trigger>
                         <Tabs.Trigger value="nutrition">Nutrition</Tabs.Trigger>
-                    </TabList>
-
-                    <TabPanels>
+                    </Tabs.List>
                         {/* Basic Info */}
                         <Tabs.Content value="basic">
                             <VStack align="stretch" gap={4} py={4}>
@@ -175,24 +172,24 @@ const AddRecipe = () => {
                                     <HStack>
                                         <Box>
                                             <Text fontSize="sm" mb={1}>Hours</Text>
-                                            <NumberInput
+                                            <NumberInput.Root
                                                 value={prepHours.toString()}
                                                 onValueChange={(details) => setPrepHours(Number(details.value))}
                                                 min={0}
                                             >
-                                                <Input />
-                                            </NumberInput>
+                                                <NumberInput.Input />
+                                            </NumberInput.Root>
                                         </Box>
                                         <Box>
                                             <Text fontSize="sm" mb={1}>Minutes</Text>
-                                            <NumberInput
+                                            <NumberInput.Root
                                                 value={prepMinutes.toString()}
                                                 onValueChange={(details) => setPrepMinutes(Number(details.value))}
                                                 min={0}
                                                 max={59}
                                             >
-                                                <Input />
-                                            </NumberInput>
+                                                <NumberInput.Input />
+                                            </NumberInput.Root>
                                         </Box>
                                     </HStack>
                                 </Box>
@@ -202,24 +199,24 @@ const AddRecipe = () => {
                                     <HStack>
                                         <Box>
                                             <Text fontSize="sm" mb={1}>Hours</Text>
-                                            <NumberInput
+                                            <NumberInput.Root
                                                 value={cookHours.toString()}
                                                 onValueChange={(details) => setCookHours(Number(details.value))}
                                                 min={0}
                                             >
-                                                <Input />
-                                            </NumberInput>
+                                                <NumberInput.Input />
+                                            </NumberInput.Root>
                                         </Box>
                                         <Box>
                                             <Text fontSize="sm" mb={1}>Minutes</Text>
-                                            <NumberInput
+                                            <NumberInput.Root
                                                 value={cookMinutes.toString()}
                                                 onValueChange={(details) => setCookMinutes(Number(details.value))}
                                                 min={0}
                                                 max={59}
                                             >
-                                                <Input />
-                                            </NumberInput>
+                                                <NumberInput.Input />
+                                            </NumberInput.Root>
                                         </Box>
                                     </HStack>
                                 </Box>
@@ -286,19 +283,17 @@ const AddRecipe = () => {
                                 />
                             </VStack>
                         </Tabs.Content>
-                    </TabPanels>
                 </Tabs.Root>
 
                 {/* Save button */}
                 <HStack justifyContent="flex-end" pt={4}>
                     <Button
-                        leftIcon={<AiOutlineSave />}
                         colorScheme="blue"
                         onClick={handleSave}
-                        isLoading={loading}
+                        loading={loading}
                         size="lg"
                     >
-                        Save Recipe
+                        <AiOutlineSave /> Save Recipe
                     </Button>
                 </HStack>
             </VStack>

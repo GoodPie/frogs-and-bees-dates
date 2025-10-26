@@ -29,3 +29,4 @@ yarn-error.log*
 /tsconfig.tsbuildinfo\
 
 .idea/
+firebase-debug.log

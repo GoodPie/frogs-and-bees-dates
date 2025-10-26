@@ -1,15 +1,15 @@
-import {useEffect, useState} from "react"
 import {Button, ChakraProvider, defaultSystem, IconButton} from "@chakra-ui/react"
 import {BrowserRouter, useNavigate, useLocation} from "react-router-dom"
 
 import "./main.css";
 
 import FrogImage from "./components/FrogImage";
-import {auth, RegisterFirebaseToken} from "./FirebaseConfig";
+import {RegisterFirebaseToken} from "./FirebaseConfig";
 import {ColorModeSwitcher} from "./ColorModeSwitcher";
 import {AiTwotoneCalendar} from "react-icons/ai";
 import {ROUTES} from "./routing/routes";
 import {AppRouter} from "./routing/AppRouter";
+import {useAuth} from "./hooks/useAuth";
 
 export const App = () => {
     return (
@@ -23,13 +23,7 @@ export const App = () => {
 
 // App content (separated to use routing hooks within BrowserRouter context)
 const AppContent = () => {
-    const [isSignedIn, setIsSignedIn] = useState(auth.currentUser);
-
-    useEffect(() => {
-        auth.onAuthStateChanged((authState) => {
-            setIsSignedIn(authState);
-        });
-    }, [isSignedIn])
+    const { user } = useAuth();
 
     return (
         <>
@@ -39,11 +33,11 @@ const AppContent = () => {
             </div>
 
             <FrogImage/>
-            {isSignedIn &&
+            {user &&
                 <CalendarToggleButton />
             }
 
-            {isSignedIn &&
+            {user &&
                 <div style={{position: "absolute", left: 0, right: 0, bottom: 16}}>
                     <div style={{display: "flex", justifyContent: "center"}}>
                         <Button variant={"ghost"} onClick={() => RegisterFirebaseToken()}>

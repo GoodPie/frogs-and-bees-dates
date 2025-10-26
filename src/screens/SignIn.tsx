@@ -2,14 +2,10 @@ import { Button, Icon } from "@chakra-ui/react";
 import { HiHeart } from "react-icons/hi";
 import { useGoogleSignIn } from "../hooks/useGoogleSignIn";
 import { useAuthRedirect } from "../hooks/useAuthRedirect";
-import {auth} from "@/FirebaseConfig.ts";
-import {useEffect} from "react";
 
 const SignIn = () => {
     const { signIn, loading } = useGoogleSignIn();
     const { redirectAfterLogin } = useAuthRedirect();
-    const user = auth.currentUser;
-
 
     const handleClick = async () => {
         const user = await signIn();
@@ -17,12 +13,6 @@ const SignIn = () => {
             redirectAfterLogin();
         }
     };
-
-    useEffect(() => {
-        if (user) {
-            redirectAfterLogin();
-        }
-    }, [redirectAfterLogin, user])
 
     return (
         <Button

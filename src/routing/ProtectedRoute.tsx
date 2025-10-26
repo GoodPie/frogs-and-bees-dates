@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { auth } from '@/FirebaseConfig';
+import { useAuth } from '@/hooks/useAuth';
 import { ROUTES } from './routes';
+import {Spinner} from "@chakra-ui/react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -8,7 +9,12 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const location = useLocation();
-  const user = auth.currentUser;
+  const { user, loading } = useAuth();
+
+  // Wait for auth to initialize before making routing decisions
+  if (loading) {
+    return <    Spinner />;
+  }
 
   if (!user) {
     // Redirect to signin, storing intended destination

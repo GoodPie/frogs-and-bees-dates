@@ -25,5 +25,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["vite.config.ts", "vitest.config.ts", "src/**/*", "scripts/**/*"],
+  "include": ["vite.config.ts", "vite.config.js"],
 }

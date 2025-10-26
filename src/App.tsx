@@ -1,24 +1,29 @@
 import {useEffect, useState} from "react"
 import {Button, ChakraProvider, defaultSystem, IconButton} from "@chakra-ui/react"
+import {BrowserRouter, useNavigate, useLocation} from "react-router-dom"
 
 import "./main.css";
 
 import FrogImage from "./components/FrogImage";
 import {auth, RegisterFirebaseToken} from "./FirebaseConfig";
-import SignIn from "./screens/SignIn";
-import ActivitySelection from "./screens/ActivitySelection";
 import {ColorModeSwitcher} from "./ColorModeSwitcher";
-import ViewCalendar from "./screens/ViewCalendar";
 import {AiTwotoneCalendar} from "react-icons/ai";
-
-const ActionButton = ({isViewingCalendar}: { isViewingCalendar: boolean }) => {
-    return isViewingCalendar ? <ViewCalendar/> : <ActivitySelection/>;
-}
+import {ROUTES} from "./routing/routes";
+import {AppRouter} from "./routing/AppRouter";
 
 export const App = () => {
+    return (
+        <ChakraProvider value={defaultSystem}>
+            <BrowserRouter>
+                <AppContent />
+            </BrowserRouter>
+        </ChakraProvider>
+    )
+}
 
+// App content (separated to use routing hooks within BrowserRouter context)
+const AppContent = () => {
     const [isSignedIn, setIsSignedIn] = useState(auth.currentUser);
-    const [isViewingCalendar, setIsViewingCalendar] = useState(false);
 
     useEffect(() => {
         auth.onAuthStateChanged((authState) => {
@@ -26,24 +31,16 @@ export const App = () => {
         });
     }, [isSignedIn])
 
-    const ToggleCalendar = () => {
-        setIsViewingCalendar(!isViewingCalendar);
-    }
-
     return (
-        <ChakraProvider value={defaultSystem}>
+        <>
             <ColorModeSwitcher/>
             <div className={"content-container"}>
-                {!isSignedIn ? <SignIn/> : <ActionButton isViewingCalendar={isViewingCalendar}/>}
+                <AppRouter />
             </div>
 
             <FrogImage/>
             {isSignedIn &&
-                <div style={{position: "absolute", right: 8, top: 8}}>
-                    <IconButton aria-label={"View Calendar"} onClick={ToggleCalendar}>
-                        <AiTwotoneCalendar/>
-                    </IconButton>
-                </div>
+                <CalendarToggleButton />
             }
 
             {isSignedIn &&
@@ -55,7 +52,25 @@ export const App = () => {
                     </div>
                 </div>
             }
+        </>
+    );
+};
 
-        </ChakraProvider>
-    )
-}
+// Calendar toggle button component
+const CalendarToggleButton = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const isCalendarView = location.pathname === ROUTES.CALENDAR;
+
+    const toggleCalendar = () => {
+        navigate(isCalendarView ? ROUTES.ACTIVITIES : ROUTES.CALENDAR);
+    };
+
+    return (
+        <div style={{position: "absolute", right: 8, top: 8}}>
+            <IconButton aria-label={"View Calendar"} onClick={toggleCalendar}>
+                <AiTwotoneCalendar/>
+            </IconButton>
+        </div>
+    );
+};

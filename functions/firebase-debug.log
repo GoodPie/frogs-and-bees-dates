@@ -1,0 +1,43 @@
+[debug] [2025-10-18T13:51:25.466Z] ----------------------------------------------------------------------
+[debug] [2025-10-18T13:51:25.470Z] Command:       /usr/local/bin/firebase /Users/brandyn/.cache/firebase/tools/lib/node_modules/firebase-tools/lib/bin/firebase init hosting
+[debug] [2025-10-18T13:51:25.470Z] CLI Version:   14.16.0
+[debug] [2025-10-18T13:51:25.470Z] Platform:      darwin
+[debug] [2025-10-18T13:51:25.470Z] Node Version:  v20.18.2
+[debug] [2025-10-18T13:51:25.471Z] Time:          Sat Oct 18 2025 21:51:25 GMT+0800 (Australian Western Standard Time)
+[debug] [2025-10-18T13:51:25.471Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-10-18T13:51:25.663Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-10-18T13:51:25.664Z] > authorizing via signed-in user (brandynbb96@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  /Users/brandyn/WebstormProjects/frogs-and-bees-dates
+
+Before we get started, keep in mind:
+
+  * You are initializing within an existing Firebase project directory
+
+[info] 
+=== Account Setup
+[info] 
+[info] Which account do you want to use for this project? Choose an account or add a new one now
+[info] 
+[debug] [2025-10-18T13:51:27.703Z] ExitPromptError: User force closed the prompt with SIGINT
+    at Interface.sigint (/Users/brandyn/.cache/firebase/tools/lib/node_modules/@inquirer/core/dist/commonjs/lib/create-prompt.js:101:37)
+    at Interface.emit (node:events:518:28)
+    at Interface.emit (node:domain:489:12)
+    at [_ttyWrite] [as _ttyWrite] (node:internal/readline/interface:1125:18)
+    at ReadStream.onkeypress (node:internal/readline/interface:264:20)
+    at ReadStream.emit (node:events:530:35)
+    at ReadStream.emit (node:domain:489:12)
+    at emitKeys (node:internal/readline/utils:371:14)
+    at emitKeys.next (<anonymous>)
+    at ReadStream.onData (node:internal/readline/emitKeypressEvents:64:36)
+[error] 
+[error] Error: An unexpected error has occurred.

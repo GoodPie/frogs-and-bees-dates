@@ -1,12 +1,17 @@
 import { Button, Icon } from "@chakra-ui/react";
 import { HiHeart } from "react-icons/hi";
 import { useGoogleSignIn } from "../hooks/useGoogleSignIn";
+import { useAuthRedirect } from "../hooks/useAuthRedirect";
 
 const SignIn = () => {
     const { signIn, loading } = useGoogleSignIn();
+    const { redirectAfterLogin } = useAuthRedirect();
 
-    const handleClick = () => {
-        void signIn();
+    const handleClick = async () => {
+        const user = await signIn();
+        if (user) {
+            redirectAfterLogin();
+        }
     };
 
     return (

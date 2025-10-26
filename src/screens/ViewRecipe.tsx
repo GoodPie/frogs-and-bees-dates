@@ -1,0 +1,244 @@
+import { Box, Button, Heading, Image, Text, VStack, HStack, Badge, Spinner, Grid } from '@chakra-ui/react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { AiOutlineEdit, AiOutlineDelete, AiOutlineArrowLeft } from 'react-icons/ai';
+import { useRecipe } from '@/hooks/useRecipe';
+import { useRecipeOperations } from '@/hooks/useRecipeOperations';
+import { RecipeJsonLd } from '@/components/RecipeJsonLd';
+import { iso8601ToReadable } from '@/utils/durationFormat';
+import { ROUTES, getRecipeEditRoute } from '@/routing/routes';
+
+/**
+ * View recipe screen showing full recipe details with structured data
+ */
+const ViewRecipe = () => {
+    const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
+    const { recipe, loading, error } = useRecipe(id);
+    const { deleteRecipe, loading: deleteLoading } = useRecipeOperations();
+
+    const handleDelete = async () => {
+        if (!id) return;
+
+        const confirmed = globalThis.confirm('Are you sure you want to delete this recipe?');
+        if (!confirmed) return;
+
+        const success = await deleteRecipe(id);
+        if (success) {
+            navigate(ROUTES.RECIPES);
+        }
+    };
+
+    const handleEdit = () => {
+        if (id) {
+            navigate(getRecipeEditRoute(id));
+        }
+    };
+
+    if (loading) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+                <Spinner size="xl" />
+            </Box>
+        );
+    }
+
+    if (error || !recipe) {
+        return (
+            <Box p={8} textAlign="center">
+                <Text color="red.500" fontSize="lg">
+                    {error || 'Recipe not found'}
+                </Text>
+                <Button mt={4} onClick={() => navigate(ROUTES.RECIPES)}>
+                    Back to Recipes
+                </Button>
+            </Box>
+        );
+    }
+
+    const imageUrl = Array.isArray(recipe.image) ? recipe.image[0] : recipe.image;
+
+    return (
+        <>
+            <RecipeJsonLd recipe={recipe} />
+            <Box p={8} w="100%" maxW="1200px" mx="auto">
+                <VStack align="stretch" gap={6}>
+                    {/* Header with actions */}
+                    <HStack justifyContent="space-between">
+                        <Button
+                            variant="ghost"
+                            onClick={() => navigate(ROUTES.RECIPES)}
+                        >
+                            <AiOutlineArrowLeft /> Back to Recipes
+                        </Button>
+                        <HStack>
+                            <Button
+                                colorScheme="blue"
+                                onClick={handleEdit}
+                            >
+                                <AiOutlineEdit /> Edit
+                            </Button>
+                            <Button
+                                colorScheme="red"
+                                onClick={handleDelete}
+                                loading={deleteLoading}
+                            >
+                                <AiOutlineDelete /> Delete
+                            </Button>
+                        </HStack>
+                    </HStack>
+
+                    {/* Recipe image */}
+                    <Image
+                        src={imageUrl}
+                        alt={recipe.name}
+                        maxHeight="500px"
+                        objectFit="cover"
+                        borderRadius="lg"
+                    />
+
+                    {/* Recipe title and description */}
+                    <VStack align="stretch" gap={3}>
+                        <Heading size="3xl">{recipe.name}</Heading>
+                        {recipe.description && (
+                            <Text fontSize="lg" color="gray.600">
+                                {recipe.description}
+                            </Text>
+                        )}
+                    </VStack>
+
+                    {/* Categories and cuisines */}
+                    {(recipe.recipeCategory || recipe.recipeCuisine) && (
+                        <HStack gap={2} flexWrap="wrap">
+                            {recipe.recipeCategory?.map((category) => (
+                                <Badge key={category} colorScheme="blue" size="lg">
+                                    {category}
+                                </Badge>
+                            ))}
+                            {recipe.recipeCuisine?.map((cuisine) => (
+                                <Badge key={cuisine} colorScheme="green" size="lg">
+                                    {cuisine}
+                                </Badge>
+                            ))}
+                        </HStack>
+                    )}
+
+                    {/* Time and yield info */}
+                    <Grid templateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap={4}>
+                        {recipe.prepTime && (
+                            <Box>
+                                <Text fontWeight="bold">Prep Time</Text>
+                                <Text>{iso8601ToReadable(recipe.prepTime)}</Text>
+                            </Box>
+                        )}
+                        {recipe.cookTime && (
+                            <Box>
+                                <Text fontWeight="bold">Cook Time</Text>
+                                <Text>{iso8601ToReadable(recipe.cookTime)}</Text>
+                            </Box>
+                        )}
+                        {recipe.totalTime && (
+                            <Box>
+                                <Text fontWeight="bold">Total Time</Text>
+                                <Text>{iso8601ToReadable(recipe.totalTime)}</Text>
+                            </Box>
+                        )}
+                        {recipe.recipeYield && (
+                            <Box>
+                                <Text fontWeight="bold">Yield</Text>
+                                <Text>{recipe.recipeYield}</Text>
+                            </Box>
+                        )}
+                    </Grid>
+
+                    {/* Ingredients */}
+                    <Box>
+                        <Heading size="xl" mb={4}>Ingredients</Heading>
+                        <VStack align="stretch" gap={2}>
+                            {recipe.recipeIngredient.map((ingredient, index) => (
+                                <Text key={index} fontSize="lg">
+                                    • {ingredient}
+                                </Text>
+                            ))}
+                        </VStack>
+                    </Box>
+
+                    {/* Instructions */}
+                    <Box>
+                        <Heading size="xl" mb={4}>Instructions</Heading>
+                        <VStack align="stretch" gap={4}>
+                            {recipe.recipeInstructions.map((instruction, index) => (
+                                <Box key={`step${index}`}>
+                                    <Text fontWeight="bold" fontSize="lg" mb={1}>
+                                        Step {index + 1}
+                                    </Text>
+                                    <Text fontSize="lg">{instruction}</Text>
+                                </Box>
+                            ))}
+                        </VStack>
+                    </Box>
+
+                    {/* Nutrition information */}
+                    {recipe.nutrition && (
+                        <Box>
+                            <Heading size="xl" mb={4}>Nutrition Information</Heading>
+                            <Grid templateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap={3}>
+                                {recipe.nutrition.servingSize && (
+                                    <Box>
+                                        <Text fontWeight="bold">Serving Size</Text>
+                                        <Text>{recipe.nutrition.servingSize}</Text>
+                                    </Box>
+                                )}
+                                {recipe.nutrition.calories && (
+                                    <Box>
+                                        <Text fontWeight="bold">Calories</Text>
+                                        <Text>{recipe.nutrition.calories}</Text>
+                                    </Box>
+                                )}
+                                {recipe.nutrition.proteinContent && (
+                                    <Box>
+                                        <Text fontWeight="bold">Protein</Text>
+                                        <Text>{recipe.nutrition.proteinContent}</Text>
+                                    </Box>
+                                )}
+                                {recipe.nutrition.carbohydrateContent && (
+                                    <Box>
+                                        <Text fontWeight="bold">Carbohydrates</Text>
+                                        <Text>{recipe.nutrition.carbohydrateContent}</Text>
+                                    </Box>
+                                )}
+                                {recipe.nutrition.fatContent && (
+                                    <Box>
+                                        <Text fontWeight="bold">Total Fat</Text>
+                                        <Text>{recipe.nutrition.fatContent}</Text>
+                                    </Box>
+                                )}
+                                {recipe.nutrition.fiberContent && (
+                                    <Box>
+                                        <Text fontWeight="bold">Fiber</Text>
+                                        <Text>{recipe.nutrition.fiberContent}</Text>
+                                    </Box>
+                                )}
+                            </Grid>
+                        </Box>
+                    )}
+
+                    {/* Keywords */}
+                    {recipe.keywords && recipe.keywords.length > 0 && (
+                        <Box>
+                            <Heading size="lg" mb={3}>Tags</Heading>
+                            <HStack gap={2} flexWrap="wrap">
+                                {recipe.keywords.map((keyword) => (
+                                    <Badge key={keyword} variant="subtle" size="md">
+                                        {keyword}
+                                    </Badge>
+                                ))}
+                            </HStack>
+                        </Box>
+                    )}
+                </VStack>
+            </Box>
+        </>
+    );
+};
+
+export default ViewRecipe;

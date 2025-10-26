@@ -4,6 +4,10 @@ import { ProtectedRoute } from './ProtectedRoute';
 import SignIn from '@/screens/SignIn';
 import ActivitySelection from '@/screens/ActivitySelection';
 import ViewCalendar from '@/screens/ViewCalendar';
+import RecipeList from '@/screens/RecipeList';
+import ViewRecipe from '@/screens/ViewRecipe';
+import AddRecipe from '@/screens/AddRecipe';
+import EditRecipe from '@/screens/EditRecipe';
 
 export function AppRouter() {
   return (
@@ -30,6 +34,38 @@ export function AppRouter() {
         element={
           <ProtectedRoute>
             <ViewCalendar />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ROUTES.RECIPES}
+        element={
+          <ProtectedRoute>
+            <RecipeList />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ROUTES.RECIPE_ADD}
+        element={
+          <ProtectedRoute>
+            <AddRecipe />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ROUTES.RECIPE_VIEW}
+        element={
+          <ProtectedRoute>
+            <ViewRecipe />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ROUTES.RECIPE_EDIT}
+        element={
+          <ProtectedRoute>
+            <EditRecipe />
           </ProtectedRoute>
         }
       />

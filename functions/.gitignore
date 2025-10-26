@@ -7,6 +7,4 @@ typings/
 
 # Node.js dependency directory
 node_modules/
-
-# Firebase Service
-firebase-service-account.json
+*.local

@@ -10,8 +10,8 @@ const FrogImage = () => {
     const [index] = useState(Math.floor(Math.random() * MAX_FROG_IMAGES) + 1);
 
     return (
-        <div data-testId={"frog-image"} id={"frog-image"}>
-            <img src={`imgs/frog_0${index}.png`} alt={"Frog Here"}/>
+        <div data-testid={"frog-image"} id={"frog-image"}>
+            <img src={`/imgs/frog_0${index}.png`} alt={"Frog Here"}/>
         </div>
     )
 }

@@ -32,6 +32,7 @@ const mapErrorCode = (code?: string): string => {
 
 export const useGoogleSignIn = (): UseGoogleSignInResult => {
     const [loading, setLoading] = useState(false);
+
     const signIn = useCallback(async () => {
         if (loading) return null; // Prevent duplicate popups
         setLoading(true);

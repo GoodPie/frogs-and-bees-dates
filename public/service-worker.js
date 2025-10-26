@@ -7,6 +7,7 @@ self.addEventListener('fetch', function(event) {
             return res;
         }
         catch(error){
+            console.error('Fetch failed; returning offline page instead.', error);
             return caches.match(event.request);
         }
     }());

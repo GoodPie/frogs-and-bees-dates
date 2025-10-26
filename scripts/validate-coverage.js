@@ -5,8 +5,8 @@
  * Ensures that test coverage meets the required thresholds
  */
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 const COVERAGE_FILE = join(process.cwd(), 'coverage', 'coverage-summary.json');
 const REQUIRED_COVERAGE = {
@@ -28,15 +28,17 @@ try {
   
   const failures = [];
   
-  Object.entries(REQUIRED_COVERAGE).forEach(([metric, threshold]) => {
+  for (const [metric, threshold] of Object.entries(REQUIRED_COVERAGE)) {
     if (total[metric].pct < threshold) {
       failures.push(`${metric}: ${total[metric].pct}% < ${threshold}%`);
     }
-  });
-  
-  if (failures.length > 0) {
+  }
+
+    if (failures.length > 0) {
     console.error('\n❌ Coverage validation failed:');
-    failures.forEach(failure => console.error(`  - ${failure}`));
+    for (const failure of failures) {
+        console.error(`  - ${failure}`);
+    }
     process.exit(1);
   }
   

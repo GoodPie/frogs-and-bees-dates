@@ -10,6 +10,7 @@
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
@@ -28,3 +29,5 @@ yarn-error.log*
 /tsconfig.tsbuildinfo\
 
 .idea/
+firebase-debug.log
+dist/

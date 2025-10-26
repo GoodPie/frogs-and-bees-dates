@@ -1,6 +1,7 @@
 import {Button, Heading, HStack, Icon, Spinner, VStack} from "@chakra-ui/react";
 import {collection, deleteDoc, getDocs, query, QueryFieldFilterConstraint, where} from "firebase/firestore";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
+import {useNavigate, useParams} from "react-router-dom";
 import {BsArrowCounterclockwise} from "react-icons/bs";
 import {FaMoneyBillAlt} from "react-icons/fa";
 import {MdLocalActivity, MdLocalMovies} from "react-icons/md";
@@ -10,6 +11,7 @@ import ActivityTime from "../enums/ActivityTime";
 import ActivityType from "../enums/ActivityType";
 import {db} from "../FirebaseConfig";
 import type {IActivityDetails} from "../interfaces/IActivityDetails";
+import {getActivityTypeRoute} from "../routing/routes";
 
 import AddToCalendar from "../components/AddToCalendar";
 
@@ -19,6 +21,9 @@ interface IActivityFilters {
 }
 
 const ActivitySelection = () => {
+    const navigate = useNavigate();
+    const {type} = useParams<{ type: string }>();
+    const hasProcessedUrlType = useRef(false);
 
     const [availableTags, setAvailableTags] = useState([] as string[]);
 
@@ -35,10 +40,6 @@ const ActivitySelection = () => {
 
 
     const [invalidResult, setInvalidResult] = useState(false);
-
-    useEffect(() => {
-        RefreshTags();
-    }, []);
 
 
     /**
@@ -62,22 +63,6 @@ const ActivitySelection = () => {
         }
     }
 
-    /**
-     * Gets the activities that match the current filters from Firebase
-     * @param filters
-     */
-    const GetAnActivityBasicFilters = async (filters: IActivityFilters) => {
-
-        const queryClauses = [];
-
-        // Only apply a time filter if we're looking for something time specific
-        if (filters.time !== ActivityTime.ANYTIME) {
-            queryClauses.push(where("time", "in", [filters.time as number, ActivityTime.ANYTIME]));
-        }
-
-        queryClauses.push(where("type", "==", filters.type as number));
-        await RunActivityQuery(queryClauses);
-    }
 
     /**
      * Runs the query to get the activity from Firebase
@@ -137,6 +122,24 @@ const ActivitySelection = () => {
 
         setIsLoadingResult(false);
 
+    }
+
+
+    /**
+     * Gets the activities that match the current filters from Firebase
+     * @param filters
+     */
+    const GetAnActivityBasicFilters = async (filters: IActivityFilters) => {
+
+        const queryClauses = [];
+
+        // Only apply a time filter if we're looking for something time specific
+        if (filters.time !== ActivityTime.ANYTIME) {
+            queryClauses.push(where("time", "in", [filters.time as number, ActivityTime.ANYTIME]));
+        }
+
+        queryClauses.push(where("type", "==", filters.type as number));
+        await RunActivityQuery(queryClauses);
     }
 
     /**
@@ -200,6 +203,9 @@ const ActivitySelection = () => {
 
         setSelectedActivity({} as IActivityDetails);
         setCurrentFilters({} as IActivityFilters);
+
+        // Navigate back to activities home
+        navigate('/activities');
     }
 
     /**
@@ -210,11 +216,39 @@ const ActivitySelection = () => {
         await GetAnActivityBasicFilters(currentFilters);
     }
 
+
+    useEffect(() => {
+        RefreshTags();
+    }, []);
+
+    // Handle activity type from URL parameter
+    useEffect(() => {
+        if (type && activityStep === 0 && !hasProcessedUrlType.current) {
+            const activityTypeMap: Record<string, ActivityType> = {
+                'food': ActivityType.FOOD,
+                'activity': ActivityType.ACTIVITY,
+                'movie': ActivityType.MOVIE,
+                'big': ActivityType.BIG,
+            };
+
+            const activityType = activityTypeMap[type.toLowerCase()];
+            if (activityType !== undefined) {
+                hasProcessedUrlType.current = true;
+                OnActivityTypeSelect(activityType);
+            }
+        } else if (!type) {
+            // Reset the ref when navigating back to activities home
+            hasProcessedUrlType.current = false;
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [type, activityStep]);
+
+
     return (
         <VStack w={"80%"}>
             {activityStep === 0 &&
                 <>
-                    <Button onClick={() => OnActivityTypeSelect(ActivityType.FOOD)}
+                    <Button onClick={() => navigate(getActivityTypeRoute('food'))}
                             w={"100%"} colorScheme={"green"}
                             variant={"outline"}
                             size={"lg"}>
@@ -222,21 +256,21 @@ const ActivitySelection = () => {
                         Food
                     </Button>
 
-                    <Button onClick={() => OnActivityTypeSelect(ActivityType.ACTIVITY)} w={"100%"}
+                    <Button onClick={() => navigate(getActivityTypeRoute('activity'))} w={"100%"}
                             colorScheme={"green"} variant={"outline"}
                             size={"lg"}>
                         <Icon as={MdLocalActivity}/>
                         Activity
                     </Button>
 
-                    <Button onClick={() => OnActivityTypeSelect(ActivityType.MOVIE)} w={"100%"}
+                    <Button onClick={() => navigate(getActivityTypeRoute('movie'))} w={"100%"}
                             colorScheme={"green"} variant={"outline"}
                             size={"lg"}>
                         <Icon as={MdLocalMovies}/>
                         Movie
                     </Button>
 
-                    <Button onClick={() => OnActivityTypeSelect(ActivityType.BIG)} w={"100%"}
+                    <Button onClick={() => navigate(getActivityTypeRoute('big'))} w={"100%"}
                             colorScheme={"green"} variant={"outline"}
                             size={"lg"}>
                         <Icon as={FaMoneyBillAlt}/>

@@ -1,15 +1,20 @@
-import { JSDOM } from "jsdom"
+import * as jsdom from "jsdom"
 import ResizeObserver from "resize-observer-polyfill"
-import { vi, beforeEach } from "vitest"
-import { firebaseMocks, resetFirebaseMocks } from "./src/__mocks__/firebase"
-import '@testing-library/jest-dom'
+import { vi, beforeEach, expect } from "vitest"
+import { firebaseMocks, resetFirebaseMocks } from "@/__mocks__/firebase"
+import * as matchers from '@testing-library/jest-dom/matchers'
+
+const { JSDOM } = jsdom;
+
+// Extend Vitest's expect with jest-dom matchers
+expect.extend(matchers)
 
 // Global error handling for tests
 const originalConsoleError = console.error
 const originalConsoleWarn = console.warn
 
 // Suppress specific warnings and errors that are expected in tests
-console.error = (...args: any[]) => {
+console.error = (...args: string[]) => {
   const message = args[0]?.toString() || ''
   
   // Suppress React warnings that are expected in tests
@@ -25,7 +30,7 @@ console.error = (...args: any[]) => {
   originalConsoleError(...args)
 }
 
-console.warn = (...args: any[]) => {
+console.warn = (...args: string[]) => {
   const message = args[0]?.toString() || ''
   
   // Suppress specific warnings
@@ -37,7 +42,7 @@ console.warn = (...args: any[]) => {
 }
 
 // Handle unhandled promise rejections in tests globally
-process.on('unhandledRejection', (reason: any) => {
+process.on('unhandledRejection', (reason: string | Error) => {
   // Only log unexpected rejections
   if (reason instanceof Error && (
     reason.message.includes('Firebase') || 
@@ -50,7 +55,7 @@ process.on('unhandledRejection', (reason: any) => {
   originalConsoleError('Unexpected unhandled rejection:', reason)
 })
 
-const { window } = new JSDOM()
+const {window} = new JSDOM()
 
 // ResizeObserver mock
 vi.stubGlobal("ResizeObserver", ResizeObserver)
@@ -162,8 +167,18 @@ Object.defineProperty(window, 'Notification', {
   },
 });
 
+// React Router mocks for navigation and location hooks
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: vi.fn(() => vi.fn()),
+    useLocation: vi.fn(() => ({ pathname: '/', state: {} })),
+  };
+});
+
 // Expose Firebase mocks globally for test assertions
-Object.assign(global, {
+Object.assign(globalThis, {
   window,
   document: window.document,
   __firebaseMocks: firebaseMocks,

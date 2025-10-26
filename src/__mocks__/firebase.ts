@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import {type Mock, vi} from 'vitest';
 
 // Mock Firebase Auth objects
 const mockUser = { uid: 'test-user-123', email: 'test@example.com' };
@@ -58,7 +58,7 @@ export const resetFirebaseMocks = () => {
 
   Object.values(firebaseMocks).forEach((mock) => {
     if (typeof mock === 'function' && 'mockClear' in mock) {
-      (mock as any).mockClear();
+      (mock as Mock).mockClear();
     }
   });
 };

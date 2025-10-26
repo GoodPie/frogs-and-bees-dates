@@ -117,9 +117,13 @@ export const firebaseMocks = {
   getToken: vi.fn(() => Promise.resolve('mock-fcm-token')),
 };
 
-// Reset all mocks to initial state
+// Reset all mocks to initial state (defaults to unauthenticated)
 export const resetFirebaseMocks = () => {
-  currentMockUser = mockUser;
+  // Trigger all callbacks with null BEFORE clearing the array
+  // This ensures any active components get the null state
+  authStateCallbacks.forEach(callback => callback(null));
+
+  currentMockUser = null;
   authStateCallbacks = [];
 
   Object.values(firebaseMocks).forEach((mock) => {

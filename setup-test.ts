@@ -1,7 +1,7 @@
 import * as jsdom from "jsdom"
 import ResizeObserver from "resize-observer-polyfill"
 import { vi, beforeEach, expect } from "vitest"
-import { firebaseMocks, resetFirebaseMocks } from "./src/__mocks__/firebase"
+import { firebaseMocks, resetFirebaseMocks } from "@/__mocks__/firebase"
 import * as matchers from '@testing-library/jest-dom/matchers'
 
 const { JSDOM } = jsdom;
@@ -55,7 +55,7 @@ process.on('unhandledRejection', (reason: string | Error) => {
   originalConsoleError('Unexpected unhandled rejection:', reason)
 })
 
-const { window } = new JSDOM()
+const {window} = new JSDOM().window
 
 // ResizeObserver mock
 vi.stubGlobal("ResizeObserver", ResizeObserver)

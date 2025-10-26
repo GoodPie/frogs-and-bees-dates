@@ -2,18 +2,18 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { screen } from '@testing-library/react';
 import { renderWithRouter } from '../utils/routing-test-utils';
 import { ProtectedRoute } from '@/routing/ProtectedRoute';
-import { auth } from '@/FirebaseConfig';
+import { setMockAuthUser, mockUser } from '@/__mocks__/firebase';
 
 describe('ProtectedRoute', () => {
   beforeEach(() => {
     // Reset auth state before each test
-    (auth as any).currentUser = null;
+    setMockAuthUser(null);
   });
 
   it('redirects to signin when not authenticated', () => {
-    auth.currentUser = null;
+    setMockAuthUser(null);
 
-    const { container } = renderWithRouter(
+    renderWithRouter(
       <ProtectedRoute>
         <div>Protected Content</div>
       </ProtectedRoute>,
@@ -26,7 +26,7 @@ describe('ProtectedRoute', () => {
 
   it('renders children when authenticated', () => {
     // Mock authenticated user
-    (auth as any).currentUser = { uid: 'test-user-123', email: 'test@example.com' };
+    setMockAuthUser(mockUser);
 
     renderWithRouter(
       <ProtectedRoute>
@@ -39,9 +39,9 @@ describe('ProtectedRoute', () => {
   });
 
   it('stores intended destination when redirecting', () => {
-    auth.currentUser = null;
+    setMockAuthUser(null);
 
-    const { container } = renderWithRouter(
+    renderWithRouter(
       <ProtectedRoute>
         <div>Protected Content</div>
       </ProtectedRoute>,

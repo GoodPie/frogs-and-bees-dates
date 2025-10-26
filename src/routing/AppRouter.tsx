@@ -18,6 +18,14 @@ export function AppRouter() {
         }
       />
       <Route
+        path={ROUTES.ACTIVITIES_TYPE}
+        element={
+          <ProtectedRoute>
+            <ActivitySelection />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path={ROUTES.CALENDAR}
         element={
           <ProtectedRoute>

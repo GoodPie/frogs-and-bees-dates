@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { db, auth } from '@/FirebaseConfig';
-import { IRecipe } from '@/interfaces/IRecipe';
+import type {IRecipe} from '@/interfaces/IRecipe';
 import { validateRecipe, sanitizeRecipe } from '@/utils/recipeValidation';
 
 /**

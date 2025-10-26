@@ -1,4 +1,4 @@
-import { IRecipeNutrition } from './IRecipeNutrition';
+import type {IRecipeNutrition} from './IRecipeNutrition';
 
 // Recipe interface following Google's structured data guidelines
 // https://developers.google.com/search/docs/appearance/structured-data/recipe

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/FirebaseConfig';
-import { IRecipe } from '@/interfaces/IRecipe';
+import type {IRecipe} from '@/interfaces/IRecipe';
 
 /**
  * Custom hook to fetch a single recipe by ID from Firestore

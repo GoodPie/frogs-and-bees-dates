@@ -1,4 +1,4 @@
-import { IRecipe } from '@/interfaces/IRecipe';
+import type {IRecipe} from '@/interfaces/IRecipe';
 
 /**
  * Validates a recipe object for required fields

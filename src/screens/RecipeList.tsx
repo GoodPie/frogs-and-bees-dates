@@ -16,6 +16,7 @@ import {useNavigate} from 'react-router-dom';
 import {AiOutlinePlus} from 'react-icons/ai';
 import {useRecipes} from '@/hooks/useRecipes';
 import {RecipeCard} from '@/components/RecipeCard';
+import {RecipeImportButton} from '@/components/RecipeImport';
 import {ROUTES} from '@/routing/routes';
 
 /**
@@ -89,12 +90,15 @@ const RecipeList = () => {
                 {/* Header */}
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Heading size="2xl">Recipes</Heading>
-                    <Button
-                        colorScheme="blue"
-                        onClick={() => navigate(ROUTES.RECIPE_ADD)}
-                    >
-                        <AiOutlinePlus/> Add Recipe
-                    </Button>
+                    <HStack gap={3}>
+                        <RecipeImportButton />
+                        <Button
+                            colorScheme="blue"
+                            onClick={() => navigate(ROUTES.RECIPE_ADD)}
+                        >
+                            <AiOutlinePlus/> Add Recipe
+                        </Button>
+                    </HStack>
                 </Box>
 
                 {/* Search and Filters */}

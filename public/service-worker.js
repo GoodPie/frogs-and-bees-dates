@@ -9,8 +9,6 @@ self.addEventListener('fetch', function(event) {
                              url.hostname.includes('googleapis.com') ||
                              url.hostname.includes('firestore.googleapis.com');
 
-    const isRecipeRoute = url.pathname.startsWith('/recipes');
-
     if (isFirebaseRequest) {
         // Network-first strategy for Firebase/Firestore requests (recipe data)
         event.respondWith(

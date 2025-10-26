@@ -1,30 +1,52 @@
-import { useState, useMemo } from 'react';
-import { Box, Button, Grid, Heading, Input, Select, Spinner, Text, VStack, HStack } from '@chakra-ui/react';
-import { useNavigate } from 'react-router-dom';
-import { AiOutlinePlus } from 'react-icons/ai';
-import { useRecipes } from '@/hooks/useRecipes';
-import { RecipeCard } from '@/components/RecipeCard';
-import { ROUTES } from '@/routing/routes';
+import {useState, useMemo} from 'react';
+import {
+    Box,
+    Button,
+    Grid,
+    Heading,
+    Input,
+    Select,
+    Spinner,
+    Text,
+    VStack,
+    HStack,
+    createListCollection
+} from '@chakra-ui/react';
+import {useNavigate} from 'react-router-dom';
+import {AiOutlinePlus} from 'react-icons/ai';
+import {useRecipes} from '@/hooks/useRecipes';
+import {RecipeCard} from '@/components/RecipeCard';
+import {ROUTES} from '@/routing/routes';
 
 /**
  * Recipe list screen showing all recipes with filtering and search
  */
 const RecipeList = () => {
     const navigate = useNavigate();
-    const { recipes, loading, error } = useRecipes();
+    const {recipes, loading, error} = useRecipes();
     const [searchTerm, setSearchTerm] = useState('');
-    const [categoryFilter, setCategoryFilter] = useState('');
-    const [cuisineFilter, setCuisineFilter] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
+    const [cuisineFilter, setCuisineFilter] = useState<string[]>([]);
 
     // Get unique categories and cuisines for filters
     const categories = useMemo(() => {
         const allCategories = recipes.flatMap(r => r.recipeCategory || []);
-        return [...new Set(allCategories)].sort();
+
+        return createListCollection({
+            items: [...new Set(allCategories)].sort(),
+            itemToString: (item) => item,
+            itemToValue: (item) => item,
+        })
     }, [recipes]);
 
     const cuisines = useMemo(() => {
         const allCuisines = recipes.flatMap(r => r.recipeCuisine || []);
-        return [...new Set(allCuisines)].sort();
+
+        return createListCollection({
+            items: [...new Set(allCuisines)].sort(),
+            itemToString: (item) => item,
+            itemToValue: (item) => item,
+        })
     }, [recipes]);
 
     // Filter recipes based on search and filters
@@ -33,11 +55,11 @@ const RecipeList = () => {
             const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 recipe.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
-            const matchesCategory = !categoryFilter ||
-                recipe.recipeCategory?.includes(categoryFilter);
+            const matchesCategory = categoryFilter.length === 0 ||
+                categoryFilter.some(cat => recipe.recipeCategory?.includes(cat));
 
-            const matchesCuisine = !cuisineFilter ||
-                recipe.recipeCuisine?.includes(cuisineFilter);
+            const matchesCuisine = cuisineFilter.length === 0 ||
+                cuisineFilter.some(cuisine => recipe.recipeCuisine?.includes(cuisine));
 
             return matchesSearch && matchesCategory && matchesCuisine;
         });
@@ -46,7 +68,7 @@ const RecipeList = () => {
     if (loading) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
-                <Spinner size="xl" />
+                <Spinner size="xl"/>
             </Box>
         );
     }
@@ -68,11 +90,10 @@ const RecipeList = () => {
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Heading size="2xl">Recipes</Heading>
                     <Button
-                        leftIcon={<AiOutlinePlus />}
                         colorScheme="blue"
                         onClick={() => navigate(ROUTES.RECIPE_ADD)}
                     >
-                        Add Recipe
+                        <AiOutlinePlus/> Add Recipe
                     </Button>
                 </Box>
 
@@ -85,28 +106,60 @@ const RecipeList = () => {
                         size="lg"
                     />
                     <HStack gap={3}>
-                        <Select
-                            placeholder="All Categories"
+                        <Select.Root
+                            collection={categories}
                             value={categoryFilter}
-                            onChange={(e) => setCategoryFilter(e.target.value)}
+                            multiple={false}
+                            onValueChange={(e) => setCategoryFilter(e.value)}
                         >
-                            {categories.map(category => (
-                                <option key={category} value={category}>
-                                    {category}
-                                </option>
-                            ))}
-                        </Select>
-                        <Select
-                            placeholder="All Cuisines"
+                            <Select.HiddenSelect/>
+                            <Select.Control>
+                                <Select.Trigger>
+                                    <Select.ValueText placeholder="All Categories"/>
+                                </Select.Trigger>
+                                <Select.IndicatorGroup>
+                                    <Select.Indicator/>
+                                    <Select.ClearTrigger/>
+                                </Select.IndicatorGroup>
+                            </Select.Control>
+                            <Select.Positioner>
+                                <Select.Content>
+                                    {categories.items.map(category => (
+                                        <Select.Item item={category} key={category}>
+                                            {category}
+                                            <Select.ItemIndicator/>
+                                        </Select.Item>
+                                    ))}
+                                </Select.Content>
+                            </Select.Positioner>
+                        </Select.Root>
+                        <Select.Root
+                            collection={cuisines}
                             value={cuisineFilter}
-                            onChange={(e) => setCuisineFilter(e.target.value)}
+                            multiple={false}
+                            onValueChange={(e) => setCuisineFilter(e.value)}
                         >
-                            {cuisines.map(cuisine => (
-                                <option key={cuisine} value={cuisine}>
-                                    {cuisine}
-                                </option>
-                            ))}
-                        </Select>
+                            <Select.HiddenSelect/>
+                            <Select.Control>
+                                <Select.Trigger>
+                                    <Select.ValueText placeholder="All Cuisines"/>
+                                </Select.Trigger>
+                                <Select.IndicatorGroup>
+                                    <Select.Indicator/>
+                                    <Select.ClearTrigger/>
+                                </Select.IndicatorGroup>
+                            </Select.Control>
+                            <Select.Positioner>
+                                <Select.Content>
+                                    {cuisines.items.map(cuisine => (
+                                        <Select.Item item={cuisine} key={cuisine}>
+                                            {cuisine}
+                                            <Select.ItemIndicator/>
+                                        </Select.Item>
+                                    ))}
+                                </Select.Content>
+                            </Select.Positioner>
+                        </Select.Root>
                     </HStack>
                 </VStack>
 
@@ -133,7 +186,7 @@ const RecipeList = () => {
                             gap={6}
                         >
                             {filteredRecipes.map(recipe => (
-                                <RecipeCard key={recipe.id} recipe={recipe} />
+                                <RecipeCard key={recipe.id} recipe={recipe}/>
                             ))}
                         </Grid>
                     </>

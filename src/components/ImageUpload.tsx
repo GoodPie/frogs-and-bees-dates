@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Button, Input, Image, Text, VStack, HStack, RadioGroup, Radio } from '@chakra-ui/react';
+import { Box, Button, Input, Image, Text, VStack, HStack, RadioGroup } from '@chakra-ui/react';
 import { useRecipeImage } from '@/hooks/useRecipeImage';
 
 interface ImageUploadProps {
@@ -33,12 +33,19 @@ export const ImageUpload = ({ imageUrl, onImageChange }: ImageUploadProps) => {
 
     return (
         <VStack align="stretch" gap={4}>
-            <RadioGroup value={uploadMethod} onChange={(value) => setUploadMethod(value as 'upload' | 'url')}>
-                <HStack gap={4}>
-                    <Radio value="url">Image URL</Radio>
-                    <Radio value="upload">Upload Image</Radio>
+            <RadioGroup.Root value={uploadMethod}
+                             onVolumeChange={(e) => setUploadMethod(e.currentTarget.nodeValue as 'upload' | 'url')}>
+            <HStack gap={4}>
+                    <RadioGroup.Item value="url">
+                        <RadioGroup.ItemControl />
+                        <RadioGroup.ItemText>Image URL</RadioGroup.ItemText>
+                    </RadioGroup.Item>
+                    <RadioGroup.Item value="upload">
+                        <RadioGroup.ItemControl />
+                        <RadioGroup.ItemText>Upload Image</RadioGroup.ItemText>
+                    </RadioGroup.Item>
                 </HStack>
-            </RadioGroup>
+            </RadioGroup.Root>
 
             {uploadMethod === 'url' ? (
                 <Box>

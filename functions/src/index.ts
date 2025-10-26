@@ -9,8 +9,8 @@
 
 import {setGlobalOptions} from "firebase-functions";
 import * as logger from "firebase-functions/logger";
-import {onDocumentCreated} from 'firebase-functions/v2/firestore';
-import { getMessaging } from "firebase-admin/messaging";
+import {onDocumentCreated} from "firebase-functions/v2/firestore";
+import {getMessaging} from "firebase-admin/messaging";
 
 
 // Start writing functions
@@ -29,84 +29,81 @@ import { getMessaging } from "firebase-admin/messaging";
 setGlobalOptions({maxInstances: 2});
 
 
-export const onEventAdded = onDocumentCreated(
-    "calendarEvents/{calendarId}",
-    async (event) => {
-        try {
-            const data = event.data?.data();
-            if (!data) {
-                logger.warn("No data in document");
-                return;
-            }
+exports.onEventAdded = onDocumentCreated(
+  "calendarEvents/{calendarId}",
+  async (event) => {
+    try {
+      const data = event.data?.data();
+      if (!data) {
+        logger.warn("No data in document");
+        return;
+      }
 
-            const name = data.activityName;
+      const name = data.activityName;
 
-            // Send notification
-            const message = {
-                notification: {
-                    title: `${name}`,
-                    body: "A new event was added to the calendar",
-                },
-                topic: "events",
-            };
+      // Send notification
+      const message = {
+        notification: {
+          title: `${name}`,
+          body: "A new event was added to the calendar",
+        },
+        topic: "events",
+      };
 
-            await getMessaging().send(message);
-            logger.info(`Notification sent for event: ${name}`);
-        } catch (e) {
-            logger.error("Error on event added:", e);
-            throw e;
-        }
+      await getMessaging().send(message);
+      logger.info(`Notification sent for event: ${name}`);
+    } catch (e) {
+      logger.error("Error on event added:", e);
+      throw e;
     }
+  },
 );
 
-export const onTokenAdded = onDocumentCreated(
-    "tokens/{userId}",
-    async (event) => {
-        try {
-            const data = event.data?.data();
-            if (!data) {
-                logger.warn("No data in document");
-                return;
-            }
+exports.onTokenAdded = onDocumentCreated(
+  "tokens/{userId}",
+  async (event) => {
+    try {
+      const data = event.data?.data();
+      if (!data) {
+        logger.warn("No data in document");
+        return;
+      }
 
-            const token = data.token;
-            logger.debug("Token:", token);
+      const token = data.token;
+      logger.debug("Token:", token);
 
-            await getMessaging().subscribeToTopic(token, "events");
-            logger.info(`Token subscribed to events topic: ${token}`);
-        } catch (e) {
-            logger.error("Error on token added:", e);
-            throw e;
-        }
+      await getMessaging().subscribeToTopic(token, "events");
+      logger.info(`Token subscribed to events topic: ${token}`);
+    } catch (e) {
+      logger.error("Error on token added:", e);
+      throw e;
     }
+  },
 );
 
-export const onRecipeAdded = onDocumentCreated(
-    "recipes/{recipeId}",
-    async (event) => {
-        try {
-            const data = event.data?.data();
-            if (!data) {
-                logger.warn("No data in document");
-                return;
-            }
-
-            const name = data.name;
-
-            // Send notification
-            const message = {
-                notification: {
-                    title: `New Recipe: ${name}`,
-                    body: "A new recipe has been added",
-                },
-                topic: "events",
-            };
-
-            await getMessaging().send(message);
-            logger.info(`Notification sent for recipe: ${name}`);
-        } catch (e) {
-            logger.error("Error on recipe added:", e);
-            throw e;
-        }
+exports.onRecipeAdded = onDocumentCreated(
+  "recipes/{recipeId}",
+  async (event) => {
+    try {
+      const data = event.data?.data();
+      if (data) {
+        const name = data.name;
+        const message = {
+          notification: {
+            title: `New Recipe: ${name}`,
+            body: "A new recipe has been added",
+          },
+          topic: "events",
+        };
+        await getMessaging().send(message);
+        logger.info(`Notification sent for recipe: ${name}`);
+      } else {
+        logger.warn("No data in document");
+        return;
+      }
+    } catch (e) {
+      logger.error("Error on recipe added:", e);
+      throw e;
     }
+  },
 );

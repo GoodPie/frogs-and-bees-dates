@@ -84,7 +84,7 @@ const RecipeList = () => {
     }
 
     return (
-        <Box p={8}>
+        <Box p={8} w="100%" maxW="1400px">
             <VStack align="stretch" gap={6}>
                 {/* Header */}
                 <Box display="flex" justifyContent="space-between" alignItems="center">

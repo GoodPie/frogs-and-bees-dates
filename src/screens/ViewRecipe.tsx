@@ -60,7 +60,7 @@ const ViewRecipe = () => {
     return (
         <>
             <RecipeJsonLd recipe={recipe} />
-            <Box p={8} maxW="1200px" mx="auto">
+            <Box p={8} w="100%" maxW="1200px" mx="auto">
                 <VStack align="stretch" gap={6}>
                     {/* Header with actions */}
                     <HStack justifyContent="space-between">

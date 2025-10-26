@@ -77,7 +77,7 @@ const AddRecipe = () => {
     };
 
     return (
-        <Box p={8} maxW="1000px" mx="auto">
+        <Box p={8} w="100%" maxW="1000px" mx="auto">
             <VStack align="stretch" gap={6}>
                 {/* Header */}
                 <HStack justifyContent="space-between">

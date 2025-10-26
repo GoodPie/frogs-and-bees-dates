@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { screen } from '@testing-library/react';
 import { renderWithRouter } from '../utils/routing-test-utils';
 import { AppRouter } from '@/routing/AppRouter';
-import { auth } from '@/FirebaseConfig';
 
 describe('URL Navigation Integration', () => {
   beforeEach(() => {
@@ -63,7 +62,6 @@ describe('URL Navigation Integration', () => {
 
   describe('Catch-all route behavior', () => {
     it('redirects undefined routes to /activities for authenticated users', () => {
-      (auth as any).currentUser = { uid: 'test-user', email: 'test@example.com' };
 
       renderWithRouter(<AppRouter />, {
         initialEntries: ['/invalid-path']
@@ -74,7 +72,6 @@ describe('URL Navigation Integration', () => {
     });
 
     it('redirects root path to /activities for authenticated users', () => {
-      (auth as any).currentUser = { uid: 'test-user', email: 'test@example.com' };
 
       renderWithRouter(<AppRouter />, {
         initialEntries: ['/']

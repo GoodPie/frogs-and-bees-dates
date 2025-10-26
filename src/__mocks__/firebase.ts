@@ -1,7 +1,48 @@
 import {type Mock, vi} from 'vitest';
+import type { Auth, User, Unsubscribe, IdTokenResult } from 'firebase/auth';
+import {addDays} from "date-fns";
 
 // Mock Firebase Auth objects
-const mockUser = { uid: 'test-user-123', email: 'test@example.com' };
+export const mockUser: User = {
+    displayName: "Test",
+    emailVerified: true,
+    isAnonymous: false,
+    metadata: {
+
+    },
+    toJSON(): object {
+        return JSON.parse(JSON.stringify(this))
+    },
+    delete(): Promise<void> {
+        return Promise.resolve();
+    },
+    getIdToken(forceRefresh?: boolean): Promise<string> {
+        console.debug("getIdTokenResult", forceRefresh)
+        return Promise.resolve("1");
+    },
+    getIdTokenResult(forceRefresh?: boolean): Promise<IdTokenResult> {
+        console.debug("getIdTokenResult", forceRefresh)
+        return Promise.resolve({
+            token: "1",
+            expirationTime: addDays(Date.now(), 1).toString(),
+            authTime: Date.now().toString(),
+            issuedAtTime: Date.now().toString(),
+            signInProvider: "google",
+            claims: {},
+            signInSecondFactor: null
+        });
+    },
+    phoneNumber: "",
+    photoURL: "",
+    providerData: [],
+    providerId: "",
+    refreshToken: "",
+    tenantId: "0",
+    uid: 'test-user-123',
+    reload(): Promise<void> {
+        return Promise.resolve();
+    },
+    email: 'test@example.com' };
 
 const mockAuth = {
   currentUser: mockUser,
@@ -21,7 +62,7 @@ export const firebaseMocks = {
   // Firebase Auth
   getAuth: vi.fn(() => mockAuth),
   signInWithPopup: vi.fn(() => Promise.resolve({ user: mockUser })),
-  onAuthStateChanged: vi.fn((auth, callback) => {
+  onAuthStateChanged: vi.fn((_auth: Auth, callback: (user: User | null) => void): Unsubscribe => {
     callback(mockAuth.currentUser);
     return vi.fn(); // Unsubscribe function
   }),

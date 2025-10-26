@@ -33,14 +33,15 @@ export const ImageUpload = ({ imageUrl, onImageChange }: ImageUploadProps) => {
 
     return (
         <VStack align="stretch" gap={4}>
-            <RadioGroup.Root value={uploadMethod}
-                             onVolumeChange={(e) => setUploadMethod(e.currentTarget.nodeValue as 'upload' | 'url')}>
-            <HStack gap={4}>
+            <RadioGroup.Root value={uploadMethod} onValueChange={(e) => setUploadMethod(e.value as 'upload' | 'url')}>
+                <HStack gap={4}>
                     <RadioGroup.Item value="url">
+                        <RadioGroup.ItemHiddenInput />
                         <RadioGroup.ItemControl />
                         <RadioGroup.ItemText>Image URL</RadioGroup.ItemText>
                     </RadioGroup.Item>
                     <RadioGroup.Item value="upload">
+                        <RadioGroup.ItemHiddenInput />
                         <RadioGroup.ItemControl />
                         <RadioGroup.ItemText>Upload Image</RadioGroup.ItemText>
                     </RadioGroup.Item>

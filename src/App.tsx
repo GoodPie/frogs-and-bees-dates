@@ -7,6 +7,7 @@ import FrogImage from "./components/FrogImage";
 import {RegisterFirebaseToken} from "./FirebaseConfig";
 import {ColorModeSwitcher} from "./ColorModeSwitcher";
 import {AiTwotoneCalendar} from "react-icons/ai";
+import {MdRestaurantMenu} from "react-icons/md";
 import {ROUTES} from "./routing/routes";
 import {AppRouter} from "./routing/AppRouter";
 import {useAuth} from "./hooks/useAuth";
@@ -34,7 +35,10 @@ const AppContent = () => {
 
             <FrogImage/>
             {user &&
-                <CalendarToggleButton />
+                <>
+                    <CalendarToggleButton />
+                    <RecipeToggleButton />
+                </>
             }
 
             {user &&
@@ -64,6 +68,25 @@ const CalendarToggleButton = () => {
         <div style={{position: "absolute", right: 8, top: 8}}>
             <IconButton aria-label={"View Calendar"} onClick={toggleCalendar}>
                 <AiTwotoneCalendar/>
+            </IconButton>
+        </div>
+    );
+};
+
+// Recipe toggle button component
+const RecipeToggleButton = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const isRecipesView = location.pathname.startsWith('/recipes');
+
+    const toggleRecipes = () => {
+        navigate(isRecipesView ? ROUTES.ACTIVITIES : ROUTES.RECIPES);
+    };
+
+    return (
+        <div style={{position: "absolute", right: 8, top: 64}}>
+            <IconButton aria-label={"View Recipes"} onClick={toggleRecipes}>
+                <MdRestaurantMenu/>
             </IconButton>
         </div>
     );

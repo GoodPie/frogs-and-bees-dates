@@ -1,4 +1,4 @@
-import { Box, Card, Image, Text, Badge, HStack } from '@chakra-ui/react';
+import { Card, Image, Text, Badge, HStack } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { IRecipe } from '@/interfaces/IRecipe';
 import { getRecipeViewRoute } from '@/routing/routes';

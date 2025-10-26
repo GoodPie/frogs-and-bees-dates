@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
     Box, Button, Heading, Input, Textarea, VStack, HStack, Text,
-    Tabs, TabList, TabPanels, Tab, TabPanel, NumberInput,
+    Tabs, TabList, TabPanels, NumberInput,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { AiOutlineArrowLeft, AiOutlineSave } from 'react-icons/ai';

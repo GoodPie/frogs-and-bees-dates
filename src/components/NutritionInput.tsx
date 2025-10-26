@@ -1,4 +1,4 @@
-import { Box, Input, VStack, HStack, Text } from '@chakra-ui/react';
+import { Box, Input, VStack, Text } from '@chakra-ui/react';
 import { IRecipeNutrition } from '@/interfaces/IRecipeNutrition';
 
 interface NutritionInputProps {

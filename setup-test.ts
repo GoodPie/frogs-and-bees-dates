@@ -1,8 +1,11 @@
 import { JSDOM } from "jsdom"
 import ResizeObserver from "resize-observer-polyfill"
-import { vi, beforeEach } from "vitest"
+import { vi, beforeEach, expect } from "vitest"
 import { firebaseMocks, resetFirebaseMocks } from "./src/__mocks__/firebase"
-import '@testing-library/jest-dom'
+import * as matchers from '@testing-library/jest-dom/matchers'
+
+// Extend Vitest's expect with jest-dom matchers
+expect.extend(matchers)
 
 // Global error handling for tests
 const originalConsoleError = console.error

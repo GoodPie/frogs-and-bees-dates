@@ -9,9 +9,9 @@ import type {IRecipe} from '@/interfaces/IRecipe';
  * @returns Object with recipe, loading state, and error
  */
 export const useRecipe = (recipeId: string | undefined) => {
-    const [recipe, setRecipe] = useState<IRecipe | null>(null);
+    const [recipe, setRecipe] = useState<IRecipe | undefined>(undefined);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | undefined>(undefined);
 
     useEffect(() => {
         if (!recipeId) {
@@ -22,7 +22,7 @@ export const useRecipe = (recipeId: string | undefined) => {
         const fetchRecipe = async () => {
             try {
                 setLoading(true);
-                setError(null);
+                setError(undefined);
 
                 const recipeDoc = await getDoc(doc(db, 'recipes', recipeId));
 

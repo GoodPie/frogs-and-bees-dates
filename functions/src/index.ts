@@ -26,7 +26,7 @@ import {getMessaging} from "firebase-admin/messaging";
 // functions should each use functions.runWith({ maxInstances: 10 }) instead.
 // In the v1 API, each function can only serve one request per container, so
 // this will be the maximum concurrent request count.
-setGlobalOptions({maxInstances: 2});
+setGlobalOptions({maxInstances: 2, region: "australia-southeast1"});
 
 
 exports.onEventAdded = onDocumentCreated(

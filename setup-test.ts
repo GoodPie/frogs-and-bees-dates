@@ -55,7 +55,7 @@ process.on('unhandledRejection', (reason: string | Error) => {
   originalConsoleError('Unexpected unhandled rejection:', reason)
 })
 
-const {window} = new JSDOM().window
+const {window} = new JSDOM()
 
 // ResizeObserver mock
 vi.stubGlobal("ResizeObserver", ResizeObserver)

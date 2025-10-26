@@ -46,10 +46,10 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
     };
 
     return (
-        <Dialog.Root open={isOpen} onOpenChange={({open}) => !open && handleClose()} size="xl">
+        <Dialog.Root open={isOpen} onOpenChange={({open}) => !open && handleClose()} size={{base: "full", md: "xl"}}>
             <Dialog.Backdrop />
             <Dialog.Positioner>
-                <Dialog.Content>
+                <Dialog.Content maxH={{base: "100vh", md: "90vh"}} overflowY="auto">
                     <Dialog.Header>
                         <Heading size="lg">Import Recipe</Heading>
                         <Dialog.CloseTrigger asChild>
@@ -59,8 +59,8 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                         </Dialog.CloseTrigger>
                     </Dialog.Header>
 
-                    <Dialog.Body>
-                        <VStack align="stretch" gap={4}>
+                    <Dialog.Body p={{base: 4, md: 6}}>
+                        <VStack align="stretch" gap={{base: 3, md: 4}}>
                             {/* URL Input */}
                             <Box>
                                 <Text fontWeight="bold" mb={2}>
@@ -78,17 +78,17 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
 
                             {/* Instructions */}
                             <Box
-                                p={4}
+                                p={{base: 3, md: 4}}
                                 bg="blue.50"
                                 borderRadius="md"
                                 borderLeft="4px solid"
                                 borderColor="blue.500"
                                 _dark={{bg: 'blue.900', borderColor: 'blue.400'}}
                             >
-                                <Text fontWeight="bold" mb={2}>
+                                <Text fontWeight="bold" mb={2} fontSize={{base: "sm", md: "md"}}>
                                     How to extract recipe data:
                                 </Text>
-                                <Text fontSize="sm" whiteSpace="pre-line" fontFamily="monospace">
+                                <Text fontSize={{base: "xs", md: "sm"}} whiteSpace="pre-line" fontFamily="monospace">
                                     {getJsonLdExtractionInstructions(importState.url || undefined)}
                                 </Text>
                             </Box>
@@ -102,9 +102,9 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                     placeholder='{"@context": "https://schema.org", "@type": "Recipe", ...}'
                                     value={importState.jsonLdText}
                                     onChange={(e) => importState.setJsonLdText(e.target.value)}
-                                    minH="200px"
+                                    minH={{base: "150px", md: "200px"}}
                                     fontFamily="monospace"
-                                    fontSize="sm"
+                                    fontSize={{base: "xs", md: "sm"}}
                                 />
                             </Box>
 
@@ -114,6 +114,8 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                 onClick={importState.parseJsonLd}
                                 loading={importState.parsing}
                                 disabled={!importState.jsonLdText.trim()}
+                                size={{base: "md", md: "md"}}
+                                minH="44px"
                             >
                                 Parse Recipe Data
                             </Button>
@@ -235,15 +237,17 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                         </VStack>
                     </Dialog.Body>
 
-                    <Dialog.Footer>
-                        <HStack justify="space-between" w="100%">
-                            <Button variant="ghost" onClick={handleClose}>
+                    <Dialog.Footer p={{base: 4, md: 6}}>
+                        <HStack justify="space-between" w="100%" gap={2} flexWrap={{base: "wrap", sm: "nowrap"}}>
+                            <Button variant="ghost" onClick={handleClose} minH="44px" flex={{base: 1, sm: "0"}}>
                                 Cancel
                             </Button>
                             <Button
                                 colorScheme="green"
                                 onClick={handleImport}
                                 disabled={!importState.parseResult?.success}
+                                minH="44px"
+                                flex={{base: 1, sm: "0"}}
                             >
                                 <AiOutlineImport /> Import Recipe
                             </Button>

@@ -29,26 +29,30 @@ const AddRecipe = () => {
     };
 
     return (
-        <Box p={8} w="100%" maxW="1000px" mx="auto">
-            <VStack align="stretch" gap={6}>
+        <Box p={{base: 4, md: 6, lg: 8}} w="100%" maxW="1000px" mx="auto">
+            <VStack align="stretch" gap={{base: 4, md: 5, lg: 6}}>
                 {/* Header */}
-                <HStack justifyContent="space-between">
-                    <Button
-                        variant="ghost"
-                        onClick={() => navigate(ROUTES.RECIPES)}
-                    >
-                        <AiOutlineArrowLeft/> Back to Recipes
-                    </Button>
-                    <VStack gap={1}>
-                        <Heading size="2xl">Add New Recipe</Heading>
+                <VStack align="stretch" gap={2}>
+                    <HStack justifyContent="space-between" alignItems="center">
+                        <Button
+                            variant="ghost"
+                            onClick={() => navigate(ROUTES.RECIPES)}
+                            size={{base: "sm", md: "md"}}
+                        >
+                            <AiOutlineArrowLeft/>
+                            <Box display={{base: "none", sm: "inline"}}>Back to Recipes</Box>
+                            <Box display={{base: "inline", sm: "none"}}>Back</Box>
+                        </Button>
+                    </HStack>
+                    <VStack gap={1} align="stretch">
+                        <Heading size={{base: "xl", md: "2xl"}}>Add New Recipe</Heading>
                         {importedRecipe && (
-                            <Badge colorScheme="green" variant="subtle">
+                            <Badge colorScheme="green" variant="subtle" w="fit-content">
                                 <AiOutlineCheckCircle /> Imported from website
                             </Badge>
                         )}
                     </VStack>
-                    <Box width="120px"/> {/* Spacer for alignment */}
-                </HStack>
+                </VStack>
 
                 {error && (
                     <Text color="red.500" fontSize="sm">

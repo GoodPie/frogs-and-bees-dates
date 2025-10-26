@@ -27,15 +27,16 @@ export const RecipeCard = ({ recipe }: RecipeCardProps) => {
             onClick={handleClick}
             cursor="pointer"
             _hover={{ transform: 'scale(1.02)', transition: 'transform 0.2s' }}
+            minH="44px"
         >
             <Image
                 src={imageUrl}
                 alt={recipe.name}
-                height="200px"
+                height={{base: "180px", md: "200px"}}
                 objectFit="cover"
                 borderTopRadius="md"
             />
-            <Card.Body gap={2}>
+            <Card.Body gap={{base: 2, md: 3}}>
                 <Text fontWeight="bold" fontSize="lg" maxLines={2}>
                     {recipe.name}
                 </Text>

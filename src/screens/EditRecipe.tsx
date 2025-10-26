@@ -46,19 +46,22 @@ const EditRecipe = () => {
     }
 
     return (
-        <Box p={8} w="100%" maxW="1000px" mx="auto">
-            <VStack align="stretch" gap={6}>
+        <Box p={{base: 4, md: 6, lg: 8}} w="100%" maxW="1000px" mx="auto">
+            <VStack align="stretch" gap={{base: 4, md: 5, lg: 6}}>
                 {/* Header */}
-                <HStack justifyContent="space-between">
+                <VStack align="stretch" gap={2}>
                     <Button
                         variant="ghost"
                         onClick={() => id && navigate(getRecipeViewRoute(id))}
+                        size={{base: "sm", md: "md"}}
+                        alignSelf="flex-start"
                     >
-                        <AiOutlineArrowLeft/> Back to Recipe
+                        <AiOutlineArrowLeft/>
+                        <Box display={{base: "none", sm: "inline"}}>Back to Recipe</Box>
+                        <Box display={{base: "inline", sm: "none"}}>Back</Box>
                     </Button>
-                    <Heading size="2xl">Edit Recipe</Heading>
-                    <Box width="120px"/> {/* Spacer for alignment */}
-                </HStack>
+                    <Heading size={{base: "xl", md: "2xl"}}>Edit Recipe</Heading>
+                </VStack>
 
                 {updateError && (
                     <Text color="red.500" fontSize="sm">

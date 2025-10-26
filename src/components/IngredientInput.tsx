@@ -26,19 +26,23 @@ export const IngredientInput = ({ ingredients, onChange }: IngredientInputProps)
     };
 
     return (
-        <VStack align="stretch" gap={2}>
+        <VStack align="stretch" gap={{base: 3, md: 2}}>
             {ingredients.map((ingredient, index) => (
-                <Box key={index} display="flex" gap={2}>
+                <Box key={index} display="flex" gap={{base: 2, md: 2}} alignItems="center">
                     <Input
                         value={ingredient}
                         onChange={(e) => handleChange(index, e.target.value)}
                         placeholder={`Ingredient ${index + 1} (e.g., 2 cups flour)`}
+                        size={{base: "md", md: "md"}}
                     />
                     <IconButton
                         aria-label="Remove ingredient"
                         onClick={() => handleRemove(index)}
                         colorScheme="red"
                         variant="ghost"
+                        size="md"
+                        minW="44px"
+                        minH="44px"
                     >
                         <AiOutlineDelete />
                     </IconButton>
@@ -47,7 +51,8 @@ export const IngredientInput = ({ ingredients, onChange }: IngredientInputProps)
             <Button
                 onClick={handleAdd}
                 variant="outline"
-                size="sm"
+                size={{base: "md", md: "sm"}}
+                minH="44px"
             >
                 <AiOutlinePlus /> Add Ingredient
             </Button>

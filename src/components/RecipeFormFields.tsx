@@ -47,14 +47,39 @@ export const RecipeFormFields = ({formState}: RecipeFormFieldsProps) => {
     } = formState;
 
     return (
-        <Tabs.Root defaultValue="basic">
-            <Tabs.List>
-                <Tabs.Trigger value="basic">Basic Info</Tabs.Trigger>
-                <Tabs.Trigger value="ingredients">Ingredients</Tabs.Trigger>
-                <Tabs.Trigger value="instructions">Instructions</Tabs.Trigger>
-                <Tabs.Trigger value="time">Time & Yield</Tabs.Trigger>
-                <Tabs.Trigger value="categorization">Categories</Tabs.Trigger>
-                <Tabs.Trigger value="nutrition">Nutrition</Tabs.Trigger>
+        <Tabs.Root defaultValue="basic" variant="enclosed">
+            <Tabs.List
+                overflowX="auto"
+                overflowY="hidden"
+                whiteSpace="nowrap"
+                css={{
+                    '&::-webkit-scrollbar': {
+                        height: '4px'
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        background: 'gray.300',
+                        borderRadius: '4px'
+                    }
+                }}
+            >
+                <Tabs.Trigger value="basic" fontSize={{base: "sm", md: "md"}} px={{base: 2, md: 4}}>
+                    <Box display={{base: "none", sm: "inline"}}>Basic Info</Box>
+                    <Box display={{base: "inline", sm: "none"}}>Basic</Box>
+                </Tabs.Trigger>
+                <Tabs.Trigger value="ingredients" fontSize={{base: "sm", md: "md"}} px={{base: 2, md: 4}}>Ingredients</Tabs.Trigger>
+                <Tabs.Trigger value="instructions" fontSize={{base: "sm", md: "md"}} px={{base: 2, md: 4}}>
+                    <Box display={{base: "none", sm: "inline"}}>Instructions</Box>
+                    <Box display={{base: "inline", sm: "none"}}>Steps</Box>
+                </Tabs.Trigger>
+                <Tabs.Trigger value="time" fontSize={{base: "sm", md: "md"}} px={{base: 2, md: 4}}>
+                    <Box display={{base: "none", sm: "inline"}}>Time & Yield</Box>
+                    <Box display={{base: "inline", sm: "none"}}>Time</Box>
+                </Tabs.Trigger>
+                <Tabs.Trigger value="categorization" fontSize={{base: "sm", md: "md"}} px={{base: 2, md: 4}}>
+                    <Box display={{base: "none", sm: "inline"}}>Categories</Box>
+                    <Box display={{base: "inline", sm: "none"}}>Tags</Box>
+                </Tabs.Trigger>
+                <Tabs.Trigger value="nutrition" fontSize={{base: "sm", md: "md"}} px={{base: 2, md: 4}}>Nutrition</Tabs.Trigger>
             </Tabs.List>
 
             {/* Basic Info */}

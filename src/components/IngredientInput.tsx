@@ -45,12 +45,11 @@ export const IngredientInput = ({ ingredients, onChange }: IngredientInputProps)
                 </Box>
             ))}
             <Button
-                leftIcon={<AiOutlinePlus />}
                 onClick={handleAdd}
                 variant="outline"
                 size="sm"
             >
-                Add Ingredient
+                <AiOutlinePlus /> Add Ingredient
             </Button>
         </VStack>
     );

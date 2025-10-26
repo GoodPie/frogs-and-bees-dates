@@ -65,27 +65,24 @@ const ViewRecipe = () => {
                     {/* Header with actions */}
                     <HStack justifyContent="space-between">
                         <Button
-                            leftIcon={<AiOutlineArrowLeft />}
                             variant="ghost"
                             onClick={() => navigate(ROUTES.RECIPES)}
                         >
-                            Back to Recipes
+                            <AiOutlineArrowLeft /> Back to Recipes
                         </Button>
                         <HStack>
                             <Button
-                                leftIcon={<AiOutlineEdit />}
                                 colorScheme="blue"
                                 onClick={handleEdit}
                             >
-                                Edit
+                                <AiOutlineEdit /> Edit
                             </Button>
                             <Button
-                                leftIcon={<AiOutlineDelete />}
                                 colorScheme="red"
                                 onClick={handleDelete}
-                                isLoading={deleteLoading}
+                                loading={deleteLoading}
                             >
-                                Delete
+                                <AiOutlineDelete /> Delete
                             </Button>
                         </HStack>
                     </HStack>

@@ -52,12 +52,11 @@ export const InstructionInput = ({ instructions, onChange }: InstructionInputPro
                 </Box>
             ))}
             <Button
-                leftIcon={<AiOutlinePlus />}
                 onClick={handleAdd}
                 variant="outline"
                 size="sm"
             >
-                Add Step
+                <AiOutlinePlus /> Add Step
             </Button>
         </VStack>
     );

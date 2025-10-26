@@ -30,4 +30,5 @@ yarn-error.log*
 
 .idea/
 firebase-debug.log
-dist/
+/dist/
+/dist/

@@ -223,7 +223,7 @@ const ActivitySelection = () => {
 
     // Handle activity type from URL parameter
     useEffect(() => {
-        if (type && activityStep === 0 && !hasProcessedUrlType.current) {
+        if (type && !hasProcessedUrlType.current) {
             const activityTypeMap: Record<string, ActivityType> = {
                 'food': ActivityType.FOOD,
                 'activity': ActivityType.ACTIVITY,
@@ -236,12 +236,19 @@ const ActivitySelection = () => {
                 hasProcessedUrlType.current = true;
                 OnActivityTypeSelect(activityType);
             }
-        } else if (!type) {
-            // Reset the ref when navigating back to activities home
+        } else if (!type && activityStep !== 0) {
+            // Reset component state when navigating back to activities home
             hasProcessedUrlType.current = false;
+            setActivityStep(0);
+            setActivities({
+                allActivities: [],
+                alreadySelectedActivities: []
+            });
+            setSelectedActivity({} as IActivityDetails);
+            setCurrentFilters({} as IActivityFilters);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [type, activityStep]);
+    }, [type]);
 
 
     return (

@@ -13,7 +13,8 @@ const ViewCalendar = () => {
 
     useEffect(() => {
         RefreshEvents();
-    });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
 
     const RefreshEvents = () => {

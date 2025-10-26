@@ -11,7 +11,7 @@ const FrogImage = () => {
 
     return (
         <div data-testid={"frog-image"} id={"frog-image"}>
-            <img src={`imgs/frog_0${index}.png`} alt={"Frog Here"}/>
+            <img src={`/imgs/frog_0${index}.png`} alt={"Frog Here"}/>
         </div>
     )
 }

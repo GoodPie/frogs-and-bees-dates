@@ -60,7 +60,7 @@ export const RecipeJsonLd = ({ recipe }: RecipeJsonLdProps) => {
         };
 
         // Remove undefined fields
-        const cleanedData = JSON.parse(JSON.stringify(structuredData));
+        const cleanedData = structuredClone(structuredData);
 
         // Create and inject script tag
         const script = document.createElement('script');
@@ -73,7 +73,7 @@ export const RecipeJsonLd = ({ recipe }: RecipeJsonLdProps) => {
         return () => {
             const existingScript = document.getElementById('recipe-structured-data');
             if (existingScript) {
-                document.head.removeChild(existingScript);
+                existingScript.remove();
             }
         };
     }, [recipe]);

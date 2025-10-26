@@ -19,7 +19,7 @@ const ViewRecipe = () => {
     const handleDelete = async () => {
         if (!id) return;
 
-        const confirmed = window.confirm('Are you sure you want to delete this recipe?');
+        const confirmed = globalThis.confirm('Are you sure you want to delete this recipe?');
         if (!confirmed) return;
 
         const success = await deleteRecipe(id);
@@ -109,13 +109,13 @@ const ViewRecipe = () => {
                     {/* Categories and cuisines */}
                     {(recipe.recipeCategory || recipe.recipeCuisine) && (
                         <HStack gap={2} flexWrap="wrap">
-                            {recipe.recipeCategory?.map((category, index) => (
-                                <Badge key={index} colorScheme="blue" size="lg">
+                            {recipe.recipeCategory?.map((category) => (
+                                <Badge key={category} colorScheme="blue" size="lg">
                                     {category}
                                 </Badge>
                             ))}
-                            {recipe.recipeCuisine?.map((cuisine, index) => (
-                                <Badge key={index} colorScheme="green" size="lg">
+                            {recipe.recipeCuisine?.map((cuisine) => (
+                                <Badge key={cuisine} colorScheme="green" size="lg">
                                     {cuisine}
                                 </Badge>
                             ))}
@@ -167,7 +167,7 @@ const ViewRecipe = () => {
                         <Heading size="xl" mb={4}>Instructions</Heading>
                         <VStack align="stretch" gap={4}>
                             {recipe.recipeInstructions.map((instruction, index) => (
-                                <Box key={index}>
+                                <Box key={`step${index}`}>
                                     <Text fontWeight="bold" fontSize="lg" mb={1}>
                                         Step {index + 1}
                                     </Text>
@@ -227,8 +227,8 @@ const ViewRecipe = () => {
                         <Box>
                             <Heading size="lg" mb={3}>Tags</Heading>
                             <HStack gap={2} flexWrap="wrap">
-                                {recipe.keywords.map((keyword, index) => (
-                                    <Badge key={index} variant="subtle" size="md">
+                                {recipe.keywords.map((keyword) => (
+                                    <Badge key={keyword} variant="subtle" size="md">
                                         {keyword}
                                     </Badge>
                                 ))}

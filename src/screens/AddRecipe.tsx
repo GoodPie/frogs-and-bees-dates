@@ -1,26 +1,26 @@
-import { useState } from 'react';
+import {useState} from 'react';
 import {
     Box, Button, Heading, Input, Textarea, VStack, HStack, Text,
     Tabs, NumberInput,
 } from '@chakra-ui/react';
-import { useNavigate } from 'react-router-dom';
-import { AiOutlineArrowLeft, AiOutlineSave } from 'react-icons/ai';
-import { useRecipeOperations } from '@/hooks/useRecipeOperations';
-import { IngredientInput } from '@/components/IngredientInput';
-import { InstructionInput } from '@/components/InstructionInput';
-import { NutritionInput } from '@/components/NutritionInput';
-import { ImageUpload } from '@/components/ImageUpload';
+import {useNavigate} from 'react-router-dom';
+import {AiOutlineArrowLeft, AiOutlineSave} from 'react-icons/ai';
+import {useRecipeOperations} from '@/hooks/useRecipeOperations';
+import {IngredientInput} from '@/components/IngredientInput';
+import {InstructionInput} from '@/components/InstructionInput';
+import {NutritionInput} from '@/components/NutritionInput';
+import {ImageUpload} from '@/components/ImageUpload';
 import type {IRecipe} from '@/interfaces/IRecipe';
 import type {IRecipeNutrition} from '@/interfaces/IRecipeNutrition';
-import { timeToISO8601 } from '@/utils/durationFormat';
-import { ROUTES, getRecipeViewRoute } from '@/routing/routes';
+import {timeToISO8601} from '@/utils/durationFormat';
+import {ROUTES, getRecipeViewRoute} from '@/routing/routes';
 
 /**
  * Add recipe screen with multi-tab form
  */
 const AddRecipe = () => {
     const navigate = useNavigate();
-    const { addRecipe, loading, error } = useRecipeOperations();
+    const {addRecipe, loading, error} = useRecipeOperations();
 
     // Basic info
     const [name, setName] = useState('');
@@ -59,9 +59,9 @@ const AddRecipe = () => {
             image,
             imageSource,
             recipeYield,
-            prepTime: prepTime !== 'PT0M' ? prepTime : undefined,
-            cookTime: cookTime !== 'PT0M' ? cookTime : undefined,
-            totalTime: totalTime !== 'PT0M' ? totalTime : undefined,
+            prepTime: prepTime === 'PT0M' ? undefined : prepTime,
+            cookTime: cookTime === 'PT0M' ? undefined : cookTime,
+            totalTime: totalTime === 'PT0M' ? undefined : totalTime,
             recipeIngredient: ingredients.filter(i => i.trim() !== ''),
             recipeInstructions: instructions.filter(i => i.trim() !== ''),
             recipeCategory: categories.split(',').map(c => c.trim()).filter(c => c !== ''),
@@ -85,10 +85,10 @@ const AddRecipe = () => {
                         variant="ghost"
                         onClick={() => navigate(ROUTES.RECIPES)}
                     >
-                        <AiOutlineArrowLeft /> Back to Recipes
+                        <AiOutlineArrowLeft/> Back to Recipes
                     </Button>
                     <Heading size="2xl">Add New Recipe</Heading>
-                    <Box width="120px" /> {/* Spacer for alignment */}
+                    <Box width="120px"/> {/* Spacer for alignment */}
                 </HStack>
 
                 {error && (
@@ -106,183 +106,183 @@ const AddRecipe = () => {
                         <Tabs.Trigger value="categorization">Categories</Tabs.Trigger>
                         <Tabs.Trigger value="nutrition">Nutrition</Tabs.Trigger>
                     </Tabs.List>
-                        {/* Basic Info */}
-                        <Tabs.Content value="basic">
-                            <VStack align="stretch" gap={4} py={4}>
-                                <Box>
-                                    <Text fontWeight="bold" mb={2}>Recipe Name *</Text>
-                                    <Input
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        placeholder="e.g., Chocolate Chip Cookies"
-                                        size="lg"
-                                    />
-                                </Box>
-
-                                <Box>
-                                    <Text fontWeight="bold" mb={2}>Description</Text>
-                                    <Textarea
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
-                                        placeholder="Brief description of the recipe"
-                                        rows={4}
-                                    />
-                                </Box>
-
-                                <Box>
-                                    <Text fontWeight="bold" mb={2}>Recipe Image *</Text>
-                                    <ImageUpload
-                                        imageUrl={image}
-                                        onImageChange={(url, source) => {
-                                            setImage(url);
-                                            setImageSource(source);
-                                        }}
-                                    />
-                                </Box>
-                            </VStack>
-                        </Tabs.Content>
-
-                        {/* Ingredients */}
-                        <Tabs.Content value="ingredients">
-                            <VStack align="stretch" gap={4} py={4}>
-                                <Text fontWeight="bold">Ingredients *</Text>
-                                <IngredientInput
-                                    ingredients={ingredients}
-                                    onChange={setIngredients}
+                    {/* Basic Info */}
+                    <Tabs.Content value="basic">
+                        <VStack align="stretch" gap={4} py={4}>
+                            <Box>
+                                <Text fontWeight="bold" mb={2}>Recipe Name *</Text>
+                                <Input
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    placeholder="e.g., Chocolate Chip Cookies"
+                                    size="lg"
                                 />
-                            </VStack>
-                        </Tabs.Content>
+                            </Box>
 
-                        {/* Instructions */}
-                        <Tabs.Content value="instructions">
-                            <VStack align="stretch" gap={4} py={4}>
-                                <Text fontWeight="bold">Instructions *</Text>
-                                <InstructionInput
-                                    instructions={instructions}
-                                    onChange={setInstructions}
+                            <Box>
+                                <Text fontWeight="bold" mb={2}>Description</Text>
+                                <Textarea
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    placeholder="Brief description of the recipe"
+                                    rows={4}
                                 />
-                            </VStack>
-                        </Tabs.Content>
+                            </Box>
 
-                        {/* Time & Yield */}
-                        <Tabs.Content value="time">
-                            <VStack align="stretch" gap={4} py={4}>
-                                <Box>
-                                    <Text fontWeight="bold" mb={2}>Prep Time</Text>
-                                    <HStack>
-                                        <Box>
-                                            <Text fontSize="sm" mb={1}>Hours</Text>
-                                            <NumberInput.Root
-                                                value={prepHours.toString()}
-                                                onValueChange={(details) => setPrepHours(Number(details.value))}
-                                                min={0}
-                                            >
-                                                <NumberInput.Input />
-                                            </NumberInput.Root>
-                                        </Box>
-                                        <Box>
-                                            <Text fontSize="sm" mb={1}>Minutes</Text>
-                                            <NumberInput.Root
-                                                value={prepMinutes.toString()}
-                                                onValueChange={(details) => setPrepMinutes(Number(details.value))}
-                                                min={0}
-                                                max={59}
-                                            >
-                                                <NumberInput.Input />
-                                            </NumberInput.Root>
-                                        </Box>
-                                    </HStack>
-                                </Box>
-
-                                <Box>
-                                    <Text fontWeight="bold" mb={2}>Cook Time</Text>
-                                    <HStack>
-                                        <Box>
-                                            <Text fontSize="sm" mb={1}>Hours</Text>
-                                            <NumberInput.Root
-                                                value={cookHours.toString()}
-                                                onValueChange={(details) => setCookHours(Number(details.value))}
-                                                min={0}
-                                            >
-                                                <NumberInput.Input />
-                                            </NumberInput.Root>
-                                        </Box>
-                                        <Box>
-                                            <Text fontSize="sm" mb={1}>Minutes</Text>
-                                            <NumberInput.Root
-                                                value={cookMinutes.toString()}
-                                                onValueChange={(details) => setCookMinutes(Number(details.value))}
-                                                min={0}
-                                                max={59}
-                                            >
-                                                <NumberInput.Input />
-                                            </NumberInput.Root>
-                                        </Box>
-                                    </HStack>
-                                </Box>
-
-                                <Box>
-                                    <Text fontWeight="bold" mb={2}>Recipe Yield</Text>
-                                    <Input
-                                        value={recipeYield}
-                                        onChange={(e) => setRecipeYield(e.target.value)}
-                                        placeholder="e.g., 6 servings, Makes 12 cookies"
-                                    />
-                                </Box>
-                            </VStack>
-                        </Tabs.Content>
-
-                        {/* Categorization */}
-                        <Tabs.Content value="categorization">
-                            <VStack align="stretch" gap={4} py={4}>
-                                <Box>
-                                    <Text fontWeight="bold" mb={2}>Categories</Text>
-                                    <Input
-                                        value={categories}
-                                        onChange={(e) => setCategories(e.target.value)}
-                                        placeholder="e.g., Dessert, Appetizer (comma-separated)"
-                                    />
-                                    <Text fontSize="xs" color="gray.500" mt={1}>
-                                        Separate multiple categories with commas
-                                    </Text>
-                                </Box>
-
-                                <Box>
-                                    <Text fontWeight="bold" mb={2}>Cuisines</Text>
-                                    <Input
-                                        value={cuisines}
-                                        onChange={(e) => setCuisines(e.target.value)}
-                                        placeholder="e.g., Italian, Mexican (comma-separated)"
-                                    />
-                                    <Text fontSize="xs" color="gray.500" mt={1}>
-                                        Separate multiple cuisines with commas
-                                    </Text>
-                                </Box>
-
-                                <Box>
-                                    <Text fontWeight="bold" mb={2}>Keywords/Tags</Text>
-                                    <Input
-                                        value={keywords}
-                                        onChange={(e) => setKeywords(e.target.value)}
-                                        placeholder="e.g., quick, easy, vegetarian (comma-separated)"
-                                    />
-                                    <Text fontSize="xs" color="gray.500" mt={1}>
-                                        Separate multiple keywords with commas
-                                    </Text>
-                                </Box>
-                            </VStack>
-                        </Tabs.Content>
-
-                        {/* Nutrition */}
-                        <Tabs.Content value="nutrition">
-                            <VStack align="stretch" gap={4} py={4}>
-                                <Text fontWeight="bold">Nutrition Information (Optional)</Text>
-                                <NutritionInput
-                                    nutrition={nutrition}
-                                    onChange={setNutrition}
+                            <Box>
+                                <Text fontWeight="bold" mb={2}>Recipe Image *</Text>
+                                <ImageUpload
+                                    imageUrl={image}
+                                    onImageChange={(url, source) => {
+                                        setImage(url);
+                                        setImageSource(source);
+                                    }}
                                 />
-                            </VStack>
-                        </Tabs.Content>
+                            </Box>
+                        </VStack>
+                    </Tabs.Content>
+
+                    {/* Ingredients */}
+                    <Tabs.Content value="ingredients">
+                        <VStack align="stretch" gap={4} py={4}>
+                            <Text fontWeight="bold">Ingredients *</Text>
+                            <IngredientInput
+                                ingredients={ingredients}
+                                onChange={setIngredients}
+                            />
+                        </VStack>
+                    </Tabs.Content>
+
+                    {/* Instructions */}
+                    <Tabs.Content value="instructions">
+                        <VStack align="stretch" gap={4} py={4}>
+                            <Text fontWeight="bold">Instructions *</Text>
+                            <InstructionInput
+                                instructions={instructions}
+                                onChange={setInstructions}
+                            />
+                        </VStack>
+                    </Tabs.Content>
+
+                    {/* Time & Yield */}
+                    <Tabs.Content value="time">
+                        <VStack align="stretch" gap={4} py={4}>
+                            <Box>
+                                <Text fontWeight="bold" mb={2}>Prep Time</Text>
+                                <HStack>
+                                    <Box>
+                                        <Text fontSize="sm" mb={1}>Hours</Text>
+                                        <NumberInput.Root
+                                            value={prepHours.toString()}
+                                            onValueChange={(details) => setPrepHours(Number(details.value))}
+                                            min={0}
+                                        >
+                                            <NumberInput.Input/>
+                                        </NumberInput.Root>
+                                    </Box>
+                                    <Box>
+                                        <Text fontSize="sm" mb={1}>Minutes</Text>
+                                        <NumberInput.Root
+                                            value={prepMinutes.toString()}
+                                            onValueChange={(details) => setPrepMinutes(Number(details.value))}
+                                            min={0}
+                                            max={59}
+                                        >
+                                            <NumberInput.Input/>
+                                        </NumberInput.Root>
+                                    </Box>
+                                </HStack>
+                            </Box>
+
+                            <Box>
+                                <Text fontWeight="bold" mb={2}>Cook Time</Text>
+                                <HStack>
+                                    <Box>
+                                        <Text fontSize="sm" mb={1}>Hours</Text>
+                                        <NumberInput.Root
+                                            value={cookHours.toString()}
+                                            onValueChange={(details) => setCookHours(Number(details.value))}
+                                            min={0}
+                                        >
+                                            <NumberInput.Input/>
+                                        </NumberInput.Root>
+                                    </Box>
+                                    <Box>
+                                        <Text fontSize="sm" mb={1}>Minutes</Text>
+                                        <NumberInput.Root
+                                            value={cookMinutes.toString()}
+                                            onValueChange={(details) => setCookMinutes(Number(details.value))}
+                                            min={0}
+                                            max={59}
+                                        >
+                                            <NumberInput.Input/>
+                                        </NumberInput.Root>
+                                    </Box>
+                                </HStack>
+                            </Box>
+
+                            <Box>
+                                <Text fontWeight="bold" mb={2}>Recipe Yield</Text>
+                                <Input
+                                    value={recipeYield}
+                                    onChange={(e) => setRecipeYield(e.target.value)}
+                                    placeholder="e.g., 6 servings, Makes 12 cookies"
+                                />
+                            </Box>
+                        </VStack>
+                    </Tabs.Content>
+
+                    {/* Categorization */}
+                    <Tabs.Content value="categorization">
+                        <VStack align="stretch" gap={4} py={4}>
+                            <Box>
+                                <Text fontWeight="bold" mb={2}>Categories</Text>
+                                <Input
+                                    value={categories}
+                                    onChange={(e) => setCategories(e.target.value)}
+                                    placeholder="e.g., Dessert, Appetizer (comma-separated)"
+                                />
+                                <Text fontSize="xs" color="gray.500" mt={1}>
+                                    Separate multiple categories with commas
+                                </Text>
+                            </Box>
+
+                            <Box>
+                                <Text fontWeight="bold" mb={2}>Cuisines</Text>
+                                <Input
+                                    value={cuisines}
+                                    onChange={(e) => setCuisines(e.target.value)}
+                                    placeholder="e.g., Italian, Mexican (comma-separated)"
+                                />
+                                <Text fontSize="xs" color="gray.500" mt={1}>
+                                    Separate multiple cuisines with commas
+                                </Text>
+                            </Box>
+
+                            <Box>
+                                <Text fontWeight="bold" mb={2}>Keywords/Tags</Text>
+                                <Input
+                                    value={keywords}
+                                    onChange={(e) => setKeywords(e.target.value)}
+                                    placeholder="e.g., quick, easy, vegetarian (comma-separated)"
+                                />
+                                <Text fontSize="xs" color="gray.500" mt={1}>
+                                    Separate multiple keywords with commas
+                                </Text>
+                            </Box>
+                        </VStack>
+                    </Tabs.Content>
+
+                    {/* Nutrition */}
+                    <Tabs.Content value="nutrition">
+                        <VStack align="stretch" gap={4} py={4}>
+                            <Text fontWeight="bold">Nutrition Information (Optional)</Text>
+                            <NutritionInput
+                                nutrition={nutrition}
+                                onChange={setNutrition}
+                            />
+                        </VStack>
+                    </Tabs.Content>
                 </Tabs.Root>
 
                 {/* Save button */}
@@ -293,7 +293,7 @@ const AddRecipe = () => {
                         loading={loading}
                         size="lg"
                     >
-                        <AiOutlineSave /> Save Recipe
+                        <AiOutlineSave/> Save Recipe
                     </Button>
                 </HStack>
             </VStack>

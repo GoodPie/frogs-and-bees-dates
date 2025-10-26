@@ -28,7 +28,7 @@ export const InstructionInput = ({ instructions, onChange }: InstructionInputPro
     return (
         <VStack align="stretch" gap={3}>
             {instructions.map((instruction, index) => (
-                <Box key={index}>
+                <Box key={`step${index}`}>
                     <Box display="flex" alignItems="center" mb={1}>
                         <Text fontWeight="medium" mr={2}>
                             Step {index + 1}

@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { getStorage } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, getStorage } from 'firebase/storage';
 import { auth } from '@/FirebaseConfig';
 import { validateImageUrl } from '@/utils/recipeValidation';
 

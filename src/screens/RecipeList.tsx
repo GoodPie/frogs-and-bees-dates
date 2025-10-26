@@ -33,7 +33,7 @@ const RecipeList = () => {
         const allCategories = recipes.flatMap(r => r.recipeCategory || []);
 
         return createListCollection({
-            items: [...new Set(allCategories)].sort(),
+            items: [...new Set(allCategories)].sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1)),
             itemToString: (item) => item,
             itemToValue: (item) => item,
         })
@@ -43,7 +43,7 @@ const RecipeList = () => {
         const allCuisines = recipes.flatMap(r => r.recipeCuisine || []);
 
         return createListCollection({
-            items: [...new Set(allCuisines)].sort(),
+            items: [...new Set(allCuisines)].sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1)),
             itemToString: (item) => item,
             itemToValue: (item) => item,
         })

@@ -54,13 +54,13 @@ export const RecipeCard = ({ recipe }: RecipeCardProps) => {
 
                 {(recipe.recipeCategory || recipe.recipeCuisine) && (
                     <HStack gap={2} flexWrap="wrap" mt={2}>
-                        {recipe.recipeCategory?.slice(0, 2).map((category, index) => (
-                            <Badge key={index} colorScheme="blue" size="sm">
+                        {recipe.recipeCategory?.slice(0, 2).map((category) => (
+                            <Badge key={category} colorScheme="blue" size="sm">
                                 {category}
                             </Badge>
                         ))}
-                        {recipe.recipeCuisine?.slice(0, 2).map((cuisine, index) => (
-                            <Badge key={index} colorScheme="green" size="sm">
+                        {recipe.recipeCuisine?.slice(0, 2).map((cuisine) => (
+                            <Badge key={cuisine} colorScheme="green" size="sm">
                                 {cuisine}
                             </Badge>
                         ))}

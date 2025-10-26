@@ -20,6 +20,6 @@ messaging.onBackgroundMessage(function(payload) {
         body: payload.notification.body,
     };
 
-    self.registration.showNotification(notificationTitle,
+    globalThis.registration.showNotification(notificationTitle,
         notificationOptions);
 });

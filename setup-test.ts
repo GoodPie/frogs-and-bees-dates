@@ -178,7 +178,7 @@ vi.mock('react-router-dom', async () => {
 });
 
 // Expose Firebase mocks globally for test assertions
-Object.assign(global, {
+Object.assign(globalThis, {
   window,
   document: window.document,
   __firebaseMocks: firebaseMocks,

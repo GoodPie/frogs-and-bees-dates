@@ -1,6 +1,6 @@
 import { Card, Image, Text, Badge, HStack } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import type {IRecipe} from '@/interfaces/IRecipe';
+import type {IRecipe} from "@/types/recipe/Recipe.ts";
 import { getRecipeViewRoute } from '@/routing/routes';
 import { iso8601ToReadable } from '@/utils/durationFormat';
 

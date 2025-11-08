@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {parseRecipeJsonLd, type RecipeParseResult} from '@/utils/recipeParser';
-import type {IRecipe} from '@/interfaces/IRecipe';
+import type {IRecipe} from "@/types/recipe/Recipe.ts";
 
 export interface RecipeImportState {
     // URL input

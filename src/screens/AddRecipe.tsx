@@ -5,7 +5,7 @@ import {useRecipeOperations} from '@/hooks/useRecipeOperations';
 import {useRecipeForm} from '@/hooks/useRecipeForm';
 import {RecipeFormFields} from '@/components/RecipeFormFields';
 import {ROUTES, getRecipeViewRoute} from '@/routing/routes';
-import type {IRecipe} from '@/interfaces/IRecipe';
+import type {IRecipe} from "@/types/recipe/Recipe.ts";
 
 /**
  * Add recipe screen with multi-tab form

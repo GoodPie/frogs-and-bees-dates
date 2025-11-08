@@ -1,36 +1,4 @@
-import type {IRecipe} from '@/interfaces/IRecipe';
-import type {IRecipeNutrition} from "@/types/recipe/Recipe.ts";
-
-/**
- * Schema.org Recipe type from JSON-LD
- * Based on https://schema.org/Recipe
- */
-interface SchemaOrgRecipe {
-    '@context'?: string;
-    '@type'?: string | string[];
-    name?: string;
-    image?: string | string[] | {url: string}[];
-    description?: string;
-    author?: {name: string} | string;
-    datePublished?: string;
-    prepTime?: string;
-    cookTime?: string;
-    totalTime?: string;
-    recipeYield?: string | number;
-    recipeCategory?: string | string[];
-    recipeCuisine?: string | string[];
-    recipeIngredient?: string[];
-    recipeInstructions?: string[] | {text: string}[] | {name?: string; text: string}[];
-    keywords?: string | string[];
-    nutrition?: {
-        calories?: string;
-    };
-    aggregateRating?: {
-        ratingValue?: number;
-        ratingCount?: number;
-    };
-    suitableForDiet?: string | string[];
-}
+import type {IRecipe, IRecipeNutrition, SchemaOrgRecipe} from '@/types/recipe/Recipe';
 
 export interface RecipeParseResult {
     success: boolean;

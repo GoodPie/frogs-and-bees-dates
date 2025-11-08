@@ -1,6 +1,48 @@
 import * as z from "zod";
 
 /**
+ * Zod schema for Schema.org Recipe from JSON-LD
+ * Based on https://schema.org/Recipe
+ */
+export const SchemaOrgRecipeSchema = z.object({
+    '@context': z.string().optional(),
+    '@type': z.union([z.string(), z.array(z.string())]).optional(),
+    name: z.string().optional(),
+    image: z.union([
+        z.string(),
+        z.array(z.string()),
+        z.array(z.object({ url: z.string() }))
+    ]).optional(),
+    description: z.string().optional(),
+    author: z.union([
+        z.string(),
+        z.object({ name: z.string() })
+    ]).optional(),
+    datePublished: z.string().optional(),
+    prepTime: z.string().optional(),
+    cookTime: z.string().optional(),
+    totalTime: z.string().optional(),
+    recipeYield: z.union([z.string(), z.number()]).optional(),
+    recipeCategory: z.union([z.string(), z.array(z.string())]).optional(),
+    recipeCuisine: z.union([z.string(), z.array(z.string())]).optional(),
+    recipeIngredient: z.array(z.string()).optional(),
+    recipeInstructions: z.union([
+        z.array(z.string()),
+        z.array(z.object({ text: z.string() })),
+        z.array(z.object({ name: z.string().optional(), text: z.string() }))
+    ]).optional(),
+    keywords: z.union([z.string(), z.array(z.string())]).optional(),
+    nutrition: z.object({
+        calories: z.string().optional(),
+    }).optional(),
+    aggregateRating: z.object({
+        ratingValue: z.number().optional(),
+        ratingCount: z.number().optional(),
+    }).optional(),
+    suitableForDiet: z.union([z.string(), z.array(z.string())]).optional(),
+});
+
+/**
  * Zod schema for nutritional information
  * Based on schema.org/NutritionInformation
  */
@@ -73,6 +115,7 @@ export const RecipeSchema = z.object({
 });
 
 // Export TypeScript types inferred from Zod schemas
+export type SchemaOrgRecipe = z.infer<typeof SchemaOrgRecipeSchema>;
 export type IRecipeNutrition = z.infer<typeof NutritionalInfoSchema>;
 export type IAggregateRating = z.infer<typeof AggregateRatingSchema>;
 export type IRecipe = z.infer<typeof RecipeSchema>;

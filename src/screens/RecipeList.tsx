@@ -16,6 +16,7 @@ import {useNavigate} from 'react-router-dom';
 import {AiOutlinePlus} from 'react-icons/ai';
 import {useRecipes} from '@/hooks/useRecipes';
 import {RecipeCard} from '@/components/RecipeCard';
+import {RecipeImportButton} from '@/components/RecipeImport';
 import {ROUTES} from '@/routing/routes';
 
 /**
@@ -84,28 +85,91 @@ const RecipeList = () => {
     }
 
     return (
-        <Box p={8} w="100%" maxW="1400px">
-            <VStack align="stretch" gap={6}>
+        <Box p={{base: 4, md: 6, lg: 8}} w="100%" maxW="1400px">
+            <VStack align="stretch" gap={{base: 4, md: 5, lg: 6}}>
                 {/* Header */}
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Heading size="2xl">Recipes</Heading>
-                    <Button
-                        colorScheme="blue"
-                        onClick={() => navigate(ROUTES.RECIPE_ADD)}
-                    >
-                        <AiOutlinePlus/> Add Recipe
-                    </Button>
+                <Box display="flex" justifyContent="space-between" alignItems={{base: "flex-start", md: "center"}} flexDirection={{base: "column", md: "row"}} gap={{base: 3, md: 0}}>
+                    <Heading size={{base: "xl", md: "2xl"}}>Recipes</Heading>
+                    <HStack gap={{base: 2, md: 3}} w={{base: "100%", md: "auto"}}>
+                        <RecipeImportButton />
+                        <Button
+                            colorScheme="blue"
+                            onClick={() => navigate(ROUTES.RECIPE_ADD)}
+                            size={{base: "md", md: "md"}}
+                            flex={{base: 1, md: "0"}}
+                        >
+                            <AiOutlinePlus/> Add Recipe
+                        </Button>
+                    </HStack>
                 </Box>
 
                 {/* Search and Filters */}
-                <VStack align="stretch" gap={3}>
+                <VStack align="stretch" gap={{base: 2, md: 3}}>
                     <Input
                         placeholder="Search recipes..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        size="lg"
+                        size={{base: "md", md: "lg"}}
                     />
-                    <HStack gap={3}>
+                    <VStack gap={{base: 2, md: 0}} align="stretch" display={{base: "flex", md: "none"}}>
+                        {/* Mobile: Vertical stacking */}
+                        <Select.Root
+                            collection={categories}
+                            value={categoryFilter}
+                            multiple={false}
+                            onValueChange={(e) => setCategoryFilter(e.value)}
+                        >
+                            <Select.HiddenSelect/>
+                            <Select.Control>
+                                <Select.Trigger>
+                                    <Select.ValueText placeholder="All Categories"/>
+                                </Select.Trigger>
+                                <Select.IndicatorGroup>
+                                    <Select.Indicator/>
+                                    <Select.ClearTrigger/>
+                                </Select.IndicatorGroup>
+                            </Select.Control>
+                            <Select.Positioner>
+                                <Select.Content>
+                                    {categories.items.map(category => (
+                                        <Select.Item item={category} key={category}>
+                                            {category}
+                                            <Select.ItemIndicator/>
+                                        </Select.Item>
+                                    ))}
+                                </Select.Content>
+                            </Select.Positioner>
+                        </Select.Root>
+                        <Select.Root
+                            collection={cuisines}
+                            value={cuisineFilter}
+                            multiple={false}
+                            onValueChange={(e) => setCuisineFilter(e.value)}
+                        >
+                            <Select.HiddenSelect/>
+                            <Select.Control>
+                                <Select.Trigger>
+                                    <Select.ValueText placeholder="All Cuisines"/>
+                                </Select.Trigger>
+                                <Select.IndicatorGroup>
+                                    <Select.Indicator/>
+                                    <Select.ClearTrigger/>
+                                </Select.IndicatorGroup>
+                            </Select.Control>
+                            <Select.Positioner>
+                                <Select.Content>
+                                    {cuisines.items.map(cuisine => (
+                                        <Select.Item item={cuisine} key={cuisine}>
+                                            {cuisine}
+                                            <Select.ItemIndicator/>
+                                        </Select.Item>
+                                    ))}
+                                </Select.Content>
+                            </Select.Positioner>
+                        </Select.Root>
+                    </VStack>
+                    <HStack gap={3} display={{base: "none", md: "flex"}}>
+                        {/* Desktop: Horizontal layout */}
                         <Select.Root
                             collection={categories}
                             value={categoryFilter}

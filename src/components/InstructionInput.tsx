@@ -26,11 +26,11 @@ export const InstructionInput = ({ instructions, onChange }: InstructionInputPro
     };
 
     return (
-        <VStack align="stretch" gap={3}>
+        <VStack align="stretch" gap={{base: 4, md: 3}}>
             {instructions.map((instruction, index) => (
                 <Box key={`step${index}`}>
-                    <Box display="flex" alignItems="center" mb={1}>
-                        <Text fontWeight="medium" mr={2}>
+                    <Box display="flex" alignItems="center" mb={2} gap={2}>
+                        <Text fontWeight="medium">
                             Step {index + 1}
                         </Text>
                         <IconButton
@@ -39,6 +39,8 @@ export const InstructionInput = ({ instructions, onChange }: InstructionInputPro
                             colorScheme="red"
                             variant="ghost"
                             size="sm"
+                            minW="44px"
+                            minH="44px"
                         >
                             <AiOutlineDelete />
                         </IconButton>
@@ -47,14 +49,15 @@ export const InstructionInput = ({ instructions, onChange }: InstructionInputPro
                         value={instruction}
                         onChange={(e) => handleChange(index, e.target.value)}
                         placeholder={`Describe step ${index + 1}`}
-                        rows={3}
+                        size={{base: "md", md: "md"}}
                     />
                 </Box>
             ))}
             <Button
                 onClick={handleAdd}
                 variant="outline"
-                size="sm"
+                size={{base: "md", md: "sm"}}
+                minH="44px"
             >
                 <AiOutlinePlus /> Add Step
             </Button>

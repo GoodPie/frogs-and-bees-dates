@@ -1,5 +1,5 @@
 import { Box, Input, VStack, Text } from '@chakra-ui/react';
-import type {IRecipeNutrition} from '@/interfaces/IRecipeNutrition';
+import type {IRecipeNutrition} from '@/types/recipe/Recipe';
 
 interface NutritionInputProps {
     nutrition: IRecipeNutrition | undefined;

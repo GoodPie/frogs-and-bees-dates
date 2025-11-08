@@ -60,47 +60,56 @@ const ViewRecipe = () => {
     return (
         <>
             <RecipeJsonLd recipe={recipe} />
-            <Box p={8} w="100%" maxW="1200px" mx="auto">
-                <VStack align="stretch" gap={6}>
+            <Box p={{base: 4, md: 6, lg: 8}} w="100%" maxW="1200px" mx="auto">
+                <VStack align="stretch" gap={{base: 4, md: 5, lg: 6}}>
                     {/* Header with actions */}
-                    <HStack justifyContent="space-between">
-                        <Button
-                            variant="ghost"
-                            onClick={() => navigate(ROUTES.RECIPES)}
-                        >
-                            <AiOutlineArrowLeft /> Back to Recipes
-                        </Button>
-                        <HStack>
+                    <VStack align="stretch" gap={2}>
+                        <HStack justifyContent="space-between" flexWrap="wrap" gap={2}>
                             <Button
-                                colorScheme="blue"
-                                onClick={handleEdit}
+                                variant="ghost"
+                                onClick={() => navigate(ROUTES.RECIPES)}
+                                size={{base: "sm", md: "md"}}
                             >
-                                <AiOutlineEdit /> Edit
+                                <AiOutlineArrowLeft />
+                                <Box display={{base: "none", sm: "inline"}}>Back to Recipes</Box>
+                                <Box display={{base: "inline", sm: "none"}}>Back</Box>
                             </Button>
-                            <Button
-                                colorScheme="red"
-                                onClick={handleDelete}
-                                loading={deleteLoading}
-                            >
-                                <AiOutlineDelete /> Delete
-                            </Button>
+                            <HStack gap={2}>
+                                <Button
+                                    colorScheme="blue"
+                                    onClick={handleEdit}
+                                    size={{base: "sm", md: "md"}}
+                                >
+                                    <AiOutlineEdit />
+                                    <Box display={{base: "none", sm: "inline"}}>Edit</Box>
+                                </Button>
+                                <Button
+                                    colorScheme="red"
+                                    onClick={handleDelete}
+                                    loading={deleteLoading}
+                                    size={{base: "sm", md: "md"}}
+                                >
+                                    <AiOutlineDelete />
+                                    <Box display={{base: "none", sm: "inline"}}>Delete</Box>
+                                </Button>
+                            </HStack>
                         </HStack>
-                    </HStack>
+                    </VStack>
 
                     {/* Recipe image */}
                     <Image
                         src={imageUrl}
                         alt={recipe.name}
-                        maxHeight="500px"
+                        maxHeight={{base: "300px", md: "400px", lg: "500px"}}
                         objectFit="cover"
                         borderRadius="lg"
                     />
 
                     {/* Recipe title and description */}
                     <VStack align="stretch" gap={3}>
-                        <Heading size="3xl">{recipe.name}</Heading>
+                        <Heading size={{base: "2xl", md: "3xl"}}>{recipe.name}</Heading>
                         {recipe.description && (
-                            <Text fontSize="lg" color="gray.600">
+                            <Text fontSize={{base: "md", md: "lg"}} color="gray.600">
                                 {recipe.description}
                             </Text>
                         )}
@@ -123,7 +132,7 @@ const ViewRecipe = () => {
                     )}
 
                     {/* Time and yield info */}
-                    <Grid templateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap={4}>
+                    <Grid templateColumns={{base: "repeat(2, 1fr)", md: "repeat(auto-fit, minmax(200px, 1fr))"}} gap={{base: 3, md: 4}}>
                         {recipe.prepTime && (
                             <Box>
                                 <Text fontWeight="bold">Prep Time</Text>
@@ -152,10 +161,10 @@ const ViewRecipe = () => {
 
                     {/* Ingredients */}
                     <Box>
-                        <Heading size="xl" mb={4}>Ingredients</Heading>
+                        <Heading size={{base: "lg", md: "xl"}} mb={{base: 3, md: 4}}>Ingredients</Heading>
                         <VStack align="stretch" gap={2}>
                             {recipe.recipeIngredient.map((ingredient, index) => (
-                                <Text key={index} fontSize="lg">
+                                <Text key={index} fontSize={{base: "md", md: "lg"}}>
                                     • {ingredient}
                                 </Text>
                             ))}
@@ -164,14 +173,14 @@ const ViewRecipe = () => {
 
                     {/* Instructions */}
                     <Box>
-                        <Heading size="xl" mb={4}>Instructions</Heading>
-                        <VStack align="stretch" gap={4}>
+                        <Heading size={{base: "lg", md: "xl"}} mb={{base: 3, md: 4}}>Instructions</Heading>
+                        <VStack align="stretch" gap={{base: 3, md: 4}}>
                             {recipe.recipeInstructions.map((instruction, index) => (
                                 <Box key={`step${index}`}>
-                                    <Text fontWeight="bold" fontSize="lg" mb={1}>
+                                    <Text fontWeight="bold" fontSize={{base: "md", md: "lg"}} mb={1}>
                                         Step {index + 1}
                                     </Text>
-                                    <Text fontSize="lg">{instruction}</Text>
+                                    <Text fontSize={{base: "md", md: "lg"}}>{instruction}</Text>
                                 </Box>
                             ))}
                         </VStack>
@@ -180,8 +189,8 @@ const ViewRecipe = () => {
                     {/* Nutrition information */}
                     {recipe.nutrition && (
                         <Box>
-                            <Heading size="xl" mb={4}>Nutrition Information</Heading>
-                            <Grid templateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap={3}>
+                            <Heading size={{base: "lg", md: "xl"}} mb={{base: 3, md: 4}}>Nutrition Information</Heading>
+                            <Grid templateColumns={{base: "repeat(2, 1fr)", sm: "repeat(3, 1fr)", md: "repeat(auto-fit, minmax(200px, 1fr))"}} gap={3}>
                                 {recipe.nutrition.servingSize && (
                                     <Box>
                                         <Text fontWeight="bold">Serving Size</Text>

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { db, auth } from '@/FirebaseConfig';
-import type {IRecipe} from '@/interfaces/IRecipe';
 import { validateRecipe, sanitizeRecipe } from '@/utils/recipeValidation';
+import type {IRecipe} from "@/types/recipe/Recipe.ts";
 
 /**
  * Custom hook for recipe CRUD operations

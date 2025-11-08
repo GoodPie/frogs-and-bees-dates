@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import type {IRecipe} from '@/interfaces/IRecipe';
+import type {IRecipe} from "@/types/recipe/Recipe.ts";
 
 interface RecipeJsonLdProps {
     recipe: IRecipe;

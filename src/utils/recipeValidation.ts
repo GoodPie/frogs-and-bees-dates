@@ -1,4 +1,4 @@
-import type {IRecipe} from '@/interfaces/IRecipe';
+import type {IRecipe} from "@/types/recipe/Recipe.ts";
 
 /**
  * Validates a recipe object for required fields
@@ -71,10 +71,10 @@ export const sanitizeRecipe = (recipe: Partial<IRecipe>): Partial<IRecipe> => {
         ...recipe,
         name: recipe.name?.trim(),
         description: recipe.description?.trim(),
-        recipeIngredient: recipe.recipeIngredient?.filter(i => i.trim() !== ''),
-        recipeInstructions: recipe.recipeInstructions?.filter(i => i.trim() !== ''),
-        recipeCategory: recipe.recipeCategory?.filter(c => c.trim() !== ''),
-        recipeCuisine: recipe.recipeCuisine?.filter(c => c.trim() !== ''),
-        keywords: recipe.keywords?.filter(k => k.trim() !== ''),
+        recipeIngredient: recipe.recipeIngredient?.filter(instruction => instruction.trim() !== ''),
+        recipeInstructions: recipe.recipeInstructions?.filter(instruction => instruction.trim() !== ''),
+        recipeCategory: recipe.recipeCategory?.filter(category => category.trim() !== ''),
+        recipeCuisine: recipe.recipeCuisine?.filter(cuisine => cuisine.trim() !== ''),
+        keywords: recipe.keywords?.filter(keyword => keyword.trim() !== ''),
     };
 };

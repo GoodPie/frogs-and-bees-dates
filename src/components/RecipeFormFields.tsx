@@ -1,7 +1,6 @@
 import {Box, Input, Textarea, VStack, Text, Tabs} from '@chakra-ui/react';
 import {IngredientInput} from '@/components/IngredientInput';
 import {InstructionInput} from '@/components/InstructionInput';
-import {NutritionInput} from '@/components/NutritionInput';
 import {ImageUpload} from '@/components/ImageUpload';
 import {TimeInputGroup} from '@/components/TimeInputGroup';
 import type {RecipeFormState} from '@/hooks/useRecipeForm';
@@ -42,19 +41,25 @@ export const RecipeFormFields = ({formState}: RecipeFormFieldsProps) => {
         setCuisines,
         keywords,
         setKeywords,
-        nutrition,
-        setNutrition,
     } = formState;
 
     return (
-        <Tabs.Root defaultValue="basic">
+        <Tabs.Root defaultValue="basic" fitted maxW={"lg"} variant="enclosed">
             <Tabs.List>
-                <Tabs.Trigger value="basic">Basic Info</Tabs.Trigger>
-                <Tabs.Trigger value="ingredients">Ingredients</Tabs.Trigger>
-                <Tabs.Trigger value="instructions">Instructions</Tabs.Trigger>
-                <Tabs.Trigger value="time">Time & Yield</Tabs.Trigger>
-                <Tabs.Trigger value="categorization">Categories</Tabs.Trigger>
-                <Tabs.Trigger value="nutrition">Nutrition</Tabs.Trigger>
+                <Tabs.Trigger value="basic" fontSize={{base: "sm", md: "md"}} px={{base: 2, md: 4}}>
+                    <Box display={{base: "none", sm: "inline"}}>Basic Info</Box>
+                    <Box display={{base: "inline", sm: "none"}}>Basic</Box>
+                </Tabs.Trigger>
+                <Tabs.Trigger value="ingredients" fontSize={{base: "sm", md: "md"}}
+                              px={{base: 2, md: 4}}>Ingredients</Tabs.Trigger>
+                <Tabs.Trigger value="instructions" fontSize={{base: "sm", md: "md"}} px={{base: 2, md: 4}}>
+                    <Box display={{base: "none", sm: "inline"}}>Instructions</Box>
+                    <Box display={{base: "inline", sm: "none"}}>Steps</Box>
+                </Tabs.Trigger>
+                <Tabs.Trigger value="categorization" fontSize={{base: "sm", md: "md"}} px={{base: 2, md: 4}}>
+                    <Box display={{base: "none", sm: "inline"}}>Categories</Box>
+                    <Box display={{base: "inline", sm: "none"}}>Tags</Box>
+                </Tabs.Trigger>
             </Tabs.List>
 
             {/* Basic Info */}
@@ -77,6 +82,31 @@ export const RecipeFormFields = ({formState}: RecipeFormFieldsProps) => {
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="Brief description of the recipe"
                             rows={4}
+                        />
+                    </Box>
+
+                    <TimeInputGroup
+                        label="Prep Time"
+                        hours={prepHours}
+                        minutes={prepMinutes}
+                        onHoursChange={setPrepHours}
+                        onMinutesChange={setPrepMinutes}
+                    />
+
+                    <TimeInputGroup
+                        label="Cook Time"
+                        hours={cookHours}
+                        minutes={cookMinutes}
+                        onHoursChange={setCookHours}
+                        onMinutesChange={setCookMinutes}
+                    />
+
+                    <Box>
+                        <Text fontWeight="bold" mb={2}>Recipe Yield</Text>
+                        <Input
+                            value={recipeYield}
+                            onChange={(e) => setRecipeYield(e.target.value)}
+                            placeholder="e.g., 6 servings, Makes 12 cookies"
                         />
                     </Box>
 
@@ -112,36 +142,6 @@ export const RecipeFormFields = ({formState}: RecipeFormFieldsProps) => {
                         instructions={instructions}
                         onChange={setInstructions}
                     />
-                </VStack>
-            </Tabs.Content>
-
-            {/* Time & Yield */}
-            <Tabs.Content value="time">
-                <VStack align="stretch" gap={4} py={4}>
-                    <TimeInputGroup
-                        label="Prep Time"
-                        hours={prepHours}
-                        minutes={prepMinutes}
-                        onHoursChange={setPrepHours}
-                        onMinutesChange={setPrepMinutes}
-                    />
-
-                    <TimeInputGroup
-                        label="Cook Time"
-                        hours={cookHours}
-                        minutes={cookMinutes}
-                        onHoursChange={setCookHours}
-                        onMinutesChange={setCookMinutes}
-                    />
-
-                    <Box>
-                        <Text fontWeight="bold" mb={2}>Recipe Yield</Text>
-                        <Input
-                            value={recipeYield}
-                            onChange={(e) => setRecipeYield(e.target.value)}
-                            placeholder="e.g., 6 servings, Makes 12 cookies"
-                        />
-                    </Box>
                 </VStack>
             </Tabs.Content>
 
@@ -183,17 +183,6 @@ export const RecipeFormFields = ({formState}: RecipeFormFieldsProps) => {
                             Separate multiple keywords with commas
                         </Text>
                     </Box>
-                </VStack>
-            </Tabs.Content>
-
-            {/* Nutrition */}
-            <Tabs.Content value="nutrition">
-                <VStack align="stretch" gap={4} py={4}>
-                    <Text fontWeight="bold">Nutrition Information (Optional)</Text>
-                    <NutritionInput
-                        nutrition={nutrition}
-                        onChange={setNutrition}
-                    />
                 </VStack>
             </Tabs.Content>
         </Tabs.Root>

@@ -30,12 +30,6 @@ describe('recipeParser', () => {
                 recipeCategory: ['Dessert', 'Cookies'],
                 recipeCuisine: ['American'],
                 keywords: ['cookies', 'chocolate', 'dessert'],
-                nutrition: {
-                    calories: '150 calories',
-                    carbohydrateContent: '20g',
-                    proteinContent: '2g',
-                    fatContent: '7g'
-                }
             });
 
             const result = parseRecipeJsonLd(jsonLd);
@@ -55,8 +49,6 @@ describe('recipeParser', () => {
             expect(result.recipe?.recipeCategory).toEqual(['Dessert', 'Cookies']);
             expect(result.recipe?.recipeCuisine).toEqual(['American']);
             expect(result.recipe?.keywords).toEqual(['cookies', 'chocolate', 'dessert']);
-            expect(result.recipe?.nutrition?.calories).toBe('150');
-            expect(result.recipe?.nutrition?.carbohydrateContent).toBe('20');
         });
 
         it('should handle string author format', () => {

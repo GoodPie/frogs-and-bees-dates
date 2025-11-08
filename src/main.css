@@ -11,15 +11,3 @@
     bottom: 2rem;
     right: 2rem;
 }
-
-.content-container {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    width: 100vw;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding-top: 80px;  /* Space for navigation buttons */
-    padding-bottom: 80px;  /* Space for notification button */
-}

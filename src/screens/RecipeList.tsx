@@ -85,7 +85,7 @@ const RecipeList = () => {
     }
 
     return (
-        <Box p={{base: 4, md: 6, lg: 8}} w="100%" maxW="1400px">
+        <Box p={{base: 4, md: 6, lg: 8}} w="100%" maxW={"5xl"} mx={"auto"}>
             <VStack align="stretch" gap={{base: 4, md: 5, lg: 6}}>
                 {/* Header */}
                 <Box display="flex" justifyContent="space-between" alignItems={{base: "flex-start", md: "center"}} flexDirection={{base: "column", md: "row"}} gap={{base: 3, md: 0}}>
@@ -95,8 +95,6 @@ const RecipeList = () => {
                         <Button
                             colorScheme="blue"
                             onClick={() => navigate(ROUTES.RECIPE_ADD)}
-                            size={{base: "md", md: "md"}}
-                            flex={{base: 1, md: "0"}}
                         >
                             <AiOutlinePlus/> Add Recipe
                         </Button>

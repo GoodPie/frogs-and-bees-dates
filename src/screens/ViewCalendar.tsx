@@ -2,9 +2,9 @@ import {useEffect, useState} from "react";
 import {collection, getDocs, orderBy, query, where} from "firebase/firestore";
 import type {ICalendarActivity} from "../interfaces/ICalendarActivity";
 import CalendarEvent from "../components/CalendarEvent";
-import {Heading, Stack, VStack} from "@chakra-ui/react";
+import {Button, Heading, Stack, VStack} from "@chakra-ui/react";
 import dayjs from "dayjs";
-import {db} from "../FirebaseConfig.ts";
+import {db, RegisterFirebaseToken} from "../FirebaseConfig.ts";
 
 const ViewCalendar = () => {
 
@@ -54,7 +54,13 @@ const ViewCalendar = () => {
                 {calendarEvents.length === 0 &&
                     <Stack>
                         <Heading as={"h3"}>No Upcoming Events 😔</Heading>
-
+                        <div style={{position: "absolute", left: 0, right: 0, bottom: 16}}>
+                            <div style={{display: "flex", justifyContent: "center"}}>
+                                <Button variant={"ghost"} onClick={() => RegisterFirebaseToken()}>
+                                    Get Notifications
+                                </Button>
+                            </div>
+                        </div>
                     </Stack>
                 }
             </Stack>

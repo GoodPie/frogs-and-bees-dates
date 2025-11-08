@@ -1,7 +1,6 @@
 import {Box, Input, Textarea, VStack, Text, Tabs} from '@chakra-ui/react';
 import {IngredientInput} from '@/components/IngredientInput';
 import {InstructionInput} from '@/components/InstructionInput';
-import {NutritionInput} from '@/components/NutritionInput';
 import {ImageUpload} from '@/components/ImageUpload';
 import {TimeInputGroup} from '@/components/TimeInputGroup';
 import type {RecipeFormState} from '@/hooks/useRecipeForm';
@@ -42,8 +41,6 @@ export const RecipeFormFields = ({formState}: RecipeFormFieldsProps) => {
         setCuisines,
         keywords,
         setKeywords,
-        nutrition,
-        setNutrition,
     } = formState;
 
     return (
@@ -63,8 +60,6 @@ export const RecipeFormFields = ({formState}: RecipeFormFieldsProps) => {
                     <Box display={{base: "none", sm: "inline"}}>Categories</Box>
                     <Box display={{base: "inline", sm: "none"}}>Tags</Box>
                 </Tabs.Trigger>
-                <Tabs.Trigger value="nutrition" fontSize={{base: "sm", md: "md"}}
-                              px={{base: 2, md: 4}}>Nutrition</Tabs.Trigger>
             </Tabs.List>
 
             {/* Basic Info */}
@@ -188,17 +183,6 @@ export const RecipeFormFields = ({formState}: RecipeFormFieldsProps) => {
                             Separate multiple keywords with commas
                         </Text>
                     </Box>
-                </VStack>
-            </Tabs.Content>
-
-            {/* Nutrition */}
-            <Tabs.Content value="nutrition">
-                <VStack align="stretch" gap={4} py={4}>
-                    <Text fontWeight="bold">Nutrition Information (Optional)</Text>
-                    <NutritionInput
-                        nutrition={nutrition}
-                        onChange={setNutrition}
-                    />
                 </VStack>
             </Tabs.Content>
         </Tabs.Root>

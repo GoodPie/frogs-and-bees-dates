@@ -1,8 +1,8 @@
-import type {IRecipeNutrition} from './IRecipeNutrition';
-
 // Recipe interface following Google's structured data guidelines
 // https://developers.google.com/search/docs/appearance/structured-data/recipe
 // https://schema.org/Recipe
+
+import type {IRecipeNutrition} from "@/types/recipe/Recipe.ts";
 
 interface IRecipe {
     // Firestore metadata
@@ -26,9 +26,6 @@ interface IRecipe {
     cookTime?: string;                  // Cooking time
     totalTime?: string;                 // Total time (prep + cook)
 
-    // Nutrition information
-    nutrition?: IRecipeNutrition;
-
     // Categorization and discovery
     recipeCategory?: string[];          // Categories (e.g., "Dessert", "Appetizer", "Main Course")
     recipeCuisine?: string[];           // Cuisine types (e.g., "Italian", "Mexican", "Asian")
@@ -38,10 +35,13 @@ interface IRecipe {
     author?: string;                    // Recipe author
     datePublished?: Date;               // Publication date
     aggregateRating?: {                 // User ratings
-        ratingValue: number;
-        ratingCount: number;
+        ratingValue?: number;
+        ratingCount?: number;
     };
     suitableForDiet?: string[];         // Dietary restrictions (e.g., "GlutenFreeDiet", "VeganDiet")
+
+    // Nutrition information
+    nutrition?: IRecipeNutrition;       // Nutritional information
 
     // Image upload metadata
     imageSource?: 'upload' | 'url';     // How the image was added

@@ -49,7 +49,6 @@ export const InstructionInput = ({ instructions, onChange }: InstructionInputPro
                         value={instruction}
                         onChange={(e) => handleChange(index, e.target.value)}
                         placeholder={`Describe step ${index + 1}`}
-                        rows={{base: 4, md: 3}}
                         size={{base: "md", md: "md"}}
                     />
                 </Box>

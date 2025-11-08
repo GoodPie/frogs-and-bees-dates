@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 import type {IRecipe} from '@/interfaces/IRecipe';
-import type {IRecipeNutrition} from '@/interfaces/IRecipeNutrition';
 import {timeToISO8601, iso8601ToMinutes} from '@/utils/durationFormat';
+import type {IRecipeNutrition} from "@/types/recipe/Recipe.ts";
 
 export interface RecipeFormState {
     // Basic info

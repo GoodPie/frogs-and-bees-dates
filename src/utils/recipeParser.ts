@@ -1,5 +1,5 @@
 import type {IRecipe} from '@/interfaces/IRecipe';
-import type {IRecipeNutrition} from '@/interfaces/IRecipeNutrition';
+import type {IRecipeNutrition} from "@/types/recipe/Recipe.ts";
 
 /**
  * Schema.org Recipe type from JSON-LD
@@ -24,14 +24,6 @@ interface SchemaOrgRecipe {
     keywords?: string | string[];
     nutrition?: {
         calories?: string;
-        carbohydrateContent?: string;
-        proteinContent?: string;
-        fatContent?: string;
-        saturatedFatContent?: string;
-        cholesterolContent?: string;
-        sodiumContent?: string;
-        fiberContent?: string;
-        sugarContent?: string;
     };
     aggregateRating?: {
         ratingValue?: number;
@@ -85,7 +77,8 @@ function extractInstructions(instructions: string[] | {text: string}[] | {name?:
             }
             if (typeof instruction === 'object' && 'text' in instruction) {
                 // Some recipes have HowToStep with optional name
-                const prefix = instruction.name ? `${instruction.name}: ` : '';
+                const hasName = 'name' in instruction && instruction.name;
+                const prefix = hasName ? `${instruction.name}: ` : '';
                 return prefix + instruction.text;
             }
             return '';
@@ -118,24 +111,8 @@ function extractAuthor(author: {name: string} | string | undefined): string | un
 function extractNutrition(nutrition: SchemaOrgRecipe['nutrition']): IRecipeNutrition | undefined {
     if (!nutrition) return undefined;
 
-    // Helper to extract numeric value and remove units
-    const parseValue = (value: string | undefined): string | undefined => {
-        if (!value) return undefined;
-        // Remove common units and extra text
-        const cleaned = value.replace(/\s*(calories|kcal|g|mg|%)\s*/gi, '').trim();
-        return cleaned || undefined;
-    };
-
     const result: IRecipeNutrition = {
         calories: parseValue(nutrition.calories),
-        carbohydrateContent: parseValue(nutrition.carbohydrateContent),
-        proteinContent: parseValue(nutrition.proteinContent),
-        fatContent: parseValue(nutrition.fatContent),
-        saturatedFatContent: parseValue(nutrition.saturatedFatContent),
-        cholesterolContent: parseValue(nutrition.cholesterolContent),
-        sodiumContent: parseValue(nutrition.sodiumContent),
-        fiberContent: parseValue(nutrition.fiberContent),
-        sugarContent: parseValue(nutrition.sugarContent),
     };
 
     // Only return if at least one value exists
@@ -148,6 +125,18 @@ function extractNutrition(nutrition: SchemaOrgRecipe['nutrition']): IRecipeNutri
 function ensureArray(value: string | string[] | undefined): string[] {
     if (!value) return [];
     return Array.isArray(value) ? value : [value];
+}
+
+/**
+ * Parses numeric value from nutrition strings, removing units
+ * Examples: "270 calories" -> "270", "14g" -> "14"
+ */
+function parseValue(value: string | undefined): string | undefined {
+    if (!value) return undefined;
+
+    // Extract the numeric portion (including decimals)
+    const match = value.match(/[\d.]+/);
+    return match ? match[0] : undefined;
 }
 
 /**

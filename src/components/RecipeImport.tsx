@@ -34,7 +34,7 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
         const recipe = importState.getParsedRecipe();
         if (recipe) {
             // Navigate to add recipe screen with imported data
-            navigate(ROUTES.ADD_RECIPE, {state: {importedRecipe: recipe}});
+            navigate(ROUTES.RECIPE_ADD, {state: {importedRecipe: recipe}});
             onClose();
             importState.reset();
         }
@@ -201,7 +201,7 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                                     {importState.parseResult.recipe.description && (
                                                         <HStack align="start">
                                                             <Text fontWeight="bold" minW="100px">Description:</Text>
-                                                            <Text noOfLines={2}>{importState.parseResult.recipe.description}</Text>
+                                                            <Text maxLines={2}>{importState.parseResult.recipe.description}</Text>
                                                         </HStack>
                                                     )}
                                                     <HStack>

@@ -44,7 +44,7 @@ export const RecipeFormFields = ({formState}: RecipeFormFieldsProps) => {
     } = formState;
 
     return (
-        <Tabs.Root defaultValue="basic" fitted maxW={"lg"} variant="enclosed">
+        <Tabs.Root defaultValue="basic" fitted w={"full"} mx={"auto"} variant="enclosed">
             <Tabs.List>
                 <Tabs.Trigger value="basic" fontSize={{base: "sm", md: "md"}} px={{base: 2, md: 4}}>
                     <Box display={{base: "none", sm: "inline"}}>Basic Info</Box>

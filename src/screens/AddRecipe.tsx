@@ -17,7 +17,7 @@ const AddRecipe = () => {
     const {addRecipe, loading, error} = useRecipeOperations();
 
     // Check if we have imported recipe data
-    const importedRecipe = (location.state as {importedRecipe?: Partial<IRecipe>})?.importedRecipe;
+    const importedRecipe = (location.state as { importedRecipe?: Partial<IRecipe> })?.importedRecipe;
     const formState = useRecipeForm(importedRecipe as IRecipe | undefined);
 
     const handleSave = async () => {
@@ -29,7 +29,7 @@ const AddRecipe = () => {
     };
 
     return (
-        <Box p={{base: 4, md: 6, lg: 8}} w="100%" maxW="1000px" mx="auto">
+        <Box p={{base: 4, md: 6, lg: 8}} w="full" maxW="5xl" mx="auto">
             <VStack align="stretch" gap={{base: 4, md: 5, lg: 6}}>
                 {/* Header */}
                 <VStack align="stretch" gap={2}>
@@ -48,7 +48,7 @@ const AddRecipe = () => {
                         <Heading size={{base: "xl", md: "2xl"}}>Add New Recipe</Heading>
                         {importedRecipe && (
                             <Badge colorScheme="green" variant="subtle" w="fit-content">
-                                <AiOutlineCheckCircle /> Imported from website
+                                <AiOutlineCheckCircle/> Imported from website
                             </Badge>
                         )}
                     </VStack>
@@ -60,7 +60,7 @@ const AddRecipe = () => {
                     </Text>
                 )}
 
-                <RecipeFormFields formState={formState} />
+                <RecipeFormFields formState={formState}/>
 
                 {/* Save button */}
                 <HStack justifyContent="flex-end" pt={4}>

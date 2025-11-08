@@ -1,22 +1,19 @@
-import {Button, ChakraProvider, defaultSystem, IconButton} from "@chakra-ui/react"
-import {BrowserRouter, useNavigate, useLocation} from "react-router-dom"
+import {Box, ChakraProvider, defaultSystem, HStack} from "@chakra-ui/react"
+import {BrowserRouter} from "react-router-dom"
 
 import "./main.css";
 
 import FrogImage from "./components/FrogImage";
-import {RegisterFirebaseToken} from "./FirebaseConfig";
 import {ColorModeSwitcher} from "./ColorModeSwitcher";
-import {AiTwotoneCalendar} from "react-icons/ai";
-import {MdRestaurantMenu} from "react-icons/md";
-import {ROUTES} from "./routing/routes";
 import {AppRouter} from "./routing/AppRouter";
 import {useAuth} from "./hooks/useAuth";
+import {Navigation} from "@/Navigation.tsx";
 
 export const App = () => {
     return (
         <ChakraProvider value={defaultSystem}>
             <BrowserRouter>
-                <AppContent />
+                <AppContent/>
             </BrowserRouter>
         </ChakraProvider>
     )
@@ -24,70 +21,18 @@ export const App = () => {
 
 // App content (separated to use routing hooks within BrowserRouter context)
 const AppContent = () => {
-    const { user } = useAuth();
+    const {user} = useAuth();
 
     return (
-        <>
-            <ColorModeSwitcher/>
-            <div className={"content-container"}>
-                <AppRouter />
-            </div>
+        <HStack>
+            <Box p={{sm: 4, md: 6, lg: 8}} className={"content-container"}  mb={48} w={"full"}>
+                <ColorModeSwitcher/>
+                <AppRouter/>
+            </Box>
 
             <FrogImage/>
-            {user &&
-                <>
-                    <CalendarToggleButton />
-                    <RecipeToggleButton />
-                </>
-            }
 
-            {user &&
-                <div style={{position: "absolute", left: 0, right: 0, bottom: 16}}>
-                    <div style={{display: "flex", justifyContent: "center"}}>
-                        <Button variant={"ghost"} onClick={() => RegisterFirebaseToken()}>
-                            Refresh Notification
-                        </Button>
-                    </div>
-                </div>
-            }
-        </>
-    );
-};
-
-// Calendar toggle button component
-const CalendarToggleButton = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const isCalendarView = location.pathname === ROUTES.CALENDAR;
-
-    const toggleCalendar = () => {
-        navigate(isCalendarView ? ROUTES.ACTIVITIES : ROUTES.CALENDAR);
-    };
-
-    return (
-        <div style={{position: "absolute", right: 8, top: 8}}>
-            <IconButton aria-label={"View Calendar"} onClick={toggleCalendar}>
-                <AiTwotoneCalendar/>
-            </IconButton>
-        </div>
-    );
-};
-
-// Recipe toggle button component
-const RecipeToggleButton = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const isRecipesView = location.pathname.startsWith('/recipes');
-
-    const toggleRecipes = () => {
-        navigate(isRecipesView ? ROUTES.ACTIVITIES : ROUTES.RECIPES);
-    };
-
-    return (
-        <div style={{position: "absolute", right: 8, top: 64}}>
-            <IconButton aria-label={"View Recipes"} onClick={toggleRecipes}>
-                <MdRestaurantMenu/>
-            </IconButton>
-        </div>
+            {user && <Navigation/>}
+        </HStack>
     );
 };

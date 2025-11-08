@@ -1,4 +1,4 @@
-import {Button, Heading, HStack, Icon, Spinner, VStack} from "@chakra-ui/react";
+import {Button, Center, Heading, HStack, Icon, Spinner, VStack} from "@chakra-ui/react";
 import {collection, deleteDoc, getDocs, query, QueryFieldFilterConstraint, where} from "firebase/firestore";
 import {useEffect, useRef, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
@@ -252,79 +252,82 @@ const ActivitySelection = () => {
 
 
     return (
-        <VStack w={"80%"}>
-            {activityStep === 0 &&
-                <>
-                    <Button onClick={() => navigate(getActivityTypeRoute('food'))}
-                            w={"100%"} colorScheme={"green"}
-                            variant={"outline"}
-                            size={"lg"}>
-                        <Icon as={RiRestaurant2Fill}/>
-                        Food
-                    </Button>
+        <Center h={"full"} my={"auto"} w={"full"}>
+            <VStack w={"full"} maxW={"5xl"}>
+                {activityStep === 0 &&
+                    <>
+                        <Button onClick={() => navigate(getActivityTypeRoute('food'))}
+                                w={"100%"} colorScheme={"green"}
+                                variant={"outline"}
+                                size={"lg"}>
+                            <Icon as={RiRestaurant2Fill}/>
+                            Food
+                        </Button>
 
-                    <Button onClick={() => navigate(getActivityTypeRoute('activity'))} w={"100%"}
-                            colorScheme={"green"} variant={"outline"}
-                            size={"lg"}>
-                        <Icon as={MdLocalActivity}/>
-                        Activity
-                    </Button>
+                        <Button onClick={() => navigate(getActivityTypeRoute('activity'))} w={"100%"}
+                                colorScheme={"green"} variant={"outline"}
+                                size={"lg"}>
+                            <Icon as={MdLocalActivity}/>
+                            Activity
+                        </Button>
 
-                    <Button onClick={() => navigate(getActivityTypeRoute('movie'))} w={"100%"}
-                            colorScheme={"green"} variant={"outline"}
-                            size={"lg"}>
-                        <Icon as={MdLocalMovies}/>
-                        Movie
-                    </Button>
+                        <Button onClick={() => navigate(getActivityTypeRoute('movie'))} w={"100%"}
+                                colorScheme={"green"} variant={"outline"}
+                                size={"lg"}>
+                            <Icon as={MdLocalMovies}/>
+                            Movie
+                        </Button>
 
-                    <Button onClick={() => navigate(getActivityTypeRoute('big'))} w={"100%"}
-                            colorScheme={"green"} variant={"outline"}
-                            size={"lg"}>
-                        <Icon as={FaMoneyBillAlt}/>
-                        Bougie Ballers
-                    </Button>
+                        <Button onClick={() => navigate(getActivityTypeRoute('big'))} w={"100%"}
+                                colorScheme={"green"} variant={"outline"}
+                                size={"lg"}>
+                            <Icon as={FaMoneyBillAlt}/>
+                            Bougie Ballers
+                        </Button>
 
+                    </>
+                }
+
+                {activityStep === 1 && loadingResult && <Spinner colorScheme={"green"}/>}
+                {activityStep === 1 && !loadingResult && <>
+
+                    <HStack w={"100"}></HStack>
+
+                    <VStack gap={6}>
+                        {invalidResult &&
+                            <VStack gap={2}>
+                                <Heading textAlign={"center"} colorScheme={"red"}>No Activities Found</Heading>
+                                <Heading textAlign={"center"} size={"sm"}>Try using different filters</Heading>
+                            </VStack>
+                        }
+
+                        {!invalidResult &&
+                            <VStack gap={2}>
+                                <Heading textAlign={"center"}>{selectedActivity.name}</Heading>
+                                <Heading textAlign={"center"} size={"md"}>{selectedActivity.description}</Heading>
+                            </VStack>
+                        }
+
+                        <HStack>
+                            <Button onClick={() => RemoveActivity(selectedActivity.name)}
+                                    colorScheme={"red"} variant={"outline"}>- Remove</Button>
+
+                            <AddToCalendar activityDescription={selectedActivity.description}
+                                           activityName={selectedActivity.name}/>
+
+                            <Button onClick={GetNewActivityBasedOnExisting}
+                                    colorScheme={"green"} variant={"outline"}><Icon
+                                as={BsArrowCounterclockwise}/></Button>
+
+                        </HStack>
+                        <Button onClick={ResetActivitySelection}
+                                colorScheme={"green"} variant={"ghost"}>Return Home</Button>
+                    </VStack>
                 </>
-            }
-
-            {activityStep === 1 && loadingResult && <Spinner colorScheme={"green"}/>}
-            {activityStep === 1 && !loadingResult && <>
-
-                <HStack w={"100"}></HStack>
-
-                <VStack gap={6}>
-                    {invalidResult &&
-                        <VStack gap={2}>
-                            <Heading textAlign={"center"} colorScheme={"red"}>No Activities Found</Heading>
-                            <Heading textAlign={"center"} size={"sm"}>Try using different filters</Heading>
-                        </VStack>
-                    }
-
-                    {!invalidResult &&
-                        <VStack gap={2}>
-                            <Heading textAlign={"center"}>{selectedActivity.name}</Heading>
-                            <Heading textAlign={"center"} size={"md"}>{selectedActivity.description}</Heading>
-                        </VStack>
-                    }
-
-                    <HStack>
-                        <Button onClick={() => RemoveActivity(selectedActivity.name)}
-                                colorScheme={"red"} variant={"outline"}>- Remove</Button>
-
-                        <AddToCalendar activityDescription={selectedActivity.description}
-                                       activityName={selectedActivity.name}/>
-
-                        <Button onClick={GetNewActivityBasedOnExisting}
-                                colorScheme={"green"} variant={"outline"}><Icon as={BsArrowCounterclockwise}/></Button>
-
-                    </HStack>
-                    <Button onClick={ResetActivitySelection}
-                            colorScheme={"green"} variant={"ghost"}>Return Home</Button>
-                </VStack>
-            </>
-            }
-            <AddNewActivity onAdded={RefreshTags} availableActivities={availableTags}/>
-        </VStack>
+                }
+                <AddNewActivity onAdded={RefreshTags} availableActivities={availableTags}/>
+            </VStack>
+        </Center>
     );
 
 

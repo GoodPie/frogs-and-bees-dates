@@ -2,12 +2,12 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { ROUTES } from './routes';
 import { ProtectedRoute } from './ProtectedRoute';
 import SignIn from '@/screens/SignIn';
-import ActivitySelection from '@/screens/ActivitySelection';
-import ViewCalendar from '@/screens/ViewCalendar';
-import RecipeList from '@/screens/RecipeList';
-import ViewRecipe from '@/screens/ViewRecipe';
-import AddRecipe from '@/screens/AddRecipe';
-import EditRecipe from '@/screens/EditRecipe';
+import ActivitySelection from '@/screens/activities/ActivitySelection';
+import ViewCalendar from '@/screens/calendar/ViewCalendar';
+import RecipeList from '@/screens/recipe-management/RecipeList';
+import ViewRecipe from '@/screens/recipe-management/ViewRecipe';
+import AddRecipe from '@/screens/recipe-management/AddRecipe';
+import EditRecipe from '@/screens/recipe-management/EditRecipe';
 
 export function AppRouter() {
   return (

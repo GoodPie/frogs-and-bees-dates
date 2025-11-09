@@ -1,15 +1,12 @@
-// Route path constants for type-safe navigation
-// Use these constants instead of string literals throughout the application
-
 export const ROUTES = {
-  SIGNIN: '/signin',
-  ACTIVITIES: '/activities',
-  ACTIVITIES_TYPE: '/activities/:type',
-  CALENDAR: '/calendar',
-  RECIPES: '/recipes',
-  RECIPE_VIEW: '/recipes/:id',
-  RECIPE_ADD: '/recipes/new',
-  RECIPE_EDIT: '/recipes/:id/edit',
+    SIGNIN: '/signin',
+    ACTIVITIES: '/activities',
+    ACTIVITIES_TYPE: '/activities/:type',
+    CALENDAR: '/calendar',
+    RECIPES: '/recipes',
+    RECIPE_VIEW: '/recipes/:id',
+    RECIPE_ADD: '/recipes/new',
+    RECIPE_EDIT: '/recipes/:id/edit',
 } as const;
 
 export type RouteKey = keyof typeof ROUTES;

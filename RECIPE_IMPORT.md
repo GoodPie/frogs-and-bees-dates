@@ -24,14 +24,25 @@ The import dialog will show instructions for extracting the recipe's JSON-LD dat
 1. Keep the recipe webpage open in another tab/window
 2. Open Browser DevTools (press F12 or right-click → Inspect)
 3. Go to the Console tab
-4. Paste this code and press Enter:
+4. Paste one of these codes and press Enter:
 
+**For most sites (single JSON-LD script):**
 ```javascript
-JSON.stringify(JSON.parse(document.querySelector('script[type="application/ld+json"]').textContent), null, 2)
+copy(JSON.parse(document.querySelector('script[type="application/ld+json"]').textContent))
 ```
 
-5. Copy the formatted JSON output from the console
+**For sites with multiple JSON-LD scripts (like RecipeTinEats, AllRecipes):**
+```javascript
+copy(Array.from(document.querySelectorAll('script[type="application/ld+json"]'))
+  .map(s => JSON.parse(s.textContent))
+  .find(obj => obj['@type'] === 'Recipe' || obj['@graph']?.find(g => g['@type'] === 'Recipe')))
+```
+
+5. The JSON will be automatically copied to your clipboard (Chrome/Edge)
+   - For Firefox, use `console.log()` instead of `copy()` and manually copy the output
 6. Paste it into the "Paste JSON-LD Data" textarea in the import dialog
+
+**Note:** The parser accepts multiple formats (raw JSON, escaped console output, or backtick-wrapped strings)
 
 ### Step 4: Parse and Review
 
@@ -146,27 +157,54 @@ When Firebase billing is enabled, consider implementing:
 
 ## Troubleshooting
 
+### "Invalid JSON format" Error
+
+This error occurs when the pasted data cannot be parsed as valid JSON. Common causes:
+
+1. **Copied escaped JSON from console output**
+   - If you see `\n`, `\"`, or other backslash sequences in your paste, you copied the string representation
+   - **Solution:** Use the `copy()` command (see Step 3 above) instead of manually copying console output
+   - The parser will automatically try to unescape this format, but raw JSON works best
+
+2. **Incomplete copy/paste**
+   - Missing opening `{` or closing `}`
+   - **Solution:** Ensure you copied the entire output, from first `{` to last `}`
+
+3. **Browser console formatting**
+   - Some browsers add extra characters or formatting
+   - **Solution:** Use the `copy()` command or try a different extraction method
+
+4. **Wrapped in quotes or backticks**
+   - Output shows backticks `` ` `` or quotes around the JSON
+   - **Solution:** The parser automatically removes these, but ensure they're balanced (opening and closing)
+
+**Still having issues?** Try this manual extraction:
+```javascript
+// Get the JSON-LD script content directly:
+document.querySelector('script[type="application/ld+json"]').textContent
+```
+Then copy the entire output and paste it.
+
 ### "No Recipe schema found in JSON-LD"
 - The website may not use structured data
+- Try using the multiple scripts version (see Step 3 - RecipeTinEats version)
+- Some sites have the Recipe inside a `@graph` array
 - Try a different recipe website
 - Check if the site uses Microdata or RDFa instead (not currently supported)
-
-### "Invalid JSON format"
-- Ensure you copied the entire JSON output
-- Check for missing brackets or commas
-- Try running the extraction code again
 
 ### Missing Images or Ingredients
 - Some websites don't include complete data in their structured markup
 - You can manually add missing information in the form after importing
 
-### Browser Console Errors
-If the extraction code fails:
+### Sites with Multiple JSON-LD Scripts
+
+Sites like RecipeTinEats, AllRecipes, and NYT Cooking often have multiple `<script type="application/ld+json">` tags. The first one might be for breadcrumbs or the website itself, not the recipe.
+
+**Solution:** Always use the `querySelectorAll` version for these sites:
 ```javascript
-// Try this alternative that handles multiple scripts:
-Array.from(document.querySelectorAll('script[type="application/ld+json"]'))
+copy(Array.from(document.querySelectorAll('script[type="application/ld+json"]'))
   .map(s => JSON.parse(s.textContent))
-  .find(obj => obj['@type'] === 'Recipe' || obj['@graph']?.find(g => g['@type'] === 'Recipe'))
+  .find(obj => obj['@type'] === 'Recipe' || obj['@graph']?.find(g => g['@type'] === 'Recipe')))
 ```
 
 ## Example Websites That Work Well

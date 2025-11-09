@@ -108,20 +108,111 @@ function parseValue(value: string | undefined): string | undefined {
 }
 
 /**
+ * Preprocesses JSON string to handle various input formats
+ * - Removes BOM characters
+ * - Trims whitespace
+ * - Removes surrounding backticks
+ * - Unescapes JSON escape sequences if needed
+ */
+function preprocessJsonInput(input: string): string {
+    // Remove BOM
+    let processed = input.replace(/^\uFEFF/, '');
+
+    // Trim whitespace
+    processed = processed.trim();
+
+    // Remove surrounding backticks (template literal markers)
+    if (processed.startsWith('`') && processed.endsWith('`')) {
+        processed = processed.slice(1, -1);
+    }
+
+    // Remove surrounding quotes if the entire string is wrapped in quotes
+    // This handles cases where users copy console.log output with quotes
+    if ((processed.startsWith('"') && processed.endsWith('"')) ||
+        (processed.startsWith("'") && processed.endsWith("'"))) {
+        // Check if this is actually a wrapped JSON string vs JSON with string values
+        const withoutQuotes = processed.slice(1, -1);
+
+        // Try to detect if this is escaped JSON by looking for literal \n or \"
+        if (withoutQuotes.includes('\\n') || withoutQuotes.includes('\\"') ||
+            withoutQuotes.includes('\\t') || withoutQuotes.includes('\\\\')) {
+            processed = withoutQuotes;
+        }
+    }
+
+    // Unescape JSON escape sequences if present
+    // This handles cases where users paste stringified JSON from console
+    if (processed.includes('\\n') || processed.includes('\\"') ||
+        processed.includes('\\t') || processed.includes('\\\\')) {
+        try {
+            // Use JSON.parse to properly unescape the string
+            // Wrap it in quotes to make it a valid JSON string
+            processed = JSON.parse(`"${processed}"`);
+        } catch {
+            // If unescaping fails, return as-is and let the main parser handle it
+            return processed;
+        }
+    }
+
+    return processed;
+}
+
+/**
+ * Detects if input looks like escaped JSON and provides helpful guidance
+ */
+function detectInputFormat(input: string): {isEscaped: boolean; hint?: string} {
+    const trimmed = input.trim();
+
+    // Check for escaped newlines and quotes (common in console output)
+    if (trimmed.includes('\\n') && trimmed.includes('\\')) {
+        return {
+            isEscaped: true,
+            hint: 'It looks like you pasted escaped JSON from console output. The parser will try to unescape it automatically.'
+        };
+    }
+
+    // Check for backticks (template literal)
+    if (trimmed.startsWith('`') && trimmed.endsWith('`')) {
+        return {
+            isEscaped: true,
+            hint: 'Detected backticks around JSON. The parser will remove them automatically.'
+        };
+    }
+
+    return {isEscaped: false};
+}
+
+/**
  * Parses schema.org Recipe JSON-LD to IRecipe format
  */
 export function parseRecipeJsonLd(jsonLdText: string): RecipeParseResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
+    // Preprocess the input
+    const preprocessed = preprocessJsonInput(jsonLdText);
+
     // Parse JSON
     let jsonData: unknown;
     try {
-        jsonData = JSON.parse(jsonLdText);
+        jsonData = JSON.parse(preprocessed);
     } catch {
+        // Detect input format to provide better error message
+        const {isEscaped, hint} = detectInputFormat(jsonLdText);
+
+        const errorMessages = ['Invalid JSON format. Please check your input.'];
+
+        if (isEscaped) {
+            errorMessages.push(hint || 'The input appears to contain escaped characters.');
+            errorMessages.push('Try copying the raw JSON content instead of the console output.');
+        } else {
+            errorMessages.push('Make sure you copied the complete JSON structure with all opening and closing brackets.');
+            errorMessages.push('Verify there are no syntax errors like trailing commas or unescaped quotes.');
+        }
+
         return {
             success: false,
-            errors: ['Invalid JSON format. Please check your input.'],
+            errors: errorMessages,
             warnings: [],
         };
     }
@@ -228,9 +319,23 @@ export function getJsonLdExtractionInstructions(url?: string): string {
 4. Paste this code and press Enter:
 
 \`\`\`javascript
-JSON.stringify(JSON.parse(document.querySelector('script[type="application/ld+json"]').textContent), null, 2)
+// For most sites (single JSON-LD script):
+copy(JSON.parse(document.querySelector('script[type="application/ld+json"]').textContent))
+
+// For sites with multiple JSON-LD scripts (like RecipeTinEats):
+copy(Array.from(document.querySelectorAll('script[type="application/ld+json"]'))
+  .map(s => JSON.parse(s.textContent))
+  .find(obj => obj['@type'] === 'Recipe' || obj['@graph']?.find(g => g['@type'] === 'Recipe')))
 \`\`\`
 
-5. Copy the output (it will be formatted JSON)
-6. Paste it in the text area below`;
+5. The JSON will be copied to your clipboard
+6. Paste it in the text area below
+
+**Note:** The parser accepts multiple formats:
+- Raw JSON (recommended)
+- Escaped JSON from console output
+- JSON wrapped in backticks
+
+If using Chrome/Edge, the \`copy()\` command automatically copies to clipboard.
+For Firefox, you may need to use \`console.log()\` and manually copy the output.`;
 }

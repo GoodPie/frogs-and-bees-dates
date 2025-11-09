@@ -287,6 +287,96 @@ describe('recipeParser', () => {
             expect(result.success).toBe(true);
             expect(result.recipe?.name).toBe('Test Recipe');
         });
+
+        it('should handle escaped JSON with \\n and \\" characters', () => {
+            // Simulate what happens when user copies stringified JSON from console
+            const validJson = {
+                '@context': 'https://schema.org',
+                '@type': 'Recipe',
+                name: 'Test Recipe',
+                image: 'https://example.com/test.jpg',
+                recipeIngredient: ['ingredient 1'],
+                recipeInstructions: ['step 1']
+            };
+
+            // Create escaped version with literal \n and \" characters
+            const escapedJson = JSON.stringify(JSON.stringify(validJson));
+            // Remove the surrounding quotes to simulate the actual paste
+            const withoutQuotes = escapedJson.slice(1, -1);
+
+            const result = parseRecipeJsonLd(withoutQuotes);
+
+            expect(result.success).toBe(true);
+            expect(result.recipe?.name).toBe('Test Recipe');
+        });
+
+        it('should handle backtick-wrapped JSON', () => {
+            const jsonLd = JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'Recipe',
+                name: 'Test Recipe',
+                image: 'https://example.com/test.jpg',
+                recipeIngredient: ['ingredient 1'],
+                recipeInstructions: ['step 1']
+            });
+
+            // Wrap in backticks (template literal markers)
+            const backtickWrapped = `\`${jsonLd}\``;
+
+            const result = parseRecipeJsonLd(backtickWrapped);
+
+            expect(result.success).toBe(true);
+            expect(result.recipe?.name).toBe('Test Recipe');
+        });
+
+        it('should handle extra whitespace', () => {
+            const jsonLd = JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'Recipe',
+                name: 'Test Recipe',
+                image: 'https://example.com/test.jpg',
+                recipeIngredient: ['ingredient 1'],
+                recipeInstructions: ['step 1']
+            });
+
+            // Add extra whitespace before and after
+            const withWhitespace = `\n\n   ${jsonLd}   \n\n`;
+
+            const result = parseRecipeJsonLd(withWhitespace);
+
+            expect(result.success).toBe(true);
+            expect(result.recipe?.name).toBe('Test Recipe');
+        });
+
+        it('should handle BOM character', () => {
+            const jsonLd = JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'Recipe',
+                name: 'Test Recipe',
+                image: 'https://example.com/test.jpg',
+                recipeIngredient: ['ingredient 1'],
+                recipeInstructions: ['step 1']
+            });
+
+            // Add BOM character at the start
+            const withBOM = '\uFEFF' + jsonLd;
+
+            const result = parseRecipeJsonLd(withBOM);
+
+            expect(result.success).toBe(true);
+            expect(result.recipe?.name).toBe('Test Recipe');
+        });
+
+        it('should provide helpful error for escaped JSON that fails preprocessing', () => {
+            // Create intentionally malformed escaped JSON
+            const malformed = '{"name": "Test\\nRecipe", "missing": closing bracket';
+
+            const result = parseRecipeJsonLd(malformed);
+
+            expect(result.success).toBe(false);
+            expect(result.errors.length).toBeGreaterThan(1);
+            expect(result.errors[0]).toContain('Invalid JSON format');
+        });
     });
 
     describe('getJsonLdExtractionInstructions', () => {

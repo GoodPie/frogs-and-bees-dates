@@ -1,5 +1,5 @@
 import {Navigate, useLocation} from 'react-router-dom';
-import {useAuth} from '@/hooks/useAuth';
+import {useAuth} from '@/screens/auth/hooks/useAuth.ts';
 import {ROUTES} from './routes';
 import type {ReactNode} from "react";
 import {Loading} from "@/components/Loading";

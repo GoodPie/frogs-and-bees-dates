@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import {collection, getDocs, orderBy, query, where} from "firebase/firestore";
-import type {ICalendarActivity} from "@/interfaces/ICalendarActivity";
-import CalendarEvent from "@/components/CalendarEvent";
+import type {ICalendarActivity} from "@/screens/calendar/types/ICalendarActivity.ts";
+import CalendarEvent from "@/screens/calendar/components/CalendarEvent.tsx";
 import {Button, Heading, Stack, VStack} from "@chakra-ui/react";
 import dayjs from "dayjs";
 import {db, RegisterFirebaseToken} from "@/FirebaseConfig.ts";

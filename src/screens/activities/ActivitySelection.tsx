@@ -6,14 +6,14 @@ import {BsArrowCounterclockwise} from "react-icons/bs";
 import {FaMoneyBillAlt} from "react-icons/fa";
 import {MdLocalActivity, MdLocalMovies} from "react-icons/md";
 import {RiRestaurant2Fill} from "react-icons/ri";
-import AddNewActivity from "@/components/AddNewActivity";
-import ActivityTime from "@/enums/ActivityTime";
-import ActivityType from "@/enums/ActivityType";
+import AddNewActivity from "@/screens/activities/components/AddNewActivity.tsx";
+import ActivityTime from "@/screens/activities/types/ActivityTime.ts";
+import ActivityType from "@/screens/activities/types/ActivityType.ts";
 import {db} from "@/FirebaseConfig";
-import type {IActivityDetails} from "@/interfaces/IActivityDetails";
+import type {IActivityDetails} from "@/screens/activities/types/IActivityDetails.ts";
 import {getActivityTypeRoute} from "@/routing/routes";
 
-import AddToCalendar from "@/components/AddToCalendar";
+import AddToCalendar from "@/screens/activities/components/AddToCalendar.tsx";
 
 interface IActivityFilters {
     type?: ActivityType,

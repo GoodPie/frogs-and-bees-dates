@@ -14,9 +14,9 @@ import {
 } from '@chakra-ui/react';
 import {useNavigate} from 'react-router-dom';
 import {AiOutlinePlus} from 'react-icons/ai';
-import {useRecipes} from '@/hooks/useRecipes';
-import {RecipeCard} from '@/components/RecipeCard';
-import {RecipeImportButton} from '@/components/RecipeImport';
+import {useRecipes} from '@/screens/recipe-management/hooks/useRecipes.ts';
+import {RecipeCard} from '@/screens/recipe-management/components/RecipeCard.tsx';
+import {RecipeImportButton} from '@/screens/recipe-management/components/RecipeImport.tsx';
 import {ROUTES} from '@/routing/routes';
 
 /**

@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ROUTES } from './routes';
 import { ProtectedRoute } from './ProtectedRoute';
-import SignIn from '@/screens/SignIn';
+import SignIn from '@/screens/auth/SignIn.tsx';
 import ActivitySelection from '@/screens/activities/ActivitySelection';
 import ViewCalendar from '@/screens/calendar/ViewCalendar';
 import RecipeList from '@/screens/recipe-management/RecipeList';

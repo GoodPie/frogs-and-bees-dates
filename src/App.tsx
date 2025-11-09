@@ -4,10 +4,10 @@ import {BrowserRouter} from "react-router-dom"
 import "./main.css";
 
 import FrogImage from "./components/FrogImage";
-import {ColorModeSwitcher} from "./ColorModeSwitcher";
+import {ColorModeSwitcher} from "./components/ColorModeSwitcher.tsx";
 import {AppRouter} from "./routing/AppRouter";
-import {useAuth} from "./hooks/useAuth";
-import {Navigation} from "@/Navigation.tsx";
+import {useAuth} from "./screens/auth/hooks/useAuth.ts";
+import {Navigation} from "@/screens/Navigation.tsx";
 
 export const App = () => {
     return (

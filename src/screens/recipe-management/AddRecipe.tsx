@@ -1,11 +1,11 @@
 import {Box, Button, Heading, VStack, HStack, Text, Badge} from '@chakra-ui/react';
 import {useNavigate, useLocation} from 'react-router-dom';
 import {AiOutlineArrowLeft, AiOutlineSave, AiOutlineCheckCircle} from 'react-icons/ai';
-import {useRecipeOperations} from '@/hooks/useRecipeOperations';
-import {useRecipeForm} from '@/hooks/useRecipeForm';
-import {RecipeFormFields} from '@/components/RecipeFormFields';
+import {useRecipeOperations} from '@/screens/recipe-management/hooks/useRecipeOperations.ts';
+import {useRecipeForm} from '@/screens/recipe-management/hooks/useRecipeForm.ts';
+import {RecipeFormFields} from '@/screens/recipe-management/components/RecipeFormFields.tsx';
 import {ROUTES, getRecipeViewRoute} from '@/routing/routes';
-import type {IRecipe} from "@/types/recipe/Recipe.ts";
+import type {IRecipe} from "@/screens/recipe-management/types/Recipe.ts";
 
 /**
  * Add recipe screen with multi-tab form

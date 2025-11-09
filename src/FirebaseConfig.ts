@@ -77,6 +77,4 @@ export const RegisterFirebaseToken = async () => {
     } else {
         console.debug('No registration token available. Request permission to generate one.');
     }
-
-
 }

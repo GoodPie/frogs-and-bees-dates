@@ -1,9 +1,9 @@
 import { Box, Button, Heading, Image, Text, VStack, HStack, Badge, Spinner, Grid } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AiOutlineEdit, AiOutlineDelete, AiOutlineArrowLeft } from 'react-icons/ai';
-import { useRecipe } from '@/hooks/useRecipe';
-import { useRecipeOperations } from '@/hooks/useRecipeOperations';
-import { RecipeJsonLd } from '@/components/RecipeJsonLd';
+import { useRecipe } from '@/screens/recipe-management/hooks/useRecipe.ts';
+import { useRecipeOperations } from '@/screens/recipe-management/hooks/useRecipeOperations.ts';
+import { RecipeJsonLd } from '@/screens/recipe-management/components/RecipeJsonLd.tsx';
 import { iso8601ToReadable } from '@/utils/durationFormat';
 import { ROUTES, getRecipeEditRoute } from '@/routing/routes';
 

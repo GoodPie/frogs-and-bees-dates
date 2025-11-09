@@ -1,10 +1,10 @@
 import {Box, Button, Heading, VStack, HStack, Text, Spinner} from '@chakra-ui/react';
 import {useParams, useNavigate} from 'react-router-dom';
 import {AiOutlineArrowLeft, AiOutlineSave} from 'react-icons/ai';
-import {useRecipe} from '@/hooks/useRecipe';
-import {useRecipeOperations} from '@/hooks/useRecipeOperations';
-import {useRecipeForm} from '@/hooks/useRecipeForm';
-import {RecipeFormFields} from '@/components/RecipeFormFields';
+import {useRecipe} from '@/screens/recipe-management/hooks/useRecipe.ts';
+import {useRecipeOperations} from '@/screens/recipe-management/hooks/useRecipeOperations.ts';
+import {useRecipeForm} from '@/screens/recipe-management/hooks/useRecipeForm.ts';
+import {RecipeFormFields} from '@/screens/recipe-management/components/RecipeFormFields.tsx';
 import {getRecipeViewRoute} from '@/routing/routes';
 
 /**

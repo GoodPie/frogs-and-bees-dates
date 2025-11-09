@@ -3,7 +3,7 @@ import {useLocation, useNavigate} from "react-router-dom";
 import {ROUTES} from "@/routing/routes.ts";
 import {useEffect, useState} from "react";
 
-export function     Navigation() {
+export function Navigation() {
     const location = useLocation();
     const navigate = useNavigate();
     const path = location.pathname;
@@ -11,7 +11,6 @@ export function     Navigation() {
     const [value, setValue] = useState<string | null>(path)
 
     useEffect(() => {
-        console.log(path)
         setValue("/" + path.split('/')[1] || null);
     }, [path]);
 

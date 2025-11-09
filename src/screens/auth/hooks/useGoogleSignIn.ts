@@ -1,13 +1,13 @@
-import { useState, useCallback } from 'react';
-import { auth } from "@/FirebaseConfig.ts";
-import { toaster } from "@/components/ui/toaster.tsx";
-import { GoogleAuthProvider, signInWithPopup, type User } from 'firebase/auth';
-import type { FirebaseError } from "firebase/app";
+import {useState, useCallback} from 'react';
+import {auth} from "@/FirebaseConfig.ts";
+import {toaster} from "@/components/ui/toaster.tsx";
+import {GoogleAuthProvider, signInWithPopup, type User} from 'firebase/auth';
+import type {FirebaseError} from "firebase/app";
 
 
 // Initialize a single provider instance
 const provider = new GoogleAuthProvider();
-provider.setCustomParameters({ prompt: "select_account" });
+provider.setCustomParameters({prompt: "select_account"});
 
 export interface UseGoogleSignInResult {
     signIn: () => Promise<User | null>;
@@ -37,9 +37,9 @@ export const useGoogleSignIn = (): UseGoogleSignInResult => {
         if (loading) return null; // Prevent duplicate popups
         setLoading(true);
         try {
-            const { user } = await signInWithPopup(auth, provider);
+            const {user} = await signInWithPopup(auth, provider);
             if (!user) {
-                toaster.create({ type: "error", title: "Sign-in failed", description: "No user details were returned." });
+                toaster.create({type: "error", title: "Sign-in failed", description: "No user details were returned."});
                 return null;
             }
             return user;
@@ -47,7 +47,7 @@ export const useGoogleSignIn = (): UseGoogleSignInResult => {
             if (err instanceof Error) {
                 console.error("Error signing in with Google:", err.message);
                 const description = mapErrorCode((err as FirebaseError).code);
-                toaster.create({ type: "error", title: "Sign-in error", description });
+                toaster.create({type: "error", title: "Sign-in error", description});
             } else {
                 console.error("Unknown error signing in with Google:", err);
             }
@@ -58,7 +58,7 @@ export const useGoogleSignIn = (): UseGoogleSignInResult => {
         }
     }, [loading]);
 
-    return { signIn, loading };
+    return {signIn, loading};
 };
 
 export default useGoogleSignIn;

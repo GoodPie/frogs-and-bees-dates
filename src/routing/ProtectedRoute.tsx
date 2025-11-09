@@ -13,7 +13,7 @@ export function ProtectedRoute({children}: Readonly<ProtectedRouteProps>) {
     const {user, loading} = useAuth();
 
     if (loading) {
-        <Loading/>
+        return <Loading/>
     }
 
     if (!user) {

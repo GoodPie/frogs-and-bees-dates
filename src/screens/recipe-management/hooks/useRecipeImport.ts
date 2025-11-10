@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import {parseRecipeJsonLd, type RecipeParseResult} from '@/screens/recipe-management/utils/recipeParser.ts';
 import type {IRecipe} from "@/screens/recipe-management/types/Recipe.ts";
+import {parseIngredients} from '@/services/ingredientParser.ts';
 
 export interface RecipeImportState {
     // URL input
@@ -16,6 +17,7 @@ export interface RecipeImportState {
 
     // Loading states
     parsing: boolean;
+    isParsing: boolean;
 
     // Actions
     parseJsonLd: () => void;
@@ -31,8 +33,9 @@ export function useRecipeImport(): RecipeImportState {
     const [jsonLdText, setJsonLdText] = useState('');
     const [parseResult, setParseResult] = useState<RecipeParseResult | null>(null);
     const [parsing, setParsing] = useState(false);
+    const [isParsing, setIsParsing] = useState(false);
 
-    const parseJsonLd = () => {
+    const parseJsonLd = async () => {
         if (!jsonLdText.trim()) {
             setParseResult({
                 success: false,
@@ -45,8 +48,28 @@ export function useRecipeImport(): RecipeImportState {
         setParsing(true);
 
         // Use setTimeout to allow UI to update with loading state
-        setTimeout(() => {
+        setTimeout(async () => {
             const result = parseRecipeJsonLd(jsonLdText);
+
+            // If parsing succeeded and recipe has ingredients, parse them
+            if (result.success && result.recipe && result.recipe.recipeIngredient) {
+                setIsParsing(true);
+                try {
+                    const ingredients = result.recipe.recipeIngredient;
+
+                    // Add parsed ingredients to recipe
+                    result.recipe.parsedIngredients = await parseIngredients(ingredients);
+                    result.recipe.ingredientParsingCompleted = true;
+                    result.recipe.ingredientParsingDate = new Date();
+                } catch (error) {
+                    console.error('Ingredient parsing failed:', error);
+                    // Add warning but don't fail the entire import
+                    result.warnings.push('Failed to parse ingredients. You can edit them manually.');
+                } finally {
+                    setIsParsing(false);
+                }
+            }
+
             setParseResult(result);
             setParsing(false);
         }, 100);
@@ -57,6 +80,7 @@ export function useRecipeImport(): RecipeImportState {
         setJsonLdText('');
         setParseResult(null);
         setParsing(false);
+        setIsParsing(false);
     };
 
     const getParsedRecipe = (): Partial<IRecipe> | null => {
@@ -73,6 +97,7 @@ export function useRecipeImport(): RecipeImportState {
         setJsonLdText,
         parseResult,
         parsing,
+        isParsing,
         parseJsonLd,
         reset,
         getParsedRecipe,

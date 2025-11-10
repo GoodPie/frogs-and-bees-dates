@@ -11,6 +11,8 @@ import {
     Badge,
     Code,
     useDisclosure,
+    Spinner,
+    Alert,
 } from '@chakra-ui/react';
 import {AiOutlineImport, AiOutlineClose, AiOutlineCheckCircle, AiOutlineWarning} from 'react-icons/ai';
 import {useRecipeImport} from '@/screens/recipe-management/hooks/useRecipeImport.ts';
@@ -112,13 +114,26 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                             <Button
                                 colorScheme="blue"
                                 onClick={importState.parseJsonLd}
-                                loading={importState.parsing}
+                                loading={importState.parsing || importState.isParsing}
                                 disabled={!importState.jsonLdText.trim()}
                                 size={{base: "md", md: "md"}}
                                 minH="44px"
                             >
                                 Parse Recipe Data
                             </Button>
+
+                            {/* Ingredient Parsing Status */}
+                            {importState.isParsing && (
+                                <Alert.Root status="info">
+                                    <Spinner size="sm" mr={2} />
+                                    <Alert.Content>
+                                        <Alert.Title>Parsing ingredients...</Alert.Title>
+                                        <Alert.Description>
+                                            Converting measurements and structuring ingredient data
+                                        </Alert.Description>
+                                    </Alert.Content>
+                                </Alert.Root>
+                            )}
 
                             {/* Parse Results */}
                             {importState.parseResult && (
@@ -209,6 +224,11 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                                         <Badge colorScheme="blue">
                                                             {importState.parseResult.recipe.recipeIngredient?.length || 0} items
                                                         </Badge>
+                                                        {importState.parseResult.recipe.ingredientParsingCompleted && (
+                                                            <Badge colorScheme="green" variant="subtle">
+                                                                ✓ Parsed
+                                                            </Badge>
+                                                        )}
                                                     </HStack>
                                                     <HStack>
                                                         <Text fontWeight="bold" minW="100px">Instructions:</Text>
@@ -229,6 +249,38 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                                         </HStack>
                                                     )}
                                                 </VStack>
+                                            </Box>
+                                        )}
+
+                                        {/* Parsed Ingredients Preview */}
+                                        {importState.parseResult.success && importState.parseResult.recipe?.parsedIngredients && (
+                                            <Box mt={3}>
+                                                <Text fontWeight="bold" fontSize="sm" mb={2}>
+                                                    Parsed Ingredients ({importState.parseResult.recipe.parsedIngredients.length}):
+                                                </Text>
+                                                <VStack align="stretch" gap={1} maxH="200px" overflowY="auto" p={2} bg="gray.50" _dark={{bg: 'gray.800'}} borderRadius="md">
+                                                    {importState.parseResult.recipe.parsedIngredients.map((ing, index) => (
+                                                        <HStack key={index} justify="space-between" fontSize="sm">
+                                                            <Text flex={1}>
+                                                                {ing.metricQuantity && ing.metricUnit
+                                                                    ? `${ing.metricQuantity} ${ing.metricUnit} ${ing.ingredientName}`
+                                                                    : ing.originalText}
+                                                                {ing.preparationNotes && ` (${ing.preparationNotes})`}
+                                                            </Text>
+                                                            {ing.requiresManualReview && (
+                                                                <Badge colorScheme="orange" size="sm" variant="subtle">
+                                                                    Review
+                                                                </Badge>
+                                                            )}
+                                                        </HStack>
+                                                    ))}
+                                                </VStack>
+                                                {importState.parseResult.recipe.parsedIngredients.some(ing => ing.requiresManualReview) && (
+                                                    <Text fontSize="xs" color="orange.600" _dark={{color: 'orange.300'}} mt={1}>
+                                                        <AiOutlineWarning style={{display: 'inline', marginRight: '4px'}} />
+                                                        Some ingredients require manual review after import
+                                                    </Text>
+                                                )}
                                             </Box>
                                         )}
                                     </VStack>

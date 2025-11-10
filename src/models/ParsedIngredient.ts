@@ -82,6 +82,11 @@ export interface ParsedIngredient {
      * Set to true for low confidence (<0.7) or parsing failures
      */
     requiresManualReview: boolean;
+
+    /**
+     * Additional properties can be added here as needed
+     */
+    parsingMethod: 'ai' | 'manual' | 'user' | 'system' | 'other'
 }
 
 /**

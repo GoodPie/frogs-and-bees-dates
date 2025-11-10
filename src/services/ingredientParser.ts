@@ -177,7 +177,7 @@ export async function parseIngredients(
     try {
         // Get Gemini model instance
         const model = getGenerativeModel(ai, {
-            model: "gemini-2.0-flash-exp", // Using latest Gemini Flash model
+            model: "gemini-2.5-flash",
         });
 
         // Build prompt with ingredient parsing instructions
@@ -189,8 +189,9 @@ export async function parseIngredients(
             generationConfig: {
                 responseMimeType: "application/json",
                 // Type assertion needed due to Firebase AI Schema type definitions
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                responseSchema: Schema.array(ingredientSchema as any),
+                responseSchema: Schema.array({
+                    items: ingredientSchema
+                }),
             },
         });
 
@@ -213,6 +214,9 @@ export async function parseIngredients(
         })) as ParsedIngredient[];
 
     } catch (error) {
+        // Log the actual error for debugging
+        console.error('Ingredient parsing error:', error);
+
         // Handle specific error types
         if (error instanceof Error) {
             if (error.message.includes('network') || error.message.includes('fetch')) {
@@ -225,6 +229,9 @@ export async function parseIngredients(
                 throw error; // Re-throw validation errors
             }
         }
-        throw new Error('Failed to parse ingredients');
+
+        // Throw with more context
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Failed to parse ingredients: ${errorMessage}`);
     }
 }

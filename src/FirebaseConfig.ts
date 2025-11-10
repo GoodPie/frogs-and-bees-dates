@@ -4,7 +4,7 @@ import {getAnalytics, logEvent} from "firebase/analytics";
 import {getAuth} from "firebase/auth";
 import {getMessaging, getToken} from "firebase/messaging";
 import {doc, getFirestore, setDoc} from "firebase/firestore";
-import {getAI} from "firebase/ai";
+import {getAI, GoogleAIBackend} from "firebase/ai";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -39,7 +39,7 @@ export const cloudMessaging = getMessaging(app);
  * Firebase AI Logic instance for Gemini API access
  * Used for ingredient parsing with structured output
  */
-export const ai = getAI(app);
+export const ai = getAI(app, {backend: new GoogleAIBackend()});
 
 /**
  * Requests permissions to send out notifications

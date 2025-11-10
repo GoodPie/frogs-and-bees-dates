@@ -14,7 +14,9 @@ import {
     Spinner,
     Alert,
 } from '@chakra-ui/react';
+import {toaster} from "@/components/ui/toaster"
 import {AiOutlineImport, AiOutlineClose, AiOutlineCheckCircle, AiOutlineWarning} from 'react-icons/ai';
+import { executeRecaptchaV3 } from '@/utils/recaptchaV3';
 import {useRecipeImport} from '@/screens/recipe-management/hooks/useRecipeImport.ts';
 import {getJsonLdExtractionInstructions} from '@/screens/recipe-management/utils/recipeParser.ts';
 import {useNavigate} from 'react-router-dom';
@@ -317,9 +319,21 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
 export const RecipeImportButton = () => {
     const {open, onOpen, onClose} = useDisclosure();
 
+    const handleOpen = async () => {
+        const token = await executeRecaptchaV3('import_recipe');
+        if (!token) {
+            toaster.error({
+                title: 'reCAPTCHA verification failed',
+                description: 'Please try again.',
+            });
+            return;
+        }
+        onOpen();
+    };
+
     return (
         <>
-            <Button colorScheme="blue" onClick={onOpen} variant="outline">
+            <Button colorScheme="blue" onClick={handleOpen} variant="outline">
                 <AiOutlineImport /> Import Recipe
             </Button>
             <RecipeImportModal isOpen={open} onClose={onClose} />

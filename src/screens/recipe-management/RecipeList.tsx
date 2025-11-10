@@ -1,4 +1,5 @@
 import {useState, useMemo} from 'react';
+import { executeRecaptchaV3 } from '@/utils/recaptchaV3';
 import {
     Box,
     Button,
@@ -10,7 +11,8 @@ import {
     Text,
     VStack,
     HStack,
-    createListCollection
+    createListCollection,
+    useToast,
 } from '@chakra-ui/react';
 import {useNavigate} from 'react-router-dom';
 import {AiOutlinePlus} from 'react-icons/ai';
@@ -23,6 +25,7 @@ import {ROUTES} from '@/routing/routes';
  * Recipe list screen showing all recipes with filtering and search
  */
 const RecipeList = () => {
+    const toast = useToast();
     const navigate = useNavigate();
     const {recipes, loading, error} = useRecipes();
     const [searchTerm, setSearchTerm] = useState('');
@@ -94,7 +97,19 @@ const RecipeList = () => {
                         <RecipeImportButton />
                         <Button
                             colorScheme="blue"
-                            onClick={() => navigate(ROUTES.RECIPE_ADD)}
+                            onClick={async () => {
+                                const token = await executeRecaptchaV3('add_recipe');
+                                if (!token) {
+                                    toast({
+                                        title: 'reCAPTCHA verification failed',
+                                        description: 'Please try again.',
+                                        status: 'error',
+                                    });
+                                    return;
+                                }
+                                // With v3 and no server verification, we proceed on any token
+                                navigate(ROUTES.RECIPE_ADD);
+                            }}
                         >
                             <AiOutlinePlus/> Add Recipe
                         </Button>

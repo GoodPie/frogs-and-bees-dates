@@ -116,6 +116,32 @@ export const firebaseMocks = {
     // Messaging
     getMessaging: vi.fn(() => ({})),
     getToken: vi.fn(() => Promise.resolve('mock-fcm-token')),
+
+    // Firebase AI Logic (Gemini API)
+    getAI: vi.fn(() => ({})),
+    getGenerativeModel: vi.fn(() => ({
+        generateContent: vi.fn(() => Promise.resolve({
+            response: {
+                text: () => JSON.stringify([
+                    {
+                        quantity: "2",
+                        unit: "cups",
+                        ingredientName: "flour",
+                        preparationNotes: null,
+                        metricQuantity: "240",
+                        metricUnit: "g",
+                        confidence: 0.95,
+                    }
+                ]),
+            },
+        })),
+    })),
+    Schema: {
+        object: vi.fn((config: any) => config),
+        array: vi.fn((schema: any) => schema),
+        string: vi.fn(() => 'string'),
+        number: vi.fn(() => 'number'),
+    },
 };
 
 // Reset all mocks to initial state (defaults to unauthenticated)

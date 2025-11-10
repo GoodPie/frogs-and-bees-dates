@@ -1,4 +1,5 @@
 import * as z from "zod";
+import type { ParsedIngredient } from "@/models/ParsedIngredient";
 
 /**
  * Zod schema for Schema.org Recipe from JSON-LD
@@ -112,6 +113,11 @@ export const RecipeSchema = z.object({
 
     // Image upload metadata
     imageSource: z.enum(['upload', 'url']).optional(),
+
+    // Ingredient parsing metadata (new fields for ingredient parsing feature)
+    parsedIngredients: z.custom<ParsedIngredient[]>().optional(),
+    ingredientParsingCompleted: z.boolean().optional(),
+    ingredientParsingDate: z.date().optional(),
 });
 
 // Export TypeScript types inferred from Zod schemas

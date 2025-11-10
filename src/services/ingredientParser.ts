@@ -139,12 +139,12 @@ function validateInput(ingredients: string[]): void {
     if (ingredients.length > 20) {
         throw new Error('Maximum 20 ingredients per request');
     }
-    ingredients.forEach((ing, i) => {
+    ingredients.forEach((ingredient, i) => {
         // Runtime type check for safety (protects against invalid data at runtime)
-        if (typeof ing !== 'string') {
+        if (typeof ingredient !== 'string') {
             throw new Error(`Ingredient at index ${i} must be a string`);
         }
-        if (ing.length > 500) {
+        if (ingredient.length > 500) {
             throw new Error(`Ingredient at index ${i} exceeds 500 characters`);
         }
     });

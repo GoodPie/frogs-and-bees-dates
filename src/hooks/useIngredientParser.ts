@@ -31,9 +31,9 @@
  * ```
  */
 
-import { useState, useCallback } from 'react';
-import { parseIngredients as parseIngredientsService } from '@/services/ingredientParser';
-import type { ParsedIngredient } from '@/models/ParsedIngredient';
+import {useCallback, useState} from 'react';
+import {parseIngredients as parseIngredientsService} from '@/services/ingredientParser';
+import type {ParsedIngredient} from '@/models/ParsedIngredient';
 
 /**
  * Hook return type
@@ -95,8 +95,7 @@ export function useIngredientParser(): UseIngredientParserReturn {
     setError(null);
 
     try {
-      const result = await parseIngredientsService(ingredients);
-      return result;
+        return await parseIngredientsService(ingredients);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to parse ingredients';
       setError(errorMessage);

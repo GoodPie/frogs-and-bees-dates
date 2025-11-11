@@ -88,137 +88,114 @@ describe('unitConversions', () => {
   });
 
   describe('convertToMetric - Weight Conversions', () => {
-    it('should convert ounces to grams', () => {
+    it('should convert ounces to grams with smart rounding', () => {
       const result = convertToMetric('1', 'oz');
-      expect(result.metricQuantity).toBe('28');
+      expect(result.metricQuantity).toBe('30'); // 28.35g → 30g (rounded to nearest 5)
       expect(result.metricUnit).toBe('g');
     });
 
-    it('should convert pounds to grams', () => {
+    it('should convert pounds to grams with smart rounding', () => {
       const result = convertToMetric('1', 'lb');
-      expect(result.metricQuantity).toBe('454');
+      expect(result.metricQuantity).toBe('450'); // 453.59g → 450g (rounded to nearest 25)
       expect(result.metricUnit).toBe('g');
     });
 
-    it('should handle plural forms', () => {
-      expect(convertToMetric('2', 'ounces').metricQuantity).toBe('57');
-      expect(convertToMetric('2', 'pounds').metricQuantity).toBe('907');
+    it('should handle plural forms with smart rounding', () => {
+      expect(convertToMetric('2', 'ounces').metricQuantity).toBe('60'); // 56.7g → 60g (rounded to nearest 10)
+      expect(convertToMetric('2', 'pounds').metricQuantity).toBe('900'); // 907.18g → 900g
     });
 
-    it('should handle abbreviated forms', () => {
-      expect(convertToMetric('1', 'oz').metricQuantity).toBe('28');
-      expect(convertToMetric('1', 'lbs').metricQuantity).toBe('454');
+    it('should handle abbreviated forms with smart rounding', () => {
+      expect(convertToMetric('1', 'oz').metricQuantity).toBe('30');
+      expect(convertToMetric('1', 'lbs').metricQuantity).toBe('450');
     });
   });
 
-  describe('convertToMetric - Volume Conversions (Liquids)', () => {
-    it('should convert cups to milliliters', () => {
+  describe('convertToMetric - Volume Units Preserved', () => {
+    it('should NOT convert cups (keep ratios)', () => {
       const result = convertToMetric('1', 'cup');
-      expect(result.metricQuantity).toBe('237');
-      expect(result.metricUnit).toBe('ml');
+      expect(result.metricQuantity).toBeNull();
+      expect(result.metricUnit).toBeNull();
     });
 
-    it('should convert tablespoons to milliliters', () => {
+    it('should NOT convert tablespoons (keep ratios)', () => {
       const result = convertToMetric('1', 'tbsp');
-      expect(result.metricQuantity).toBe('15');
-      expect(result.metricUnit).toBe('ml');
+      expect(result.metricQuantity).toBeNull();
+      expect(result.metricUnit).toBeNull();
     });
 
-    it('should convert teaspoons to milliliters', () => {
+    it('should NOT convert teaspoons (keep ratios)', () => {
       const result = convertToMetric('1', 'tsp');
-      expect(result.metricQuantity).toBe('5');
-      expect(result.metricUnit).toBe('ml');
+      expect(result.metricQuantity).toBeNull();
+      expect(result.metricUnit).toBeNull();
     });
 
-    it('should convert fluid ounces to milliliters', () => {
+    it('should NOT convert fluid ounces (keep ratios)', () => {
       const result = convertToMetric('1', 'fl oz');
-      expect(result.metricQuantity).toBe('30');
-      expect(result.metricUnit).toBe('ml');
+      expect(result.metricQuantity).toBeNull();
+      expect(result.metricUnit).toBeNull();
     });
   });
 
-  describe('convertToMetric - Density-Based Conversions', () => {
-    it('should convert cups of flour to grams', () => {
+  describe('convertToMetric - Volume Units with Ingredient Names', () => {
+    it('should NOT convert cups even with ingredient name (keep ratios)', () => {
       const result = convertToMetric('1', 'cup', 'flour');
-      expect(result.metricQuantity).toBe('120');
-      expect(result.metricUnit).toBe('g');
+      expect(result.metricQuantity).toBeNull();
+      expect(result.metricUnit).toBeNull();
     });
 
-    it('should convert cups of all-purpose flour to grams', () => {
-      const result = convertToMetric('2', 'cups', 'all-purpose flour');
-      expect(result.metricQuantity).toBe('240');
-      expect(result.metricUnit).toBe('g');
+    it('should NOT convert cups of any ingredient', () => {
+      expect(convertToMetric('2', 'cups', 'all-purpose flour').metricQuantity).toBeNull();
+      expect(convertToMetric('1', 'cup', 'bread flour').metricQuantity).toBeNull();
+      expect(convertToMetric('1', 'cup', 'sugar').metricQuantity).toBeNull();
+      expect(convertToMetric('1', 'cup', 'brown sugar').metricQuantity).toBeNull();
+      expect(convertToMetric('1', 'cup', 'butter').metricQuantity).toBeNull();
     });
 
-    it('should convert cups of bread flour to grams', () => {
-      const result = convertToMetric('1', 'cup', 'bread flour');
-      expect(result.metricQuantity).toBe('127');
-      expect(result.metricUnit).toBe('g');
-    });
-
-    it('should convert cups of sugar to grams', () => {
-      const result = convertToMetric('1', 'cup', 'sugar');
-      expect(result.metricQuantity).toBe('200');
-      expect(result.metricUnit).toBe('g');
-    });
-
-    it('should convert cups of brown sugar to grams', () => {
-      const result = convertToMetric('1', 'cup', 'brown sugar');
-      expect(result.metricQuantity).toBe('220');
-      expect(result.metricUnit).toBe('g');
-    });
-
-    it('should convert cups of butter to grams', () => {
-      const result = convertToMetric('1', 'cup', 'butter');
-      expect(result.metricQuantity).toBe('227');
-      expect(result.metricUnit).toBe('g');
-    });
-
-    it('should convert tablespoons of butter to grams', () => {
+    it('should NOT convert tablespoons even with ingredient name', () => {
       const result = convertToMetric('1', 'tbsp', 'butter');
-      expect(result.metricQuantity).toBe('14');
-      expect(result.metricUnit).toBe('g');
+      expect(result.metricQuantity).toBeNull();
+      expect(result.metricUnit).toBeNull();
     });
 
-    it('should fall back to volume for unknown ingredients', () => {
+    it('should NOT convert any volume unit regardless of ingredient', () => {
       const result = convertToMetric('1', 'cup', 'unknown ingredient');
-      expect(result.metricQuantity).toBe('237');
-      expect(result.metricUnit).toBe('ml');
+      expect(result.metricQuantity).toBeNull();
+      expect(result.metricUnit).toBeNull();
     });
   });
 
   describe('convertToMetric - Fraction Support', () => {
-    it('should handle simple fractions', () => {
+    it('should handle fractions but NOT convert volume units', () => {
       const result = convertToMetric('1/2', 'cup', 'flour');
-      expect(result.metricQuantity).toBe('60');
+      expect(result.metricQuantity).toBeNull();
+      expect(result.metricUnit).toBeNull();
+    });
+
+    it('should handle fractions for weight units with smart rounding', () => {
+      const result = convertToMetric('1/2', 'lb');
+      expect(result.metricQuantity).toBe('225'); // 226.8g → 225g
       expect(result.metricUnit).toBe('g');
     });
 
-    it('should handle quarter fractions', () => {
-      const result = convertToMetric('1/4', 'cup', 'sugar');
-      expect(result.metricQuantity).toBe('50');
-      expect(result.metricUnit).toBe('g');
-    });
-
-    it('should handle third fractions', () => {
-      const result = convertToMetric('1/3', 'cup');
-      expect(result.metricQuantity).toBe('79');
-      expect(result.metricUnit).toBe('ml');
+    it('should parse fractions correctly for non-converted units', () => {
+      const result = convertToMetric('1/4', 'cup');
+      expect(result.metricQuantity).toBeNull();
+      expect(result.metricUnit).toBeNull();
     });
   });
 
   describe('convertToMetric - Range Support', () => {
-    it('should handle ranges by taking midpoint', () => {
+    it('should parse ranges but NOT convert volume units', () => {
       const result = convertToMetric('2-3', 'cups', 'flour');
-      // Midpoint is 2.5, 2.5 * 120 = 300
-      expect(result.metricQuantity).toBe('300');
-      expect(result.metricUnit).toBe('g');
+      expect(result.metricQuantity).toBeNull();
+      expect(result.metricUnit).toBeNull();
     });
 
-    it('should handle ranges for weight units', () => {
+    it('should handle ranges for weight units with smart rounding', () => {
       const result = convertToMetric('1-2', 'lb');
-      // Midpoint is 1.5, 1.5 * 453.592 = 680.388 ≈ 680
-      expect(result.metricQuantity).toBe('680');
+      // Midpoint is 1.5, 1.5 * 453.592 = 680.388 → 700g (rounded to nearest 50)
+      expect(result.metricQuantity).toBe('700');
       expect(result.metricUnit).toBe('g');
     });
   });
@@ -302,35 +279,35 @@ describe('unitConversions', () => {
       expect(result.metricUnit).toBeNull();
     });
 
-    it('should handle whitespace', () => {
+    it('should handle whitespace but NOT convert volume units', () => {
       const result = convertToMetric(' 2 ', ' cups ', 'flour');
-      expect(result.metricQuantity).toBe('240');
-      expect(result.metricUnit).toBe('g');
+      expect(result.metricQuantity).toBeNull();
+      expect(result.metricUnit).toBeNull();
     });
 
-    it('should be case-insensitive', () => {
-      expect(convertToMetric('1', 'CUP', 'FLOUR').metricQuantity).toBe('120');
-      expect(convertToMetric('1', 'Cup', 'Flour').metricQuantity).toBe('120');
+    it('should be case-insensitive (volume units not converted)', () => {
+      expect(convertToMetric('1', 'CUP', 'FLOUR').metricQuantity).toBeNull();
+      expect(convertToMetric('1', 'Cup', 'Flour').metricQuantity).toBeNull();
     });
   });
 
   describe('convertToMetric - Multiple Quantities', () => {
-    it('should handle decimal quantities', () => {
+    it('should handle decimal quantities but NOT convert volume units', () => {
       const result = convertToMetric('1.5', 'cups', 'flour');
-      expect(result.metricQuantity).toBe('180');
+      expect(result.metricQuantity).toBeNull();
+      expect(result.metricUnit).toBeNull();
+    });
+
+    it('should handle large weight quantities with smart rounding', () => {
+      const result = convertToMetric('10', 'lb');
+      expect(result.metricQuantity).toBe('4500'); // 4535.92g → 4500g
       expect(result.metricUnit).toBe('g');
     });
 
-    it('should handle large quantities', () => {
-      const result = convertToMetric('10', 'cups', 'sugar');
-      expect(result.metricQuantity).toBe('2000');
+    it('should handle small weight quantities with smart rounding', () => {
+      const result = convertToMetric('0.25', 'oz');
+      expect(result.metricQuantity).toBe('7'); // 7.09g → 7g
       expect(result.metricUnit).toBe('g');
-    });
-
-    it('should handle small quantities', () => {
-      const result = convertToMetric('0.25', 'tsp');
-      expect(result.metricQuantity).toBe('1');
-      expect(result.metricUnit).toBe('ml');
     });
   });
 });

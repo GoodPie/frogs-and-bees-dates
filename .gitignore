@@ -9,8 +9,6 @@
 /coverage
 
 # production
-/build
-/dist
 
 # misc
 .DS_Store
@@ -30,3 +28,4 @@ yarn-error.log*
 
 .idea/
 firebase-debug.log
+/dist/

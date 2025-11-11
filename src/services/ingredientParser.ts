@@ -6,7 +6,14 @@
  *
  * Note: For deterministic unit conversions in the application (outside of AI parsing), use the
  * unitConversions utility (@/utils/unitConversions.ts) which leverages the convert.js library.
- * The conversion factors below are provided to the AI for consistent parsing behavior.
+ *
+ * **Current Conversion Strategy:**
+ * - Volume units (cups, tsp, tbsp, fl oz) are NOT converted - ratios are more important than exact metric equivalents
+ * - Weight units (oz, lb) are converted to grams with smart rounding for practical measurements
+ * - Already-metric units (ml, g, kg, l) are preserved as-is
+ *
+ * The conversion factors below are provided to the AI for reference, but the actual conversion logic
+ * in unitConversions.ts prioritizes practical, easy-to-measure values over precise conversions.
  *
  * @module services/ingredientParser
  */

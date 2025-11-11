@@ -177,8 +177,8 @@ describe('IngredientEditForm', () => {
                 originalText: '2 cups whole wheat flour', // originalText is reconstructed from edited fields
                 quantity: '2', // quantity goes through string input so becomes string
                 ingredientName: 'whole wheat flour',
-                metricQuantity: '240', // recalculated using convert.js
-                metricUnit: 'g',
+                metricQuantity: null, // cups are NOT converted (ratios preserved)
+                metricUnit: null,
                 parsingMethod: 'manual',
                 confidence: 1.0,
                 requiresManualReview: false,

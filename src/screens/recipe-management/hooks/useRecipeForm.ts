@@ -2,6 +2,7 @@ import {useState, useEffect} from 'react';
 import type {IRecipe} from "@/screens/recipe-management/types/Recipe.ts";
 import {timeToISO8601, iso8601ToMinutes} from '@/utils/durationFormat.ts';
 import type {IRecipeNutrition} from '@/screens/recipe-management/types/Recipe.ts';
+import type {ParsedIngredient} from '@/models/ParsedIngredient.ts';
 
 export interface RecipeFormState {
     // Basic info
@@ -29,6 +30,10 @@ export interface RecipeFormState {
     // Ingredients and instructions
     ingredients: string[];
     setIngredients: (value: string[]) => void;
+    parsedIngredients: ParsedIngredient[];
+    setParsedIngredients: (value: ParsedIngredient[]) => void;
+    ingredientParsingCompleted: boolean;
+    setIngredientParsingCompleted: (value: boolean) => void;
     instructions: string[];
     setInstructions: (value: string[]) => void;
 
@@ -68,6 +73,8 @@ export const useRecipeForm = (initialRecipe?: IRecipe): RecipeFormState => {
 
     // Ingredients and instructions
     const [ingredients, setIngredients] = useState<string[]>(['']);
+    const [parsedIngredients, setParsedIngredients] = useState<ParsedIngredient[]>([]);
+    const [ingredientParsingCompleted, setIngredientParsingCompleted] = useState(false);
     const [instructions, setInstructions] = useState<string[]>(['']);
 
     // Categorization
@@ -101,6 +108,8 @@ export const useRecipeForm = (initialRecipe?: IRecipe): RecipeFormState => {
         }
 
         setIngredients(initialRecipe.recipeIngredient.length > 0 ? initialRecipe.recipeIngredient : ['']);
+        setParsedIngredients(initialRecipe.parsedIngredients || []);
+        setIngredientParsingCompleted(initialRecipe.ingredientParsingCompleted || false);
         setInstructions(initialRecipe.recipeInstructions.length > 0 ? initialRecipe.recipeInstructions : ['']);
         setCategories(initialRecipe.recipeCategory?.join(', ') || '');
         setCuisines(initialRecipe.recipeCuisine?.join(', ') || '');
@@ -125,6 +134,9 @@ export const useRecipeForm = (initialRecipe?: IRecipe): RecipeFormState => {
             cookTime: cookTime === 'PT0M' ? undefined : cookTime,
             totalTime: totalTime === 'PT0M' ? undefined : totalTime,
             recipeIngredient: ingredients.filter(i => i.trim() !== ''),
+            parsedIngredients: parsedIngredients.length > 0 ? parsedIngredients : undefined,
+            ingredientParsingCompleted: ingredientParsingCompleted || undefined,
+            ingredientParsingDate: ingredientParsingCompleted ? new Date() : undefined,
             recipeInstructions: instructions.filter(i => i.trim() !== ''),
             recipeCategory: categories.split(',').map(c => c.trim()).filter(c => c !== ''),
             recipeCuisine: cuisines.split(',').map(c => c.trim()).filter(c => c !== ''),
@@ -154,6 +166,10 @@ export const useRecipeForm = (initialRecipe?: IRecipe): RecipeFormState => {
         setCookMinutes,
         ingredients,
         setIngredients,
+        parsedIngredients,
+        setParsedIngredients,
+        ingredientParsingCompleted,
+        setIngredientParsingCompleted,
         instructions,
         setInstructions,
         categories,

@@ -11,12 +11,17 @@ import {
     Badge,
     Code,
     useDisclosure,
+    Collapsible,
 } from '@chakra-ui/react';
+import {toaster} from "@/components/ui/toaster"
 import {AiOutlineImport, AiOutlineClose, AiOutlineCheckCircle, AiOutlineWarning} from 'react-icons/ai';
+import {executeRecaptchaV3} from '@/utils/recaptchaV3';
 import {useRecipeImport} from '@/screens/recipe-management/hooks/useRecipeImport.ts';
-import {getJsonLdExtractionInstructions} from '@/screens/recipe-management/utils/recipeParser.ts';
-import {useNavigate} from 'react-router-dom';
-import {ROUTES} from '@/routing/routes.ts';
+import {getJsonLdExtractionInstructions} from '@/screens/recipe-management/utils/parsing/jsonLdParser.ts';
+import {RecipeParseError} from './RecipeParseError';
+import {IngredientParsingProgress} from './IngredientParsingProgress';
+import {RecipeImportErrorBoundary} from './RecipeImportErrorBoundary';
+import {LuChevronDown} from "react-icons/lu";
 
 export interface RecipeImportProps {
     isOpen: boolean;
@@ -27,34 +32,44 @@ export interface RecipeImportProps {
  * Modal for importing recipes from JSON-LD
  */
 export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
-    const navigate = useNavigate();
     const importState = useRecipeImport();
 
     const handleImport = () => {
-        const recipe = importState.getParsedRecipe();
-        if (recipe) {
-            // Navigate to add recipe screen with imported data
-            navigate(ROUTES.RECIPE_ADD, {state: {importedRecipe: recipe}});
-            onClose();
-            importState.reset();
-        }
+        importState.importRecipe();
+        onClose();
     };
 
     const handleClose = () => {
+        // Check if there's complete parsed data that hasn't been imported
+        const hasUnsavedData = importState.state.status === 'complete' &&
+                               importState.state.recipe &&
+                               importState.canImport;
+
+        if (hasUnsavedData) {
+            const shouldClose = window.confirm(
+                'You have successfully parsed recipe data that has not been imported. ' +
+                'If you close now, this data will be lost. Are you sure you want to close?'
+            );
+
+            if (!shouldClose) {
+                return; // User cancelled, don't close
+            }
+        }
+
         importState.reset();
         onClose();
     };
 
     return (
         <Dialog.Root open={isOpen} onOpenChange={({open}) => !open && handleClose()} size={{base: "full", md: "xl"}}>
-            <Dialog.Backdrop />
+            <Dialog.Backdrop/>
             <Dialog.Positioner>
                 <Dialog.Content maxH={{base: "100vh", md: "90vh"}} overflowY="auto">
                     <Dialog.Header>
                         <Heading size="lg">Import Recipe</Heading>
                         <Dialog.CloseTrigger asChild>
                             <Button variant="ghost" size="sm">
-                                <AiOutlineClose />
+                                <AiOutlineClose/>
                             </Button>
                         </Dialog.CloseTrigger>
                     </Dialog.Header>
@@ -85,12 +100,28 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                 borderColor="blue.500"
                                 _dark={{bg: 'blue.900', borderColor: 'blue.400'}}
                             >
-                                <Text fontWeight="bold" mb={2} fontSize={{base: "sm", md: "md"}}>
-                                    How to extract recipe data:
-                                </Text>
-                                <Text fontSize={{base: "xs", md: "sm"}} whiteSpace="pre-line" fontFamily="monospace">
-                                    {getJsonLdExtractionInstructions(importState.url || undefined)}
-                                </Text>
+                                <Collapsible.Root>
+                                    <Collapsible.Trigger cursor="pointer"   >
+                                        <HStack>
+                                            <Collapsible.Indicator
+                                                transition="transform 0.2s"
+                                                _open={{transform: "rotate(180deg)"}}
+                                            >
+                                                <LuChevronDown/>
+                                            </Collapsible.Indicator>
+                                            <Text fontWeight="bold" fontSize={{base: "sm", md: "md"}}>
+                                                How to extract recipe data
+                                            </Text>
+
+                                        </HStack>
+                                    </Collapsible.Trigger>
+                                    <Collapsible.Content>
+                                        <Text fontSize={{base: "xs", md: "sm"}} whiteSpace="pre-line"
+                                              fontFamily="monospace">
+                                            {getJsonLdExtractionInstructions(importState.url || undefined)}
+                                        </Text>
+                                    </Collapsible.Content>
+                                </Collapsible.Root>
                             </Box>
 
                             {/* JSON-LD Input */}
@@ -112,75 +143,70 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                             <Button
                                 colorScheme="blue"
                                 onClick={importState.parseJsonLd}
-                                loading={importState.parsing}
-                                disabled={!importState.jsonLdText.trim()}
+                                loading={importState.state.status === 'parsing-json'}
+                                disabled={!importState.jsonLdText.trim() || importState.state.status === 'parsing-json'}
                                 size={{base: "md", md: "md"}}
                                 minH="44px"
                             >
                                 Parse Recipe Data
                             </Button>
 
-                            {/* Parse Results */}
-                            {importState.parseResult && (
+                            {/* Ingredient Parsing Progress */}
+                            {importState.state.status === 'parsing-ingredients' && (
+                                <IngredientParsingProgress
+                                    current={importState.state.current}
+                                    total={importState.state.total}
+                                    canCancel={importState.canCancel}
+                                    onCancel={importState.cancel}
+                                />
+                            )}
+
+                            {/* Error Display */}
+                            {importState.state.status === 'error' && (
+                                <RecipeParseError
+                                    error={importState.state.error}
+                                    errorMessage={importState.errorMessage}
+                                    canRetry={importState.canRetry}
+                                    onRetry={importState.retry}
+                                />
+                            )}
+
+                            {/* Success Results */}
+                            {importState.state.status === 'complete' && importState.state.recipe && (
                                 <Box
                                     p={4}
                                     borderRadius="md"
                                     borderWidth="1px"
-                                    borderColor={importState.parseResult.success ? 'green.500' : 'red.500'}
-                                    bg={importState.parseResult.success ? 'green.50' : 'red.50'}
+                                    borderColor="green.500"
+                                    bg="green.50"
                                     _dark={{
-                                        bg: importState.parseResult.success ? 'green.900' : 'red.900',
+                                        bg: 'green.900',
                                     }}
                                 >
                                     <VStack align="stretch" gap={3}>
-                                        {/* Success/Error Header */}
+                                        {/* Success Header */}
                                         <HStack>
-                                            {importState.parseResult.success ? (
-                                                <>
-                                                    <AiOutlineCheckCircle color="green" size={24} />
-                                                    <Text fontWeight="bold" color="green.700" _dark={{color: 'green.200'}}>
-                                                        Recipe parsed successfully!
-                                                    </Text>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <AiOutlineClose color="red" size={24} />
-                                                    <Text fontWeight="bold" color="red.700" _dark={{color: 'red.200'}}>
-                                                        Failed to parse recipe
-                                                    </Text>
-                                                </>
-                                            )}
+                                            <AiOutlineCheckCircle color="green" size={24}/>
+                                            <Text fontWeight="bold" color="green.700" _dark={{color: 'green.200'}}>
+                                                Recipe parsed successfully!
+                                            </Text>
                                         </HStack>
 
-                                        {/* Errors */}
-                                        {importState.parseResult.errors.length > 0 && (
-                                            <Box>
-                                                <Text fontWeight="bold" fontSize="sm" mb={1} color="red.700" _dark={{color: 'red.200'}}>
-                                                    Errors:
-                                                </Text>
-                                                <VStack align="stretch" gap={1}>
-                                                    {importState.parseResult.errors.map((error, index) => (
-                                                        <Text key={index} fontSize="sm" color="red.600" _dark={{color: 'red.300'}}>
-                                                            • {error}
-                                                        </Text>
-                                                    ))}
-                                                </VStack>
-                                            </Box>
-                                        )}
-
                                         {/* Warnings */}
-                                        {importState.parseResult.warnings.length > 0 && (
+                                        {importState.state.warnings && importState.state.warnings.length > 0 && (
                                             <Box>
                                                 <HStack mb={1}>
-                                                    <AiOutlineWarning color="orange" />
-                                                    <Text fontWeight="bold" fontSize="sm" color="orange.700" _dark={{color: 'orange.200'}}>
+                                                    <AiOutlineWarning color="orange"/>
+                                                    <Text fontWeight="bold" fontSize="sm" color="orange.700"
+                                                          _dark={{color: 'orange.200'}}>
                                                         Warnings:
                                                     </Text>
                                                 </HStack>
                                                 <VStack align="stretch" gap={1}>
-                                                    {importState.parseResult.warnings.map((warning, index) => (
-                                                        <Text key={index} fontSize="sm" color="orange.600" _dark={{color: 'orange.300'}}>
-                                                            • {warning}
+                                                    {importState.state.warnings.map((warning, index) => (
+                                                        <Text key={index} fontSize="sm" color="orange.600"
+                                                              _dark={{color: 'orange.300'}}>
+                                                            • {warning.message}
                                                         </Text>
                                                     ))}
                                                 </VStack>
@@ -188,47 +214,86 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                         )}
 
                                         {/* Recipe Preview */}
-                                        {importState.parseResult.success && importState.parseResult.recipe && (
-                                            <Box>
+                                        <Box>
+                                            <Text fontWeight="bold" fontSize="sm" mb={2}>
+                                                Recipe Preview:
+                                            </Text>
+                                            <VStack align="stretch" gap={2} fontSize="sm">
+                                                <HStack>
+                                                    <Text fontWeight="bold" minW="100px">Name:</Text>
+                                                    <Text>{importState.state.recipe.name}</Text>
+                                                </HStack>
+                                                {importState.state.recipe.description && (
+                                                    <HStack align="start">
+                                                        <Text fontWeight="bold" minW="100px">Description:</Text>
+                                                        <Text maxLines={2}>{importState.state.recipe.description}</Text>
+                                                    </HStack>
+                                                )}
+                                                <HStack>
+                                                    <Text fontWeight="bold" minW="100px">Ingredients:</Text>
+                                                    <Badge colorScheme="blue">
+                                                        {importState.state.recipe.recipeIngredient?.length || 0} items
+                                                    </Badge>
+                                                    {importState.state.recipe.ingredientParsingCompleted && (
+                                                        <Badge colorScheme="green" variant="subtle">
+                                                            ✓ Parsed
+                                                        </Badge>
+                                                    )}
+                                                </HStack>
+                                                <HStack>
+                                                    <Text fontWeight="bold" minW="100px">Instructions:</Text>
+                                                    <Badge colorScheme="green">
+                                                        {importState.state.recipe.recipeInstructions?.length || 0} steps
+                                                    </Badge>
+                                                </HStack>
+                                                {importState.state.recipe.prepTime && (
+                                                    <HStack>
+                                                        <Text fontWeight="bold" minW="100px">Prep Time:</Text>
+                                                        <Code>{importState.state.recipe.prepTime}</Code>
+                                                    </HStack>
+                                                )}
+                                                {importState.state.recipe.cookTime && (
+                                                    <HStack>
+                                                        <Text fontWeight="bold" minW="100px">Cook Time:</Text>
+                                                        <Code>{importState.state.recipe.cookTime}</Code>
+                                                    </HStack>
+                                                )}
+                                            </VStack>
+                                        </Box>
+
+                                        {/* Parsed Ingredients Preview */}
+                                        {importState.state.recipe.parsedIngredients && (
+                                            <Box mt={3}>
                                                 <Text fontWeight="bold" fontSize="sm" mb={2}>
-                                                    Recipe Preview:
+                                                    Parsed Ingredients
+                                                    ({importState.state.recipe.parsedIngredients.length}):
                                                 </Text>
-                                                <VStack align="stretch" gap={2} fontSize="sm">
-                                                    <HStack>
-                                                        <Text fontWeight="bold" minW="100px">Name:</Text>
-                                                        <Text>{importState.parseResult.recipe.name}</Text>
-                                                    </HStack>
-                                                    {importState.parseResult.recipe.description && (
-                                                        <HStack align="start">
-                                                            <Text fontWeight="bold" minW="100px">Description:</Text>
-                                                            <Text maxLines={2}>{importState.parseResult.recipe.description}</Text>
+                                                <VStack align="stretch" gap={1} maxH="200px" overflowY="auto" p={2}
+                                                        bg="gray.50" _dark={{bg: 'gray.800'}} borderRadius="md">
+                                                    {importState.state.recipe.parsedIngredients.map((ing, index) => (
+                                                        <HStack key={index} justify="space-between" fontSize="sm">
+                                                            <Text flex={1}>
+                                                                {ing.metricQuantity && ing.metricUnit
+                                                                    ? `${ing.metricQuantity} ${ing.metricUnit} ${ing.ingredientName}`
+                                                                    : ing.originalText}
+                                                                {ing.preparationNotes && ` (${ing.preparationNotes})`}
+                                                            </Text>
+                                                            {ing.requiresManualReview && (
+                                                                <Badge colorScheme="orange" size="sm" variant="subtle">
+                                                                    Review
+                                                                </Badge>
+                                                            )}
                                                         </HStack>
-                                                    )}
-                                                    <HStack>
-                                                        <Text fontWeight="bold" minW="100px">Ingredients:</Text>
-                                                        <Badge colorScheme="blue">
-                                                            {importState.parseResult.recipe.recipeIngredient?.length || 0} items
-                                                        </Badge>
-                                                    </HStack>
-                                                    <HStack>
-                                                        <Text fontWeight="bold" minW="100px">Instructions:</Text>
-                                                        <Badge colorScheme="green">
-                                                            {importState.parseResult.recipe.recipeInstructions?.length || 0} steps
-                                                        </Badge>
-                                                    </HStack>
-                                                    {importState.parseResult.recipe.prepTime && (
-                                                        <HStack>
-                                                            <Text fontWeight="bold" minW="100px">Prep Time:</Text>
-                                                            <Code>{importState.parseResult.recipe.prepTime}</Code>
-                                                        </HStack>
-                                                    )}
-                                                    {importState.parseResult.recipe.cookTime && (
-                                                        <HStack>
-                                                            <Text fontWeight="bold" minW="100px">Cook Time:</Text>
-                                                            <Code>{importState.parseResult.recipe.cookTime}</Code>
-                                                        </HStack>
-                                                    )}
+                                                    ))}
                                                 </VStack>
+                                                {importState.state.recipe.parsedIngredients.some(ing => ing.requiresManualReview) && (
+                                                    <Text fontSize="xs" color="orange.600" _dark={{color: 'orange.300'}}
+                                                          mt={1}>
+                                                        <AiOutlineWarning
+                                                            style={{display: 'inline', marginRight: '4px'}}/>
+                                                        Some ingredients require manual review after import
+                                                    </Text>
+                                                )}
                                             </Box>
                                         )}
                                     </VStack>
@@ -245,11 +310,10 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                             <Button
                                 colorScheme="green"
                                 onClick={handleImport}
-                                disabled={!importState.parseResult?.success}
+                                disabled={!importState.canImport}
                                 minH="44px"
-                                flex={{base: 1, sm: "0"}}
                             >
-                                <AiOutlineImport /> Import Recipe
+                                <AiOutlineImport/> Import Recipe
                             </Button>
                         </HStack>
                     </Dialog.Footer>
@@ -265,12 +329,26 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
 export const RecipeImportButton = () => {
     const {open, onOpen, onClose} = useDisclosure();
 
+    const handleOpen = async () => {
+        const token = await executeRecaptchaV3('import_recipe');
+        if (!token) {
+            toaster.error({
+                title: 'reCAPTCHA verification failed',
+                description: 'Please try again.',
+            });
+            return;
+        }
+        onOpen();
+    };
+
     return (
         <>
-            <Button colorScheme="blue" onClick={onOpen} variant="outline">
-                <AiOutlineImport /> Import Recipe
+            <Button colorScheme="blue" onClick={handleOpen} variant="outline">
+                <AiOutlineImport/> Import Recipe
             </Button>
-            <RecipeImportModal isOpen={open} onClose={onClose} />
+            <RecipeImportErrorBoundary>
+                <RecipeImportModal isOpen={open} onClose={onClose}/>
+            </RecipeImportErrorBoundary>
         </>
     );
 };

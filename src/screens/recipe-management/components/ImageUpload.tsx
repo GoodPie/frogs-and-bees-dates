@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import {type ChangeEvent, useState} from 'react';
 import { Box, Button, Input, Image, Text, VStack, HStack, RadioGroup } from '@chakra-ui/react';
 import { useRecipeImage } from '@/screens/recipe-management/hooks/useRecipeImage.ts';
 
@@ -15,7 +15,7 @@ export const ImageUpload = ({ imageUrl, onImageChange }: ImageUploadProps) => {
     const [urlInput, setUrlInput] = useState(imageUrl);
     const { uploadImage, validateUrl, loading, error } = useRecipeImage();
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 

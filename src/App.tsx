@@ -1,4 +1,5 @@
 import {Box, ChakraProvider, defaultSystem, HStack} from "@chakra-ui/react"
+import { Toaster } from "@/components/ui/toaster"
 import {BrowserRouter} from "react-router-dom"
 
 import "./main.css";
@@ -14,6 +15,7 @@ export const App = () => {
         <ChakraProvider value={defaultSystem}>
             <BrowserRouter>
                 <AppContent/>
+                <Toaster />
             </BrowserRouter>
         </ChakraProvider>
     )

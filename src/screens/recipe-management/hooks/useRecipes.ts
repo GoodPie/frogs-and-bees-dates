@@ -31,10 +31,10 @@ export const useRecipes = () => {
                     fetchedRecipes.push({
                         id: doc.id,
                         ...data,
-                        createdAt: data.createdAt?.toDate(),
-                        updatedAt: data.updatedAt?.toDate(),
-                        datePublished: data.datePublished?.toDate(),
-                        ingredientParsingDate: data.ingredientParsingDate?.toDate(),
+                        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt,
+                        updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt,
+                        datePublished: data.datePublished?.toDate ? data.datePublished.toDate() : data.datePublished,
+                        ingredientParsingDate: data.ingredientParsingDate?.toDate ? data.ingredientParsingDate.toDate() : data.ingredientParsingDate,
                     } as IRecipe);
                 });
 

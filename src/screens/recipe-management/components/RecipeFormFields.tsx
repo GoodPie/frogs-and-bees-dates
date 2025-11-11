@@ -62,13 +62,21 @@ export const RecipeFormFields = ({formState}: RecipeFormFieldsProps) => {
             (ing) => ing.originalText === editingIngredient?.originalText
         );
         if (index !== -1) {
+            // Mark as manually edited if this is a user edit
+            const manuallyEdited: ParsedIngredient = {
+                ...updated,
+                parsingMethod: 'manual',
+                confidence: 1.0, // User-edited ingredients are fully "confident"
+                requiresManualReview: false, // User has reviewed it
+            };
+
             const newParsed = [...parsedIngredients];
-            newParsed[index] = updated;
+            newParsed[index] = manuallyEdited;
             setParsedIngredients(newParsed);
 
             // Sync with raw ingredients
             const newRaw = [...ingredients];
-            newRaw[index] = updated.originalText;
+            newRaw[index] = manuallyEdited.originalText;
             setIngredients(newRaw);
         }
         setEditingIngredient(null);

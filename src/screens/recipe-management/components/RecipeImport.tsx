@@ -11,15 +11,17 @@ import {
     Badge,
     Code,
     useDisclosure,
+    Collapsible,
 } from '@chakra-ui/react';
 import {toaster} from "@/components/ui/toaster"
 import {AiOutlineImport, AiOutlineClose, AiOutlineCheckCircle, AiOutlineWarning} from 'react-icons/ai';
-import { executeRecaptchaV3 } from '@/utils/recaptchaV3';
+import {executeRecaptchaV3} from '@/utils/recaptchaV3';
 import {useRecipeImport} from '@/screens/recipe-management/hooks/useRecipeImport.ts';
 import {getJsonLdExtractionInstructions} from '@/screens/recipe-management/utils/recipeParser.ts';
-import { RecipeParseError } from './RecipeParseError';
-import { IngredientParsingProgress } from './IngredientParsingProgress';
-import { RecipeImportErrorBoundary } from './RecipeImportErrorBoundary';
+import {RecipeParseError} from './RecipeParseError';
+import {IngredientParsingProgress} from './IngredientParsingProgress';
+import {RecipeImportErrorBoundary} from './RecipeImportErrorBoundary';
+import {LuChevronDown} from "react-icons/lu";
 
 export interface RecipeImportProps {
     isOpen: boolean;
@@ -38,20 +40,36 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
     };
 
     const handleClose = () => {
+        // Check if there's complete parsed data that hasn't been imported
+        const hasUnsavedData = importState.state.status === 'complete' &&
+                               importState.state.recipe &&
+                               importState.canImport;
+
+        if (hasUnsavedData) {
+            const shouldClose = window.confirm(
+                'You have successfully parsed recipe data that has not been imported. ' +
+                'If you close now, this data will be lost. Are you sure you want to close?'
+            );
+
+            if (!shouldClose) {
+                return; // User cancelled, don't close
+            }
+        }
+
         importState.reset();
         onClose();
     };
 
     return (
         <Dialog.Root open={isOpen} onOpenChange={({open}) => !open && handleClose()} size={{base: "full", md: "xl"}}>
-            <Dialog.Backdrop />
+            <Dialog.Backdrop/>
             <Dialog.Positioner>
                 <Dialog.Content maxH={{base: "100vh", md: "90vh"}} overflowY="auto">
                     <Dialog.Header>
                         <Heading size="lg">Import Recipe</Heading>
                         <Dialog.CloseTrigger asChild>
                             <Button variant="ghost" size="sm">
-                                <AiOutlineClose />
+                                <AiOutlineClose/>
                             </Button>
                         </Dialog.CloseTrigger>
                     </Dialog.Header>
@@ -82,12 +100,28 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                 borderColor="blue.500"
                                 _dark={{bg: 'blue.900', borderColor: 'blue.400'}}
                             >
-                                <Text fontWeight="bold" mb={2} fontSize={{base: "sm", md: "md"}}>
-                                    How to extract recipe data:
-                                </Text>
-                                <Text fontSize={{base: "xs", md: "sm"}} whiteSpace="pre-line" fontFamily="monospace">
-                                    {getJsonLdExtractionInstructions(importState.url || undefined)}
-                                </Text>
+                                <Collapsible.Root>
+                                    <Collapsible.Trigger cursor="pointer"   >
+                                        <HStack>
+                                            <Collapsible.Indicator
+                                                transition="transform 0.2s"
+                                                _open={{transform: "rotate(180deg)"}}
+                                            >
+                                                <LuChevronDown/>
+                                            </Collapsible.Indicator>
+                                            <Text fontWeight="bold" fontSize={{base: "sm", md: "md"}}>
+                                                How to extract recipe data
+                                            </Text>
+
+                                        </HStack>
+                                    </Collapsible.Trigger>
+                                    <Collapsible.Content>
+                                        <Text fontSize={{base: "xs", md: "sm"}} whiteSpace="pre-line"
+                                              fontFamily="monospace">
+                                            {getJsonLdExtractionInstructions(importState.url || undefined)}
+                                        </Text>
+                                    </Collapsible.Content>
+                                </Collapsible.Root>
                             </Box>
 
                             {/* JSON-LD Input */}
@@ -152,7 +186,7 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                     <VStack align="stretch" gap={3}>
                                         {/* Success Header */}
                                         <HStack>
-                                            <AiOutlineCheckCircle color="green" size={24} />
+                                            <AiOutlineCheckCircle color="green" size={24}/>
                                             <Text fontWeight="bold" color="green.700" _dark={{color: 'green.200'}}>
                                                 Recipe parsed successfully!
                                             </Text>
@@ -162,14 +196,16 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                         {importState.state.warnings && importState.state.warnings.length > 0 && (
                                             <Box>
                                                 <HStack mb={1}>
-                                                    <AiOutlineWarning color="orange" />
-                                                    <Text fontWeight="bold" fontSize="sm" color="orange.700" _dark={{color: 'orange.200'}}>
+                                                    <AiOutlineWarning color="orange"/>
+                                                    <Text fontWeight="bold" fontSize="sm" color="orange.700"
+                                                          _dark={{color: 'orange.200'}}>
                                                         Warnings:
                                                     </Text>
                                                 </HStack>
                                                 <VStack align="stretch" gap={1}>
                                                     {importState.state.warnings.map((warning, index) => (
-                                                        <Text key={index} fontSize="sm" color="orange.600" _dark={{color: 'orange.300'}}>
+                                                        <Text key={index} fontSize="sm" color="orange.600"
+                                                              _dark={{color: 'orange.300'}}>
                                                             • {warning.message}
                                                         </Text>
                                                     ))}
@@ -229,9 +265,11 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                         {importState.state.recipe.parsedIngredients && (
                                             <Box mt={3}>
                                                 <Text fontWeight="bold" fontSize="sm" mb={2}>
-                                                    Parsed Ingredients ({importState.state.recipe.parsedIngredients.length}):
+                                                    Parsed Ingredients
+                                                    ({importState.state.recipe.parsedIngredients.length}):
                                                 </Text>
-                                                <VStack align="stretch" gap={1} maxH="200px" overflowY="auto" p={2} bg="gray.50" _dark={{bg: 'gray.800'}} borderRadius="md">
+                                                <VStack align="stretch" gap={1} maxH="200px" overflowY="auto" p={2}
+                                                        bg="gray.50" _dark={{bg: 'gray.800'}} borderRadius="md">
                                                     {importState.state.recipe.parsedIngredients.map((ing, index) => (
                                                         <HStack key={index} justify="space-between" fontSize="sm">
                                                             <Text flex={1}>
@@ -249,8 +287,10 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                                     ))}
                                                 </VStack>
                                                 {importState.state.recipe.parsedIngredients.some(ing => ing.requiresManualReview) && (
-                                                    <Text fontSize="xs" color="orange.600" _dark={{color: 'orange.300'}} mt={1}>
-                                                        <AiOutlineWarning style={{display: 'inline', marginRight: '4px'}} />
+                                                    <Text fontSize="xs" color="orange.600" _dark={{color: 'orange.300'}}
+                                                          mt={1}>
+                                                        <AiOutlineWarning
+                                                            style={{display: 'inline', marginRight: '4px'}}/>
                                                         Some ingredients require manual review after import
                                                     </Text>
                                                 )}
@@ -272,9 +312,8 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                 onClick={handleImport}
                                 disabled={!importState.canImport}
                                 minH="44px"
-                                flex={{base: 1, sm: "0"}}
                             >
-                                <AiOutlineImport /> Import Recipe
+                                <AiOutlineImport/> Import Recipe
                             </Button>
                         </HStack>
                     </Dialog.Footer>
@@ -305,10 +344,10 @@ export const RecipeImportButton = () => {
     return (
         <>
             <Button colorScheme="blue" onClick={handleOpen} variant="outline">
-                <AiOutlineImport /> Import Recipe
+                <AiOutlineImport/> Import Recipe
             </Button>
             <RecipeImportErrorBoundary>
-                <RecipeImportModal isOpen={open} onClose={onClose} />
+                <RecipeImportModal isOpen={open} onClose={onClose}/>
             </RecipeImportErrorBoundary>
         </>
     );

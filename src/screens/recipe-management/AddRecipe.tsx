@@ -1,23 +1,83 @@
 import {Box, Button, Heading, VStack, HStack, Text, Badge} from '@chakra-ui/react';
 import {useNavigate, useLocation} from 'react-router-dom';
-import {AiOutlineArrowLeft, AiOutlineSave, AiOutlineCheckCircle} from 'react-icons/ai';
+import {AiOutlineArrowLeft, AiOutlineSave, AiOutlineCheckCircle, AiOutlineWarning} from 'react-icons/ai';
 import {useRecipeOperations} from '@/screens/recipe-management/hooks/useRecipeOperations.ts';
 import {useRecipeForm} from '@/screens/recipe-management/hooks/useRecipeForm.ts';
 import {RecipeFormFields} from '@/screens/recipe-management/components/RecipeFormFields.tsx';
 import {ROUTES, getRecipeViewRoute} from '@/routing/routes';
 import type {IRecipe} from "@/screens/recipe-management/types/Recipe.ts";
+import {useEffect, useState} from 'react';
+
+/**
+ * Validates imported recipe data from navigation state
+ * Returns validated recipe or null if invalid
+ */
+function validateImportedRecipe(importedRecipe: any): Partial<IRecipe> | null {
+    // Check if importedRecipe exists and is an object
+    if (!importedRecipe || typeof importedRecipe !== 'object') {
+        return null;
+    }
+
+    // Must have at minimum a name to be considered valid
+    if (!importedRecipe.name || typeof importedRecipe.name !== 'string') {
+        return null;
+    }
+
+    // Validate arrays are actually arrays (not corrupted)
+    const validatedRecipe: Partial<IRecipe> = {
+        ...importedRecipe,
+        recipeIngredient: Array.isArray(importedRecipe.recipeIngredient)
+            ? importedRecipe.recipeIngredient
+            : [],
+        recipeInstructions: Array.isArray(importedRecipe.recipeInstructions)
+            ? importedRecipe.recipeInstructions
+            : [],
+        recipeCategory: Array.isArray(importedRecipe.recipeCategory)
+            ? importedRecipe.recipeCategory
+            : undefined,
+        recipeCuisine: Array.isArray(importedRecipe.recipeCuisine)
+            ? importedRecipe.recipeCuisine
+            : undefined,
+        keywords: Array.isArray(importedRecipe.keywords)
+            ? importedRecipe.keywords
+            : undefined,
+        parsedIngredients: Array.isArray(importedRecipe.parsedIngredients)
+            ? importedRecipe.parsedIngredients
+            : undefined,
+    };
+
+    return validatedRecipe;
+}
 
 /**
  * Add recipe screen with multi-tab form
- * Supports importing recipe data via location state
+ * Supports importing recipe data via location state with validation and fallback handling
  */
 const AddRecipe = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const {addRecipe, loading, error} = useRecipeOperations();
+    const [validationWarning, setValidationWarning] = useState<string | null>(null);
 
-    // Check if we have imported recipe data
-    const importedRecipe = (location.state as { importedRecipe?: Partial<IRecipe> })?.importedRecipe;
+    // Validate and extract imported recipe data from navigation state
+    const rawImportedRecipe = (location.state as { importedRecipe?: Partial<IRecipe> })?.importedRecipe;
+    const importedRecipe = rawImportedRecipe ? validateImportedRecipe(rawImportedRecipe) : null;
+
+    // Check if this is a legacy recipe (missing parsedIngredients)
+    const isLegacyRecipe = importedRecipe &&
+        !importedRecipe.parsedIngredients &&
+        importedRecipe.recipeIngredient &&
+        importedRecipe.recipeIngredient.length > 0;
+
+    // Show warning for validation issues or legacy recipes
+    useEffect(() => {
+        if (rawImportedRecipe && !importedRecipe) {
+            setValidationWarning('Imported recipe data was incomplete or corrupt. Starting with empty form.');
+        } else if (isLegacyRecipe) {
+            setValidationWarning('This recipe was imported before ingredient parsing was available. Ingredients will be shown as plain text.');
+        }
+    }, [rawImportedRecipe, importedRecipe, isLegacyRecipe]);
+
     const formState = useRecipeForm(importedRecipe as IRecipe | undefined);
 
     const handleSave = async () => {
@@ -58,6 +118,25 @@ const AddRecipe = () => {
                     <Text color="red.500" fontSize="sm">
                         {error}
                     </Text>
+                )}
+
+                {validationWarning && (
+                    <HStack
+                        p={3}
+                        bg="orange.50"
+                        borderRadius="md"
+                        borderWidth="1px"
+                        borderColor="orange.200"
+                        _dark={{
+                            bg: "orange.900",
+                            borderColor: "orange.700",
+                        }}
+                    >
+                        <AiOutlineWarning color="orange" />
+                        <Text color="orange.700" _dark={{ color: "orange.200" }} fontSize="sm">
+                            {validationWarning}
+                        </Text>
+                    </HStack>
                 )}
 
                 <RecipeFormFields formState={formState}/>

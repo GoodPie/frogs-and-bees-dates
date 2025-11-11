@@ -8,6 +8,7 @@
  */
 
 import {Box, HStack, Text, Badge, VStack} from '@chakra-ui/react';
+import {AiOutlineWarning} from 'react-icons/ai';
 import type {ParsedIngredient} from '@/models/ParsedIngredient.ts';
 
 export type DisplayMode = 'original' | 'metric' | 'imperial';
@@ -131,6 +132,16 @@ export function IngredientList({
                         {ingredient.requiresManualReview && (
                             <Badge colorScheme="orange" size="sm" variant="subtle">
                                 Review
+                            </Badge>
+                        )}
+
+                        {/* Show warning badge for low confidence (< 0.7) */}
+                        {ingredient.confidence < 0.7 && ingredient.parsingMethod !== 'manual' && (
+                            <Badge colorScheme="red" size="sm" variant="subtle">
+                                <HStack gap={1}>
+                                    <AiOutlineWarning />
+                                    <Text>Low Confidence</Text>
+                                </HStack>
                             </Badge>
                         )}
 

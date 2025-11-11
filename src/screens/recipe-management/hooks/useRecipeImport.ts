@@ -75,6 +75,18 @@ export function useRecipeImport(): UseRecipeImportReturn {
   // Create parsing service (singleton)
   const parsingService = useRef(createRecipeParsingService());
 
+  // Session management: Generate unique session ID for each import operation
+  // This prevents state conflicts when importing multiple recipes in succession
+  const sessionIdRef = useRef<string | null>(null);
+
+  /**
+   * Generates a new session ID for the current import operation
+   */
+  const generateSessionId = useCallback(() => {
+    sessionIdRef.current = `import-session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return sessionIdRef.current;
+  }, []);
+
   /**
    * Parse JSON-LD and optionally parse ingredients
    */
@@ -103,6 +115,9 @@ export function useRecipeImport(): UseRecipeImportReturn {
     }
 
     try {
+      // Generate new session ID for this import operation
+      const currentSessionId = generateSessionId();
+
       // Start JSON parsing phase
       const parsingStartTime = Date.now();
       setState({
@@ -167,16 +182,25 @@ export function useRecipeImport(): UseRecipeImportReturn {
         result.recipe!.recipeIngredient!,
         {
           onProgress: (current: number, total: number) => {
-            setState({
-              status: 'parsing-ingredients',
-              current,
-              total,
-              startedAt: parsingStartTime,
-            });
+            // Only update state if this is still the current session
+            if (sessionIdRef.current === currentSessionId) {
+              setState({
+                status: 'parsing-ingredients',
+                current,
+                total,
+                startedAt: parsingStartTime,
+              });
+            }
           },
           signal: abortControllerRef.current.signal,
         }
       );
+
+      // Check if session is still valid before updating state
+      if (sessionIdRef.current !== currentSessionId) {
+        // Session has been superseded by another import, ignore results
+        return;
+      }
 
       // Add parsed ingredients to recipe
       const finalRecipe: Partial<IRecipe> = {
@@ -197,14 +221,16 @@ export function useRecipeImport(): UseRecipeImportReturn {
         });
       }
 
-      // Complete successfully
-      setState({
-        status: 'complete',
-        recipe: finalRecipe,
-        startedAt: parsingStartTime,
-        completedAt: Date.now(),
-        warnings: allWarnings,
-      });
+      // Complete successfully (only if session is still valid)
+      if (sessionIdRef.current === currentSessionId) {
+        setState({
+          status: 'complete',
+          recipe: finalRecipe,
+          startedAt: parsingStartTime,
+          completedAt: Date.now(),
+          warnings: allWarnings,
+        });
+      }
     } catch (error) {
       // Handle errors during parsing
       let importError: ImportError;
@@ -271,6 +297,9 @@ export function useRecipeImport(): UseRecipeImportReturn {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
+
+    // Clear session ID to invalidate any in-flight operations
+    sessionIdRef.current = null;
 
     setState({ status: 'idle' });
     setUrl('');

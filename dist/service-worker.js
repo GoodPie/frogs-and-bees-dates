@@ -16,8 +16,8 @@ self.addEventListener('fetch', function(event) {
                 .then(response => {
                     // Cache successful Firebase responses
                     if (response.ok) {
-                        const cache = caches.open(RECIPE_CACHE_NAME);
-                        cache.then(c => c.put(event.request.url, response.clone()));
+                        const responseClone = response.clone();
+                        caches.open(RECIPE_CACHE_NAME).then(c => c.put(event.request.url, responseClone));
                     }
                     return response;
                 })
@@ -32,17 +32,26 @@ self.addEventListener('fetch', function(event) {
         );
     } else {
         // Cache-first strategy for static assets
-        event.respondWith(async function() {
-            try {
-                const res = await fetch(event.request);
-                const cache = await caches.open(CACHE_NAME);
-                cache.put(event.request.url, res.clone());
-                return res;
-            }
-            catch(error) {
-                console.error('Fetch failed; returning cached version.', error);
-                return caches.match(event.request);
-            }
-        }());
+        event.respondWith(
+            caches.match(event.request)
+                .then(cachedResponse => {
+                    if (cachedResponse) {
+                        return cachedResponse;
+                    }
+                    // If not in cache, fetch from network and cache it
+                    return fetch(event.request)
+                        .then(response => {
+                            const responseClone = response.clone();
+                            caches.open(CACHE_NAME).then(cache => {
+                                cache.put(event.request.url, responseClone);
+                            });
+                            return response;
+                        })
+                        .catch(error => {
+                            console.error('Fetch failed and no cached version available:', error);
+                            throw error;
+                        });
+                })
+        );
     }
 });

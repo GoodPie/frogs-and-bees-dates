@@ -20,6 +20,7 @@ import {
     NativeSelectField,
 } from '@chakra-ui/react';
 import type {ParsedIngredient} from '@/models/ParsedIngredient.ts';
+import {convertToMetric} from '@/utils/unitConversions.ts';
 
 export interface IngredientEditFormProps {
     /** The ingredient to edit */
@@ -85,13 +86,31 @@ export function IngredientEditForm({
     const [preparationNotes, setPreparationNotes] = useState(ingredient.preparationNotes || '');
 
     const handleSave = () => {
+        // Reconstruct originalText from edited fields
+        const parts: string[] = [];
+        if (quantity.trim()) parts.push(quantity.trim());
+        if (unit) parts.push(unit);
+        parts.push(ingredientName);
+        if (preparationNotes) parts.push(`(${preparationNotes})`);
+        const reconstructedOriginalText = parts.join(' ');
+
+        // Recalculate metric conversions using the conversion utility
+        const conversion = convertToMetric(
+            quantity.trim() || null,
+            unit || null,
+            ingredientName
+        );
+
         // Create updated ingredient with manual edit flags
         const updatedIngredient: ParsedIngredient = {
             ...ingredient,
+            originalText: reconstructedOriginalText,
             quantity: quantity.trim() || null,
             unit: unit || null,
             ingredientName,
             preparationNotes: preparationNotes || null,
+            metricQuantity: conversion.metricQuantity,
+            metricUnit: conversion.metricUnit,
             // Set flags for manual edit
             parsingMethod: 'manual',
             confidence: 1.0,

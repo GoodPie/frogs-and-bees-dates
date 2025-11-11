@@ -4,6 +4,10 @@
  * Parses unstructured ingredient strings into structured components using Firebase AI Logic (Gemini API).
  * Provides automatic metric conversion for imperial measurements and handles complex ingredient formats.
  *
+ * Note: For deterministic unit conversions in the application (outside of AI parsing), use the
+ * unitConversions utility (@/utils/unitConversions.ts) which leverages the convert.js library.
+ * The conversion factors below are provided to the AI for consistent parsing behavior.
+ *
  * @module services/ingredientParser
  */
 

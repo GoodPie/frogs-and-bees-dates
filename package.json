@@ -9,6 +9,7 @@
     "@emotion/react": "^11.14.0",
     "@firebase/rules-unit-testing": "^5.0.0",
     "@testing-library/user-event": "^14.6.1",
+    "convert": "^5.13.1",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.7",
     "firebase": "^12.3.0",

@@ -48,7 +48,7 @@ function extractInstructions(instructions: string[] | {text: string}[] | {name?:
                 const hasName = 'name' in instruction && instruction.name;
 
                 // If name and text are the same (or text starts with name), just use text
-                if (hasName && instruction.text.trim().startsWith(instruction.name.trim())) {
+                if (hasName && instruction.name && instruction.text.trim().startsWith(instruction.name.trim())) {
                     return instruction.text;
                 }
 

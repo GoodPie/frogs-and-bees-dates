@@ -136,7 +136,7 @@ export const useRecipeForm = (initialRecipe?: IRecipe): RecipeFormState => {
             recipeIngredient: ingredients.filter(i => i.trim() !== ''),
             parsedIngredients: parsedIngredients.length > 0 ? parsedIngredients : undefined,
             ingredientParsingCompleted: ingredientParsingCompleted || undefined,
-            ingredientParsingDate: ingredientParsingCompleted ? new Date().toISOString() : undefined,
+            ingredientParsingDate: ingredientParsingCompleted ? new Date() : undefined,
             recipeInstructions: instructions.filter(i => i.trim() !== ''),
             recipeCategory: categories.split(',').map(c => c.trim()).filter(c => c !== ''),
             recipeCuisine: cuisines.split(',').map(c => c.trim()).filter(c => c !== ''),

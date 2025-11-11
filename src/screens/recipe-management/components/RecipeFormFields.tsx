@@ -53,7 +53,7 @@ export const RecipeFormFields = ({formState}: RecipeFormFieldsProps) => {
     const [displayMode, setDisplayMode] = useState<DisplayMode>('metric');
     const [editingIngredient, setEditingIngredient] = useState<ParsedIngredient | null>(null);
 
-    const handleIngredientEdit = (ingredient: ParsedIngredient) => {
+    const handleIngredientEdit = (_index: number, ingredient: ParsedIngredient) => {
         setEditingIngredient(ingredient);
     };
 
@@ -204,7 +204,7 @@ export const RecipeFormFields = ({formState}: RecipeFormFieldsProps) => {
                             <IngredientList
                                 ingredients={parsedIngredients}
                                 displayMode={displayMode}
-                                onIngredientClick={handleIngredientEdit}
+                                onEditIngredient={handleIngredientEdit}
                             />
                         )
                     ) : (

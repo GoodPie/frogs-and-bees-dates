@@ -142,6 +142,7 @@ export const firebaseMocks = {
         string: vi.fn(() => 'string'),
         number: vi.fn(() => 'number'),
     },
+    GoogleAIBackend: vi.fn(() => ({})),
 };
 
 // Reset all mocks to initial state (defaults to unauthenticated)

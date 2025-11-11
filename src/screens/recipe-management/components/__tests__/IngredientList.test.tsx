@@ -29,7 +29,7 @@ describe('IngredientList', () => {
             metricQuantity: '240',
             metricUnit: 'g',
             confidence: 0.95,
-            parsingMethod: 'client',
+            parsingMethod: 'ai',
             requiresManualReview: false,
         },
         {
@@ -41,7 +41,7 @@ describe('IngredientList', () => {
             metricQuantity: '5',
             metricUnit: 'ml',
             confidence: 1.0,
-            parsingMethod: 'client',
+            parsingMethod: 'ai',
             requiresManualReview: false,
         },
         {
@@ -53,7 +53,7 @@ describe('IngredientList', () => {
             metricQuantity: null,
             metricUnit: null,
             confidence: 0.5,
-            parsingMethod: 'client',
+            parsingMethod: 'ai',
             requiresManualReview: true,
         },
     ];
@@ -101,7 +101,7 @@ describe('IngredientList', () => {
                 metricQuantity: '227',
                 metricUnit: 'g',
                 confidence: 0.9,
-                parsingMethod: 'client',
+                parsingMethod: 'ai',
                 requiresManualReview: false,
             };
 

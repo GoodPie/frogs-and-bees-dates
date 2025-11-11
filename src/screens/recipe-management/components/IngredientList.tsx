@@ -27,15 +27,24 @@ export interface IngredientListProps {
  * Formats an ingredient for display based on the selected mode
  */
 function formatIngredient(ingredient: ParsedIngredient, mode: DisplayMode): string {
+    // Helper to clean ingredient name (remove trailing commas/periods)
+    const cleanName = (name: string) => name.trim().replace(/[,.\s]+$/, '');
+
+    // Helper to check if preparation notes are meaningful
+    const hasPreparationNotes = (notes: string | null) => {
+        return notes && notes.trim().replace(/[,.\s]+/g, '').length > 0;
+    };
+
     switch (mode) {
         case 'original':
             return ingredient.originalText;
 
         case 'metric':
             if (ingredient.metricQuantity && ingredient.metricUnit) {
-                const base = `${ingredient.metricQuantity} ${ingredient.metricUnit} ${ingredient.ingredientName}`;
-                return ingredient.preparationNotes
-                    ? `${base}, ${ingredient.preparationNotes}`
+                const cleanedName = cleanName(ingredient.ingredientName);
+                const base = `${ingredient.metricQuantity} ${ingredient.metricUnit} ${cleanedName}`;
+                return hasPreparationNotes(ingredient.preparationNotes)
+                    ? `${base}, ${ingredient.preparationNotes?.trim()}`
                     : base;
             }
             // Fallback to original if no metric conversion available
@@ -43,9 +52,10 @@ function formatIngredient(ingredient: ParsedIngredient, mode: DisplayMode): stri
 
         case 'imperial':
             if (ingredient.quantity && ingredient.unit) {
-                const base = `${ingredient.quantity} ${ingredient.unit} ${ingredient.ingredientName}`;
-                return ingredient.preparationNotes
-                    ? `${base}, ${ingredient.preparationNotes}`
+                const cleanedName = cleanName(ingredient.ingredientName);
+                const base = `${ingredient.quantity} ${ingredient.unit} ${cleanedName}`;
+                return hasPreparationNotes(ingredient.preparationNotes)
+                    ? `${base}, ${ingredient.preparationNotes?.trim()}`
                     : base;
             }
             // Fallback to original if no quantity/unit

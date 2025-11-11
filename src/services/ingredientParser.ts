@@ -211,6 +211,7 @@ export async function parseIngredients(
             metricUnit: item.metricUnit || null,
             confidence: item.confidence || 0.5,
             requiresManualReview: (item.confidence || 0.5) < 0.7,
+            parsingMethod: 'ai',
         })) as ParsedIngredient[];
 
     } catch (error) {

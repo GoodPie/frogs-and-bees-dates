@@ -88,7 +88,7 @@ export function IngredientEditForm({
         // Create updated ingredient with manual edit flags
         const updatedIngredient: ParsedIngredient = {
             ...ingredient,
-            quantity: quantity,
+            quantity: quantity.trim() || null,
             unit: unit || null,
             ingredientName,
             preparationNotes: preparationNotes || null,

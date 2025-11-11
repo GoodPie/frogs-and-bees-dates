@@ -163,6 +163,7 @@ vi.mock('firebase/ai', () => ({
   getAI: firebaseMocks.getAI,
   getGenerativeModel: firebaseMocks.getGenerativeModel,
   Schema: firebaseMocks.Schema,
+  GoogleAIBackend: firebaseMocks.GoogleAIBackend,
 }));
 
 // Mock Notification API

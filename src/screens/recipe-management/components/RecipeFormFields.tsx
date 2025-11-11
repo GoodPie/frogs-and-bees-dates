@@ -1,9 +1,13 @@
-import {Box, Input, Textarea, VStack, Text, Tabs} from '@chakra-ui/react';
+import {useState} from 'react';
+import {Box, Input, Textarea, VStack, Text, Tabs, HStack, Button} from '@chakra-ui/react';
 import {IngredientInput} from '@/screens/recipe-management/components/IngredientInput.tsx';
 import {InstructionInput} from '@/screens/recipe-management/components/InstructionInput.tsx';
 import {ImageUpload} from '@/screens/recipe-management/components/ImageUpload.tsx';
 import {TimeInputGroup} from '@/components/TimeInputGroup.tsx';
 import type {RecipeFormState} from '@/screens/recipe-management/hooks/useRecipeForm.ts';
+import {IngredientList, type DisplayMode} from '@/screens/recipe-management/components/IngredientList.tsx';
+import {IngredientEditForm} from '@/screens/recipe-management/components/IngredientEditForm.tsx';
+import type {ParsedIngredient} from '@/models/ParsedIngredient.ts';
 
 interface RecipeFormFieldsProps {
     formState: RecipeFormState;
@@ -33,6 +37,8 @@ export const RecipeFormFields = ({formState}: RecipeFormFieldsProps) => {
         setCookMinutes,
         ingredients,
         setIngredients,
+        parsedIngredients,
+        setParsedIngredients,
         instructions,
         setInstructions,
         categories,
@@ -42,6 +48,35 @@ export const RecipeFormFields = ({formState}: RecipeFormFieldsProps) => {
         keywords,
         setKeywords,
     } = formState;
+
+    // Local state for ingredient editing
+    const [displayMode, setDisplayMode] = useState<DisplayMode>('metric');
+    const [editingIngredient, setEditingIngredient] = useState<ParsedIngredient | null>(null);
+
+    const handleIngredientEdit = (ingredient: ParsedIngredient) => {
+        setEditingIngredient(ingredient);
+    };
+
+    const handleIngredientSave = (updated: ParsedIngredient) => {
+        const index = parsedIngredients.findIndex(
+            (ing) => ing.originalText === editingIngredient?.originalText
+        );
+        if (index !== -1) {
+            const newParsed = [...parsedIngredients];
+            newParsed[index] = updated;
+            setParsedIngredients(newParsed);
+
+            // Sync with raw ingredients
+            const newRaw = [...ingredients];
+            newRaw[index] = updated.originalText;
+            setIngredients(newRaw);
+        }
+        setEditingIngredient(null);
+    };
+
+    const handleIngredientCancel = () => {
+        setEditingIngredient(null);
+    };
 
     return (
         <Tabs.Root defaultValue="basic" fitted w={"full"} mx={"auto"} variant="enclosed">
@@ -126,11 +161,58 @@ export const RecipeFormFields = ({formState}: RecipeFormFieldsProps) => {
             {/* Ingredients */}
             <Tabs.Content value="ingredients">
                 <VStack align="stretch" gap={4} py={4}>
-                    <Text fontWeight="bold">Ingredients *</Text>
-                    <IngredientInput
-                        ingredients={ingredients}
-                        onChange={setIngredients}
-                    />
+                    <HStack justify="space-between">
+                        <Text fontWeight="bold">Ingredients *</Text>
+                        {parsedIngredients.length > 0 && (
+                            <HStack gap={2}>
+                                <Button
+                                    size="sm"
+                                    variant={displayMode === 'original' ? 'solid' : 'outline'}
+                                    onClick={() => setDisplayMode('original')}
+                                >
+                                    Original
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant={displayMode === 'metric' ? 'solid' : 'outline'}
+                                    onClick={() => setDisplayMode('metric')}
+                                >
+                                    Metric
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant={displayMode === 'imperial' ? 'solid' : 'outline'}
+                                    onClick={() => setDisplayMode('imperial')}
+                                >
+                                    Imperial
+                                </Button>
+                            </HStack>
+                        )}
+                    </HStack>
+
+                    {/* Show parsed ingredients if available */}
+                    {parsedIngredients.length > 0 ? (
+                        editingIngredient ? (
+                            <Box p={4} borderWidth="1px" borderRadius="md">
+                                <IngredientEditForm
+                                    ingredient={editingIngredient}
+                                    onSave={handleIngredientSave}
+                                    onCancel={handleIngredientCancel}
+                                />
+                            </Box>
+                        ) : (
+                            <IngredientList
+                                ingredients={parsedIngredients}
+                                displayMode={displayMode}
+                                onIngredientClick={handleIngredientEdit}
+                            />
+                        )
+                    ) : (
+                        <IngredientInput
+                            ingredients={ingredients}
+                            onChange={setIngredients}
+                        />
+                    )}
                 </VStack>
             </Tabs.Content>
 

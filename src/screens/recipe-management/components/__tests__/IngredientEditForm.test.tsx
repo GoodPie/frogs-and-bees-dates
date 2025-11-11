@@ -28,7 +28,7 @@ describe('IngredientEditForm', () => {
         metricQuantity: '240',
         metricUnit: 'g',
         confidence: 0.95,
-        parsingMethod: 'client',
+        parsingMethod: 'ai',
         requiresManualReview: false,
     };
 
@@ -58,7 +58,7 @@ describe('IngredientEditForm', () => {
                 metricQuantity: null,
                 metricUnit: null,
                 confidence: 0.5,
-                parsingMethod: 'client',
+                parsingMethod: 'ai',
                 requiresManualReview: true,
             };
 
@@ -174,6 +174,7 @@ describe('IngredientEditForm', () => {
             // Verify onSave was called with correct data
             expect(mockOnSave).toHaveBeenCalledWith({
                 ...mockIngredient,
+                quantity: '2', // quantity goes through string input so becomes string
                 ingredientName: 'whole wheat flour',
                 parsingMethod: 'manual',
                 confidence: 1.0,

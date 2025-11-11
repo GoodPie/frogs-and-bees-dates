@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Box, Button, Heading, Image, Text, VStack, HStack, Badge, Spinner, Grid } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AiOutlineEdit, AiOutlineDelete, AiOutlineArrowLeft } from 'react-icons/ai';
@@ -6,6 +7,7 @@ import { useRecipeOperations } from '@/screens/recipe-management/hooks/useRecipe
 import { RecipeJsonLd } from '@/screens/recipe-management/components/RecipeJsonLd.tsx';
 import { iso8601ToReadable } from '@/utils/durationFormat';
 import { ROUTES, getRecipeEditRoute } from '@/routing/routes';
+import { IngredientList, type DisplayMode } from '@/screens/recipe-management/components/IngredientList.tsx';
 
 /**
  * View recipe screen showing full recipe details with structured data
@@ -15,6 +17,7 @@ const ViewRecipe = () => {
     const navigate = useNavigate();
     const { recipe, loading, error } = useRecipe(id);
     const { deleteRecipe, loading: deleteLoading } = useRecipeOperations();
+    const [displayMode, setDisplayMode] = useState<DisplayMode>('metric');
 
     const handleDelete = async () => {
         if (!id) return;
@@ -161,14 +164,49 @@ const ViewRecipe = () => {
 
                     {/* Ingredients */}
                     <Box>
-                        <Heading size={{base: "lg", md: "xl"}} mb={{base: 3, md: 4}}>Ingredients</Heading>
-                        <VStack align="stretch" gap={2}>
-                            {recipe.recipeIngredient.map((ingredient, index) => (
-                                <Text key={index} fontSize={{base: "md", md: "lg"}}>
-                                    • {ingredient}
-                                </Text>
-                            ))}
-                        </VStack>
+                        <HStack justify="space-between" mb={{base: 3, md: 4}}>
+                            <Heading size={{base: "lg", md: "xl"}}>Ingredients</Heading>
+                            {recipe.parsedIngredients && recipe.parsedIngredients.length > 0 && (
+                                <HStack gap={2}>
+                                    <Button
+                                        size="sm"
+                                        variant={displayMode === 'original' ? 'solid' : 'outline'}
+                                        onClick={() => setDisplayMode('original')}
+                                    >
+                                        Original
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant={displayMode === 'metric' ? 'solid' : 'outline'}
+                                        onClick={() => setDisplayMode('metric')}
+                                    >
+                                        Metric
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant={displayMode === 'imperial' ? 'solid' : 'outline'}
+                                        onClick={() => setDisplayMode('imperial')}
+                                    >
+                                        Imperial
+                                    </Button>
+                                </HStack>
+                            )}
+                        </HStack>
+
+                        {recipe.parsedIngredients && recipe.parsedIngredients.length > 0 ? (
+                            <IngredientList
+                                ingredients={recipe.parsedIngredients}
+                                displayMode={displayMode}
+                            />
+                        ) : (
+                            <VStack align="stretch" gap={2}>
+                                {recipe.recipeIngredient.map((ingredient, index) => (
+                                    <Text key={index} fontSize={{base: "md", md: "lg"}}>
+                                        • {ingredient}
+                                    </Text>
+                                ))}
+                            </VStack>
+                        )}
                     </Box>
 
                     {/* Instructions */}

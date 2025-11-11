@@ -1,5 +1,5 @@
 import {useState, useMemo} from 'react';
-import { executeRecaptchaV3 } from '@/utils/recaptchaV3';
+import {executeRecaptchaV3} from '@/utils/recaptchaV3';
 import {
     Box,
     Button,
@@ -12,7 +12,6 @@ import {
     VStack,
     HStack,
     createListCollection,
-    useToast,
 } from '@chakra-ui/react';
 import {useNavigate} from 'react-router-dom';
 import {AiOutlinePlus} from 'react-icons/ai';
@@ -20,12 +19,12 @@ import {useRecipes} from '@/screens/recipe-management/hooks/useRecipes.ts';
 import {RecipeCard} from '@/screens/recipe-management/components/RecipeCard.tsx';
 import {RecipeImportButton} from '@/screens/recipe-management/components/RecipeImport.tsx';
 import {ROUTES} from '@/routing/routes';
+import {toaster} from "@/components/ui/toaster.tsx";
 
 /**
  * Recipe list screen showing all recipes with filtering and search
  */
 const RecipeList = () => {
-    const toast = useToast();
     const navigate = useNavigate();
     const {recipes, loading, error} = useRecipes();
     const [searchTerm, setSearchTerm] = useState('');
@@ -91,19 +90,19 @@ const RecipeList = () => {
         <Box p={{base: 4, md: 6, lg: 8}} w="100%" maxW={"5xl"} mx={"auto"}>
             <VStack align="stretch" gap={{base: 4, md: 5, lg: 6}}>
                 {/* Header */}
-                <Box display="flex" justifyContent="space-between" alignItems={{base: "flex-start", md: "center"}} flexDirection={{base: "column", md: "row"}} gap={{base: 3, md: 0}}>
+                <Box display="flex" justifyContent="space-between" alignItems={{base: "flex-start", md: "center"}}
+                     flexDirection={{base: "column", md: "row"}} gap={{base: 3, md: 0}}>
                     <Heading size={{base: "xl", md: "2xl"}}>Recipes</Heading>
                     <HStack gap={{base: 2, md: 3}} w={{base: "100%", md: "auto"}}>
-                        <RecipeImportButton />
+                        <RecipeImportButton/>
                         <Button
                             colorScheme="blue"
                             onClick={async () => {
                                 const token = await executeRecaptchaV3('add_recipe');
                                 if (!token) {
-                                    toast({
+                                    toaster.error({
                                         title: 'reCAPTCHA verification failed',
                                         description: 'Please try again.',
-                                        status: 'error',
                                     });
                                     return;
                                 }

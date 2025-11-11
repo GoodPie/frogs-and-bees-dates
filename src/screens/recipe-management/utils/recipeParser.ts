@@ -46,6 +46,13 @@ function extractInstructions(instructions: string[] | {text: string}[] | {name?:
             if (typeof instruction === 'object' && 'text' in instruction) {
                 // Some recipes have HowToStep with optional name
                 const hasName = 'name' in instruction && instruction.name;
+
+                // If name and text are the same (or text starts with name), just use text
+                if (hasName && instruction.text.trim().startsWith(instruction.name.trim())) {
+                    return instruction.text;
+                }
+
+                // If they're different, prefix with name
                 const prefix = hasName ? `${instruction.name}: ` : '';
                 return prefix + instruction.text;
             }

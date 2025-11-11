@@ -69,12 +69,23 @@ export const validateISO8601Duration = (duration: string): boolean => {
 };
 
 /**
+ * Removes undefined values from an object
+ * @param obj - Object to clean
+ * @returns Object with undefined values removed
+ */
+const removeUndefined = <T extends Record<string, unknown>>(obj: T): Partial<T> => {
+    return Object.fromEntries(
+        Object.entries(obj).filter(([, v]) => v !== undefined)
+    ) as Partial<T>;
+};
+
+/**
  * Sanitizes recipe data before saving
  * @param recipe - Recipe object to sanitize
  * @returns Sanitized recipe object
  */
 export const sanitizeRecipe = (recipe: Partial<IRecipe>): Partial<IRecipe> => {
-    return {
+    const sanitized = {
         ...recipe,
         name: recipe.name?.trim(),
         description: recipe.description?.trim(),
@@ -83,5 +94,11 @@ export const sanitizeRecipe = (recipe: Partial<IRecipe>): Partial<IRecipe> => {
         recipeCategory: recipe.recipeCategory?.filter(category => category.trim() !== ''),
         recipeCuisine: recipe.recipeCuisine?.filter(cuisine => cuisine.trim() !== ''),
         keywords: recipe.keywords?.filter(keyword => keyword.trim() !== ''),
+        // Clean nutrition object to remove undefined values
+        nutrition: recipe.nutrition ? removeUndefined(recipe.nutrition) : undefined,
+        aggregateRating: recipe.aggregateRating ? removeUndefined(recipe.aggregateRating) : undefined,
     };
+
+    // Remove top-level undefined values (including empty nutrition/aggregateRating)
+    return removeUndefined(sanitized);
 };

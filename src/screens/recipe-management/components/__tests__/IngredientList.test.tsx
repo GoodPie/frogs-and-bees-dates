@@ -198,4 +198,105 @@ describe('IngredientList', () => {
             expect(reviewBox).toBeTruthy();
         });
     });
+
+    describe('Security - ReDoS Prevention', () => {
+        it('should handle ingredients with many trailing punctuation/spaces without timeout', () => {
+            // This would cause ReDoS with vulnerable regex /[,.\s]+$/
+            const attackString = 'flour' + ' ,. '.repeat(100) + 'x';
+            const maliciousIngredient: ParsedIngredient = {
+                originalText: attackString,
+                quantity: 1,
+                unit: 'cup',
+                ingredientName: attackString,
+                preparationNotes: null,
+                metricQuantity: '120',
+                metricUnit: 'g',
+                confidence: 0.9,
+                parsingMethod: 'ai',
+                requiresManualReview: false,
+            };
+
+            const startTime = performance.now();
+            renderWithChakra(
+                <IngredientList ingredients={[maliciousIngredient]} displayMode="metric" />
+            );
+            const endTime = performance.now();
+
+            // Should complete in reasonable time (< 100ms)
+            expect(endTime - startTime).toBeLessThan(100);
+        });
+
+        it('should correctly clean ingredient names with trailing punctuation', () => {
+            const testCases: ParsedIngredient[] = [
+                {
+                    originalText: '1 cup flour, , ,',
+                    quantity: 1,
+                    unit: 'cup',
+                    ingredientName: 'flour, , ,',
+                    preparationNotes: null,
+                    metricQuantity: '120',
+                    metricUnit: 'g',
+                    confidence: 0.9,
+                    parsingMethod: 'ai',
+                    requiresManualReview: false,
+                },
+                {
+                    originalText: '1 tsp salt...',
+                    quantity: 1,
+                    unit: 'tsp',
+                    ingredientName: 'salt...',
+                    preparationNotes: null,
+                    metricQuantity: '5',
+                    metricUnit: 'ml',
+                    confidence: 0.9,
+                    parsingMethod: 'ai',
+                    requiresManualReview: false,
+                },
+                {
+                    originalText: '2 eggs   ',
+                    quantity: 2,
+                    unit: 'pieces',
+                    ingredientName: 'eggs   ',
+                    preparationNotes: null,
+                    metricQuantity: '2',
+                    metricUnit: 'pieces',
+                    confidence: 0.9,
+                    parsingMethod: 'ai',
+                    requiresManualReview: false,
+                },
+            ];
+
+            renderWithChakra(
+                <IngredientList ingredients={testCases} displayMode="metric" />
+            );
+
+            // Should clean trailing punctuation/spaces
+            expect(screen.getByText('120 g flour')).toBeInTheDocument();
+            expect(screen.getByText('5 ml salt')).toBeInTheDocument();
+            expect(screen.getByText('2 pieces eggs')).toBeInTheDocument();
+        });
+
+        it('should handle preparation notes with only punctuation/spaces', () => {
+            const edgeCase: ParsedIngredient = {
+                originalText: '1 cup flour',
+                quantity: 1,
+                unit: 'cup',
+                ingredientName: 'flour',
+                preparationNotes: '  , . , . ',
+                metricQuantity: '120',
+                metricUnit: 'g',
+                confidence: 0.9,
+                parsingMethod: 'ai',
+                requiresManualReview: false,
+            };
+
+            renderWithChakra(
+                <IngredientList ingredients={[edgeCase]} displayMode="metric" />
+            );
+
+            // Should not add comma for meaningless notes
+            expect(screen.getByText('120 g flour')).toBeInTheDocument();
+            expect(screen.queryByText(/, \s*,/)).not.toBeInTheDocument();
+        });
+    });
 });

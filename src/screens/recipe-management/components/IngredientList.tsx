@@ -28,11 +28,27 @@ export interface IngredientListProps {
  */
 function formatIngredient(ingredient: ParsedIngredient, mode: DisplayMode): string {
     // Helper to clean ingredient name (remove trailing commas/periods)
-    const cleanName = (name: string) => name.trim().replace(/[,.\s]+$/, '');
+    // Using iterative approach to prevent ReDoS vulnerability
+    const cleanName = (name: string) => {
+        let cleaned = name.trim();
+        while (cleaned.length > 0 && /[,.\s]/.test(cleaned[cleaned.length - 1])) {
+            cleaned = cleaned.slice(0, -1);
+        }
+        return cleaned;
+    };
 
     // Helper to check if preparation notes are meaningful
+    // Using iterative approach to prevent ReDoS vulnerability
     const hasPreparationNotes = (notes: string | null) => {
-        return notes && notes.trim().replace(/[,.\s]+/g, '').length > 0;
+        if (!notes) return false;
+        const trimmed = notes.trim();
+        // Check if there's any character that's not comma, period, or whitespace
+        for (let i = 0; i < trimmed.length; i++) {
+            if (!/[,.\s]/.test(trimmed[i])) {
+                return true;
+            }
+        }
+        return false;
     };
 
     switch (mode) {

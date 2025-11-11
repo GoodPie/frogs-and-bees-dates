@@ -22,8 +22,8 @@ import type {ValidationError, ValidationWarning} from '@/screens/recipe-manageme
 export function validateRequiredFields(recipe: Partial<IRecipe>): ValidationError[] {
     const errors: ValidationError[] = [];
 
-    // Name is required
-    if (!recipe.name) {
+    // Name is required and must not be empty
+    if (!recipe.name || recipe.name.trim() === '') {
         errors.push({
             type: 'missing_required_field',
             field: 'name',
@@ -33,9 +33,13 @@ export function validateRequiredFields(recipe: Partial<IRecipe>): ValidationErro
         });
     }
 
-    // Image is required
-    const imageValue = (Array.isArray(recipe.image) && recipe.image.length > 0 ? recipe.image[0] : '');
-    if (!imageValue || imageValue.trim() === '') {
+    // Image is required (can be string or non-empty array)
+    const hasValidImage = recipe.image && (
+        (typeof recipe.image === 'string' && recipe.image.trim() !== '') ||
+        (Array.isArray(recipe.image) && recipe.image.length > 0)
+    );
+
+    if (!hasValidImage) {
         errors.push({
             type: 'missing_required_field',
             field: 'image',

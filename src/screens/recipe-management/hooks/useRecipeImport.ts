@@ -1,105 +1,338 @@
-import {useState} from 'react';
-import {parseRecipeJsonLd, type RecipeParseResult} from '@/screens/recipe-management/utils/recipeParser.ts';
-import type {IRecipe} from "@/screens/recipe-management/types/Recipe.ts";
-import {parseIngredients} from '@/services/ingredientParser.ts';
+import { useState, useCallback, useRef } from 'react';
+import type { ImportFlowState } from '@/screens/recipe-management/types/state';
+import type { ImportError } from '@/screens/recipe-management/types/errors';
+import type { IRecipe } from '@/screens/recipe-management/types/Recipe';
+import { isRecoverableError, formatImportError } from '@/screens/recipe-management/types/errors';
+import { createRecipeParsingService } from '@/screens/recipe-management/utils/parsing/jsonLdParser';
+import { parseIngredientsWithProgress } from '@/services/ingredientParser';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/routing/routes';
 
-export interface RecipeImportState {
-    // URL input
-    url: string;
-    setUrl: (url: string) => void;
+export interface UseRecipeImportReturn {
+  // State
+  state: ImportFlowState;
+  url: string;
+  jsonLdText: string;
 
-    // JSON-LD input
-    jsonLdText: string;
-    setJsonLdText: (text: string) => void;
+  // Setters
+  setUrl: (url: string) => void;
+  setJsonLdText: (text: string) => void;
 
-    // Parse result
-    parseResult: RecipeParseResult | null;
+  // Actions
+  parseJsonLd: () => Promise<void>;
+  reset: () => void;
+  retry: () => Promise<void>;
+  cancel: () => void;
+  importRecipe: () => void;
 
-    // Loading states
-    parsing: boolean;
-    isParsing: boolean;
-
-    // Actions
-    parseJsonLd: () => void;
-    reset: () => void;
-    getParsedRecipe: () => Partial<IRecipe> | null;
+  // Computed
+  canImport: boolean;
+  canRetry: boolean;
+  canCancel: boolean;
+  errorMessage: string | null;
 }
 
 /**
- * Hook for managing recipe import from JSON-LD
+ * Hook for managing recipe import from JSON-LD with state machine pattern
+ *
+ * @returns Recipe import state and actions
+ *
+ * @example
+ * ```tsx
+ * function RecipeImportModal() {
+ *   const {
+ *     state,
+ *     jsonLdText,
+ *     setJsonLdText,
+ *     parseJsonLd,
+ *     importRecipe,
+ *     canImport
+ *   } = useRecipeImport();
+ *
+ *   return (
+ *     <div>
+ *       <textarea value={jsonLdText} onChange={(e) => setJsonLdText(e.target.value)} />
+ *       {state.status === 'idle' && <button onClick={parseJsonLd}>Parse</button>}
+ *       {state.status === 'complete' && <button onClick={importRecipe} disabled={!canImport}>Import</button>}
+ *     </div>
+ *   );
+ * }
+ * ```
  */
-export function useRecipeImport(): RecipeImportState {
-    const [url, setUrl] = useState('');
-    const [jsonLdText, setJsonLdText] = useState('');
-    const [parseResult, setParseResult] = useState<RecipeParseResult | null>(null);
-    const [parsing, setParsing] = useState(false);
-    const [isParsing, setIsParsing] = useState(false);
+export function useRecipeImport(): UseRecipeImportReturn {
+  const navigate = useNavigate();
 
-    const parseJsonLd = async () => {
-        if (!jsonLdText.trim()) {
-            setParseResult({
-                success: false,
-                errors: ['Please paste JSON-LD data'],
-                warnings: [],
+  // Input state
+  const [url, setUrl] = useState('');
+  const [jsonLdText, setJsonLdText] = useState('');
+
+  // Import flow state machine
+  const [state, setState] = useState<ImportFlowState>({ status: 'idle' });
+
+  // Abort controller for cancellation
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Create parsing service (singleton)
+  const parsingService = useRef(createRecipeParsingService());
+
+  /**
+   * Parse JSON-LD and optionally parse ingredients
+   */
+  const parseJsonLd = useCallback(async () => {
+    if (!jsonLdText.trim()) {
+      const error: ImportError = {
+        type: 'validation',
+        errors: [
+          {
+            type: 'missing_required_field',
+            field: 'jsonLdText',
+            message: 'Please paste JSON-LD data',
+            severity: 'error',
+          },
+        ],
+      };
+
+      setState({
+        status: 'error',
+        error,
+        startedAt: Date.now(),
+        recoverable: true,
+        failedAt: Date.now(),
+      });
+      return;
+    }
+
+    try {
+      // Start JSON parsing phase
+      const parsingStartTime = Date.now();
+      setState({
+        status: 'parsing-json',
+        startedAt: parsingStartTime,
+      });
+
+      // Let React flush state update to UI
+      await Promise.resolve();
+
+      // Parse JSON-LD
+      const result = await parsingService.current.parseJsonLd(jsonLdText, {
+        sourceUrl: url || undefined,
+        validationMode: 'lenient',
+      });
+
+      if (!result.success) {
+        // Convert validation errors to ImportError
+        const error: ImportError = {
+          type: 'validation',
+          errors: result.errors,
+        };
+
+        setState({
+          status: 'error',
+          error,
+          startedAt: parsingStartTime,
+          recoverable: true,
+          failedAt: Date.now(),
+        });
+        return;
+      }
+
+      // Check if recipe has ingredients to parse
+      const hasIngredients = result.recipe?.recipeIngredient && result.recipe.recipeIngredient.length > 0;
+
+      if (!hasIngredients) {
+        // No ingredients to parse - complete immediately
+        setState({
+          status: 'complete',
+          recipe: result.recipe!,
+          startedAt: parsingStartTime,
+          completedAt: Date.now(),
+          warnings: result.warnings,
+        });
+        return;
+      }
+
+      // Start ingredient parsing phase
+      setState({
+        status: 'parsing-ingredients',
+        current: 0,
+        total: result.recipe!.recipeIngredient!.length,
+        startedAt: Date.now(),
+      });
+
+      // Create abort controller for cancellation support
+      abortControllerRef.current = new AbortController();
+
+      // Parse ingredients with progress tracking
+      const ingredientResult = await parseIngredientsWithProgress(
+        result.recipe!.recipeIngredient!,
+        {
+          onProgress: (current: number, total: number) => {
+            setState({
+              status: 'parsing-ingredients',
+              current,
+              total,
+              startedAt: parsingStartTime,
             });
-            return;
+          },
+          signal: abortControllerRef.current.signal,
+        }
+      );
+
+      // Add parsed ingredients to recipe
+      const finalRecipe: Partial<IRecipe> = {
+        ...result.recipe,
+        parsedIngredients: ingredientResult.parsedIngredients,
+        ingredientParsingCompleted: true,
+        ingredientParsingDate: new Date(),
+      };
+
+      // Combine warnings from JSON-LD parsing and ingredient parsing
+      const allWarnings = [...result.warnings];
+      if (ingredientResult.failedIngredients.length > 0) {
+        allWarnings.push({
+          type: 'low_confidence',
+          message: `${ingredientResult.failedIngredients.length} ingredients could not be parsed automatically`,
+          actionable: true,
+          severity: 'warning',
+        });
+      }
+
+      // Complete successfully
+      setState({
+        status: 'complete',
+        recipe: finalRecipe,
+        startedAt: parsingStartTime,
+        completedAt: Date.now(),
+        warnings: allWarnings,
+      });
+    } catch (error) {
+      // Handle errors during parsing
+      let importError: ImportError;
+
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          // User cancelled - reset to idle
+          setState({ status: 'idle' });
+          return;
         }
 
-        setParsing(true);
-
-        // Use setTimeout to allow UI to update with loading state
-        setTimeout(async () => {
-            const result = parseRecipeJsonLd(jsonLdText);
-
-            // If parsing succeeded and recipe has ingredients, parse them
-            if (result.success && result.recipe && result.recipe.recipeIngredient) {
-                setIsParsing(true);
-                try {
-                    const ingredients = result.recipe.recipeIngredient;
-
-                    // Add parsed ingredients to recipe
-                    result.recipe.parsedIngredients = await parseIngredients(ingredients);
-                    result.recipe.ingredientParsingCompleted = true;
-                    result.recipe.ingredientParsingDate = new Date();
-                } catch (error) {
-                    console.error('Ingredient parsing failed:', error);
-                    // Add warning but don't fail the entire import
-                    result.warnings.push('Failed to parse ingredients. You can edit them manually.');
-                } finally {
-                    setIsParsing(false);
-                }
-            }
-
-            setParseResult(result);
-            setParsing(false);
-        }, 100);
-    };
-
-    const reset = () => {
-        setUrl('');
-        setJsonLdText('');
-        setParseResult(null);
-        setParsing(false);
-        setIsParsing(false);
-    };
-
-    const getParsedRecipe = (): Partial<IRecipe> | null => {
-        if (!parseResult?.success || !parseResult.recipe) {
-            return null;
+        // Check if it's a JSON parse error
+        if (error.message.includes('JSON')) {
+          importError = {
+            type: 'json_parse',
+            message: 'Invalid JSON format',
+            details: error.message,
+          };
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          importError = {
+            type: 'network',
+            message: error.message,
+            retryable: true,
+          };
+        } else if (error.message.includes('timeout')) {
+          importError = {
+            type: 'timeout',
+            operation: 'Recipe parsing',
+            timeoutMs: 5000,
+          };
+        } else {
+          // Generic network/system error
+          importError = {
+            type: 'network',
+            message: error.message || 'An unexpected error occurred',
+            retryable: true,
+          };
         }
-        return parseResult.recipe;
-    };
+      } else {
+        // Unknown error type
+        importError = {
+          type: 'network',
+          message: 'An unexpected error occurred',
+          retryable: true,
+        };
+      }
 
-    return {
-        url,
-        setUrl,
-        jsonLdText,
-        setJsonLdText,
-        parseResult,
-        parsing,
-        isParsing,
-        parseJsonLd,
-        reset,
-        getParsedRecipe,
-    };
+      setState({
+        status: 'error',
+        error: importError,
+        startedAt: Date.now(),
+        recoverable: isRecoverableError(importError),
+        failedAt: Date.now(),
+      });
+    }
+  }, [jsonLdText, url]);
+
+  /**
+   * Reset to idle state
+   */
+  const reset = useCallback(() => {
+    // Cancel any in-progress operations
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+
+    setState({ status: 'idle' });
+    setUrl('');
+    setJsonLdText('');
+  }, []);
+
+  /**
+   * Retry parsing after an error
+   */
+  const retry = useCallback(async () => {
+    if (state.status === 'error' && state.recoverable) {
+      await parseJsonLd();
+    }
+  }, [state, parseJsonLd]);
+
+  /**
+   * Cancel in-progress operation
+   */
+  const cancel = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  }, []);
+
+  /**
+   * Import recipe and navigate to edit screen
+   */
+  const importRecipe = useCallback(() => {
+    if (state.status === 'complete' && state.recipe) {
+      navigate(ROUTES.RECIPE_ADD, { state: { importedRecipe: state.recipe } });
+      reset();
+    }
+  }, [state, navigate, reset]);
+
+  // Computed properties
+  const canImport =
+    state.status === 'complete' &&
+    !!state.recipe?.name &&
+    !!state.recipe?.image;
+
+  const canRetry = state.status === 'error' && state.recoverable;
+
+  const canCancel = state.status === 'parsing-ingredients';
+
+  const errorMessage =
+    state.status === 'error' ? formatImportError(state.error) : null;
+
+  return {
+    state,
+    url,
+    jsonLdText,
+    setUrl,
+    setJsonLdText,
+    parseJsonLd,
+    reset,
+    retry,
+    cancel,
+    importRecipe,
+    canImport,
+    canRetry,
+    canCancel,
+    errorMessage,
+  };
 }

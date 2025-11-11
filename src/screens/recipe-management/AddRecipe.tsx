@@ -1,10 +1,10 @@
-import {Box, Button, Heading, VStack, HStack, Text, Badge} from '@chakra-ui/react';
-import {useNavigate, useLocation} from 'react-router-dom';
-import {AiOutlineArrowLeft, AiOutlineSave, AiOutlineCheckCircle, AiOutlineWarning} from 'react-icons/ai';
+import {Badge, Box, Button, Heading, HStack, Text, VStack} from '@chakra-ui/react';
+import {useLocation, useNavigate} from 'react-router-dom';
+import {AiOutlineArrowLeft, AiOutlineCheckCircle, AiOutlineSave, AiOutlineWarning} from 'react-icons/ai';
 import {useRecipeOperations} from '@/screens/recipe-management/hooks/useRecipeOperations.ts';
 import {useRecipeForm} from '@/screens/recipe-management/hooks/useRecipeForm.ts';
 import {RecipeFormFields} from '@/screens/recipe-management/components/RecipeFormFields.tsx';
-import {ROUTES, getRecipeViewRoute} from '@/routing/routes';
+import {getRecipeViewRoute, ROUTES} from '@/routing/routes';
 import type {IRecipe} from "@/screens/recipe-management/types/Recipe.ts";
 import {useEffect, useState} from 'react';
 
@@ -12,41 +12,42 @@ import {useEffect, useState} from 'react';
  * Validates imported recipe data from navigation state
  * Returns validated recipe or null if invalid
  */
-function validateImportedRecipe(importedRecipe: any): Partial<IRecipe> | null {
+function validateImportedRecipe(importedRecipe: unknown): Partial<IRecipe> | null {
     // Check if importedRecipe exists and is an object
     if (!importedRecipe || typeof importedRecipe !== 'object') {
         return null;
     }
 
+    // Type-narrow to a record for safe property access
+    const recipe = importedRecipe as Record<string, unknown>;
+
     // Must have at minimum a name to be considered valid
-    if (!importedRecipe.name || typeof importedRecipe.name !== 'string') {
+    if (!recipe.name || typeof recipe.name !== 'string') {
         return null;
     }
 
     // Validate arrays are actually arrays (not corrupted)
-    const validatedRecipe: Partial<IRecipe> = {
-        ...importedRecipe,
-        recipeIngredient: Array.isArray(importedRecipe.recipeIngredient)
-            ? importedRecipe.recipeIngredient
+    return {
+        ...recipe,
+        recipeIngredient: Array.isArray(recipe.recipeIngredient)
+            ? recipe.recipeIngredient
             : [],
-        recipeInstructions: Array.isArray(importedRecipe.recipeInstructions)
-            ? importedRecipe.recipeInstructions
+        recipeInstructions: Array.isArray(recipe.recipeInstructions)
+            ? recipe.recipeInstructions
             : [],
-        recipeCategory: Array.isArray(importedRecipe.recipeCategory)
-            ? importedRecipe.recipeCategory
+        recipeCategory: Array.isArray(recipe.recipeCategory)
+            ? recipe.recipeCategory
             : undefined,
-        recipeCuisine: Array.isArray(importedRecipe.recipeCuisine)
-            ? importedRecipe.recipeCuisine
+        recipeCuisine: Array.isArray(recipe.recipeCuisine)
+            ? recipe.recipeCuisine
             : undefined,
-        keywords: Array.isArray(importedRecipe.keywords)
-            ? importedRecipe.keywords
+        keywords: Array.isArray(recipe.keywords)
+            ? recipe.keywords
             : undefined,
-        parsedIngredients: Array.isArray(importedRecipe.parsedIngredients)
-            ? importedRecipe.parsedIngredients
+        parsedIngredients: Array.isArray(recipe.parsedIngredients)
+            ? recipe.parsedIngredients
             : undefined,
-    };
-
-    return validatedRecipe;
+    } as Partial<IRecipe>;
 }
 
 /**

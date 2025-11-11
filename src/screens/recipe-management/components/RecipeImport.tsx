@@ -17,7 +17,7 @@ import {toaster} from "@/components/ui/toaster"
 import {AiOutlineImport, AiOutlineClose, AiOutlineCheckCircle, AiOutlineWarning} from 'react-icons/ai';
 import {executeRecaptchaV3} from '@/utils/recaptchaV3';
 import {useRecipeImport} from '@/screens/recipe-management/hooks/useRecipeImport.ts';
-import {getJsonLdExtractionInstructions} from '@/screens/recipe-management/utils/recipeParser.ts';
+import {getJsonLdExtractionInstructions} from '@/screens/recipe-management/utils/parsing/jsonLdParser.ts';
 import {RecipeParseError} from './RecipeParseError';
 import {IngredientParsingProgress} from './IngredientParsingProgress';
 import {RecipeImportErrorBoundary} from './RecipeImportErrorBoundary';

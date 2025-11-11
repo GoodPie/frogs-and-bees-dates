@@ -286,7 +286,7 @@ export function useRecipeImport(): UseRecipeImportReturn {
         failedAt: Date.now(),
       });
     }
-  }, [jsonLdText, url]);
+  }, [jsonLdText, url, generateSessionId]);
 
   /**
    * Reset to idle state

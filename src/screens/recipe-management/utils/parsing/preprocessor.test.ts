@@ -282,7 +282,7 @@ describe('getByteSize', () => {
   });
 
   it('should calculate JSON byte size', () => {
-    const input = '{"test":1}';
-    expect(getByteSize(input)).toBe(11);
+    const input = '{"test":1}'; // 10 characters
+    expect(getByteSize(input)).toBe(10);
   });
 });

@@ -26,6 +26,13 @@ export const validateRecipe = (recipe: Partial<IRecipe>): { isValid: boolean; er
         errors.push('At least one instruction step is required');
     }
 
+    // Validate parsedIngredients if present
+    if (recipe.parsedIngredients && recipe.recipeIngredient) {
+        if (recipe.parsedIngredients.length !== recipe.recipeIngredient.length) {
+            errors.push('Parsed ingredients count must match recipe ingredients count');
+        }
+    }
+
     return {
         isValid: errors.length === 0,
         errors

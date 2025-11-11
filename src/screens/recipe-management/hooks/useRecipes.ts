@@ -34,6 +34,7 @@ export const useRecipes = () => {
                         createdAt: data.createdAt?.toDate(),
                         updatedAt: data.updatedAt?.toDate(),
                         datePublished: data.datePublished?.toDate(),
+                        ingredientParsingDate: data.ingredientParsingDate?.toDate(),
                     } as IRecipe);
                 });
 

@@ -151,6 +151,31 @@ function validateInput(ingredients: string[]): void {
 }
 
 /**
+ * Options for batch ingredient parsing with progress tracking
+ */
+export interface ParseIngredientsWithProgressOptions {
+    /** Progress callback fired after each batch completes */
+    onProgress?: (current: number, total: number) => void;
+
+    /** Abort signal for cancellation support */
+    signal?: AbortSignal;
+}
+
+/**
+ * Result from batch ingredient parsing with progress
+ */
+export interface ParseIngredientsWithProgressResult {
+    /** Successfully parsed ingredients */
+    parsedIngredients: ParsedIngredient[];
+
+    /** Ingredients that failed to parse */
+    failedIngredients: string[];
+
+    /** Total parsing duration in milliseconds */
+    durationMs: number;
+}
+
+/**
  * Parses an array of ingredient strings using Firebase AI Logic
  *
  * @param ingredients - Array of raw ingredient strings (e.g., ["2 cups flour", "1 tsp salt"])
@@ -235,4 +260,83 @@ export async function parseIngredients(
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         throw new Error(`Failed to parse ingredients: ${errorMessage}`);
     }
+}
+
+/**
+ * Parses large arrays of ingredients in batches with progress tracking
+ * Automatically splits into batches of 20 ingredients or less
+ *
+ * @param ingredients - Array of raw ingredient strings
+ * @param options - Progress tracking and cancellation options
+ * @returns Promise resolving to result with parsed ingredients and failures
+ *
+ * @example
+ * ```typescript
+ * const result = await parseIngredientsWithProgress(
+ *   largeIngredientList,
+ *   {
+ *     onProgress: (current, total) => {
+ *       console.log(`Parsing ${current}/${total} ingredients`);
+ *     },
+ *     signal: abortController.signal
+ *   }
+ * );
+ *
+ * console.log('Parsed:', result.parsedIngredients.length);
+ * console.log('Failed:', result.failedIngredients.length);
+ * console.log('Duration:', result.durationMs, 'ms');
+ * ```
+ */
+export async function parseIngredientsWithProgress(
+    ingredients: string[],
+    options: ParseIngredientsWithProgressOptions = {}
+): Promise<ParseIngredientsWithProgressResult> {
+    const startTime = Date.now();
+    const MAX_BATCH_SIZE = 20;
+
+    // Split ingredients into batches
+    const batches: string[][] = [];
+    for (let i = 0; i < ingredients.length; i += MAX_BATCH_SIZE) {
+        batches.push(ingredients.slice(i, i + MAX_BATCH_SIZE));
+    }
+
+    const parsedIngredients: ParsedIngredient[] = [];
+    const failedIngredients: string[] = [];
+
+    for (let i = 0; i < batches.length; i++) {
+        // Check for cancellation
+        if (options.signal?.aborted) {
+            throw new DOMException('Ingredient parsing was cancelled', 'AbortError');
+        }
+
+        const batch = batches[i];
+
+        try {
+            // Parse current batch
+            const batchResults = await parseIngredients(batch);
+            parsedIngredients.push(...batchResults);
+
+            // Fire progress callback
+            if (options.onProgress) {
+                const currentCount = parsedIngredients.length + failedIngredients.length;
+                options.onProgress(currentCount, ingredients.length);
+            }
+        } catch (error) {
+            // If batch fails, mark all ingredients in this batch as failed
+            console.error(`Batch ${i + 1} failed:`, error);
+            failedIngredients.push(...batch);
+
+            // Still fire progress callback for failed batch
+            if (options.onProgress) {
+                const currentCount = parsedIngredients.length + failedIngredients.length;
+                options.onProgress(currentCount, ingredients.length);
+            }
+        }
+    }
+
+    return {
+        parsedIngredients,
+        failedIngredients,
+        durationMs: Date.now() - startTime,
+    };
 }

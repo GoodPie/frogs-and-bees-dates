@@ -1,4 +1,5 @@
 import type {IRecipe, IRecipeNutrition, SchemaOrgRecipe} from '@/screens/recipe-management/types/Recipe.ts';
+import {preprocessJsonInput} from "@/screens/recipe-management/utils/parsing/preprocessor.ts";
 
 export interface RecipeParseResult {
     success: boolean;
@@ -114,55 +115,6 @@ function parseValue(value: string | undefined): string | undefined {
     return match ? match[0] : undefined;
 }
 
-/**
- * Preprocesses JSON string to handle various input formats
- * - Removes BOM characters
- * - Trims whitespace
- * - Removes surrounding backticks
- * - Unescapes JSON escape sequences if needed
- */
-function preprocessJsonInput(input: string): string {
-    // Remove BOM
-    let processed = input.replace(/^\uFEFF/, '');
-
-    // Trim whitespace
-    processed = processed.trim();
-
-    // Remove surrounding backticks (template literal markers)
-    if (processed.startsWith('`') && processed.endsWith('`')) {
-        processed = processed.slice(1, -1);
-    }
-
-    // Remove surrounding quotes if the entire string is wrapped in quotes
-    // This handles cases where users copy console.log output with quotes
-    if ((processed.startsWith('"') && processed.endsWith('"')) ||
-        (processed.startsWith("'") && processed.endsWith("'"))) {
-        // Check if this is actually a wrapped JSON string vs JSON with string values
-        const withoutQuotes = processed.slice(1, -1);
-
-        // Try to detect if this is escaped JSON by looking for literal \n or \"
-        if (withoutQuotes.includes('\\n') || withoutQuotes.includes('\\"') ||
-            withoutQuotes.includes('\\t') || withoutQuotes.includes('\\\\')) {
-            processed = withoutQuotes;
-        }
-    }
-
-    // Unescape JSON escape sequences if present
-    // This handles cases where users paste stringified JSON from console
-    if (processed.includes('\\n') || processed.includes('\\"') ||
-        processed.includes('\\t') || processed.includes('\\\\')) {
-        try {
-            // Use JSON.parse to properly unescape the string
-            // Wrap it in quotes to make it a valid JSON string
-            processed = JSON.parse(`"${processed}"`);
-        } catch {
-            // If unescaping fails, return as-is and let the main parser handle it
-            return processed;
-        }
-    }
-
-    return processed;
-}
 
 /**
  * Detects if input looks like escaped JSON and provides helpful guidance

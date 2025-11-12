@@ -393,3 +393,143 @@ describe('createRecipeParsingService', () => {
         expect(result.valid).toBe(true);
     });
 });
+
+describe('Performance Tests', () => {
+    /**
+     * Helper function to create a recipe with N ingredients
+     */
+    function createRecipeWithIngredients(count: number): string {
+        const ingredients = Array.from({ length: count }, (_, i) => `Ingredient ${i + 1}`);
+        return JSON.stringify({
+            '@type': 'Recipe',
+            name: `Recipe with ${count} ingredients`,
+            image: 'https://example.com/image.jpg',
+            recipeIngredient: ingredients,
+            recipeInstructions: ['Step 1', 'Step 2', 'Step 3'],
+        });
+    }
+
+    it('should parse recipe with 5 ingredients in reasonable time', () => {
+        const jsonLd = createRecipeWithIngredients(5);
+
+        const start = performance.now();
+        const result = parseRecipeJsonLd(jsonLd);
+        const duration = performance.now() - start;
+
+        expect(result.success).toBe(true);
+        expect(result.recipe?.recipeIngredient).toHaveLength(5);
+        expect(duration).toBeLessThan(100); // Should be very fast
+    });
+
+    it('should parse recipe with 10 ingredients in reasonable time', () => {
+        const jsonLd = createRecipeWithIngredients(10);
+
+        const start = performance.now();
+        const result = parseRecipeJsonLd(jsonLd);
+        const duration = performance.now() - start;
+
+        expect(result.success).toBe(true);
+        expect(result.recipe?.recipeIngredient).toHaveLength(10);
+        expect(duration).toBeLessThan(100); // Should scale linearly
+    });
+
+    it('should parse recipe with 15 ingredients in reasonable time', () => {
+        const jsonLd = createRecipeWithIngredients(15);
+
+        const start = performance.now();
+        const result = parseRecipeJsonLd(jsonLd);
+        const duration = performance.now() - start;
+
+        expect(result.success).toBe(true);
+        expect(result.recipe?.recipeIngredient).toHaveLength(15);
+        expect(duration).toBeLessThan(150); // Should scale linearly
+    });
+
+    it('should parse recipe with 20 ingredients in reasonable time', () => {
+        const jsonLd = createRecipeWithIngredients(20);
+
+        const start = performance.now();
+        const result = parseRecipeJsonLd(jsonLd);
+        const duration = performance.now() - start;
+
+        expect(result.success).toBe(true);
+        expect(result.recipe?.recipeIngredient).toHaveLength(20);
+        expect(duration).toBeLessThan(200); // Should scale linearly, <200ms p95
+    });
+
+    it('should handle large recipe (100 ingredients) without timeout', () => {
+        const jsonLd = createRecipeWithIngredients(100);
+
+        const start = performance.now();
+        const result = parseRecipeJsonLd(jsonLd);
+        const duration = performance.now() - start;
+
+        expect(result.success).toBe(true);
+        expect(result.recipe?.recipeIngredient).toHaveLength(100);
+        expect(duration).toBeLessThan(1000); // Should complete within 1s
+    });
+
+    it('should parse recipe with complex nested structures efficiently', () => {
+        const jsonLd = JSON.stringify({
+            '@type': 'Recipe',
+            name: 'Complex Recipe',
+            image: ['https://example.com/1.jpg', 'https://example.com/2.jpg'],
+            recipeIngredient: Array.from({ length: 15 }, (_, i) => `Ingredient ${i + 1}`),
+            recipeInstructions: [
+                {
+                    '@type': 'HowToSection',
+                    name: 'Prep',
+                    itemListElement: [
+                        { '@type': 'HowToStep', text: 'Step 1' },
+                        { '@type': 'HowToStep', text: 'Step 2' },
+                    ],
+                },
+                {
+                    '@type': 'HowToSection',
+                    name: 'Cook',
+                    itemListElement: [
+                        { '@type': 'HowToStep', text: 'Step 3' },
+                        { '@type': 'HowToStep', text: 'Step 4' },
+                    ],
+                },
+            ],
+            author: {
+                '@type': 'Person',
+                name: 'Test Author',
+            },
+            nutrition: {
+                '@type': 'NutritionInformation',
+                calories: '200 calories',
+            },
+        });
+
+        const start = performance.now();
+        const result = parseRecipeJsonLd(jsonLd);
+        const duration = performance.now() - start;
+
+        expect(result.success).toBe(true);
+        expect(duration).toBeLessThan(150); // Complex structures should still be fast
+    });
+
+    it('should maintain consistent performance across multiple parses', () => {
+        const jsonLd = createRecipeWithIngredients(15);
+        const durations: number[] = [];
+
+        // Parse the same recipe 10 times
+        for (let i = 0; i < 10; i++) {
+            const start = performance.now();
+            const result = parseRecipeJsonLd(jsonLd);
+            const duration = performance.now() - start;
+
+            expect(result.success).toBe(true);
+            durations.push(duration);
+        }
+
+        // Calculate average and ensure consistency
+        const avgDuration = durations.reduce((a, b) => a + b, 0) / durations.length;
+        const maxDuration = Math.max(...durations);
+
+        expect(avgDuration).toBeLessThan(100);
+        expect(maxDuration).toBeLessThan(150); // No single outlier should be too slow
+    });
+});

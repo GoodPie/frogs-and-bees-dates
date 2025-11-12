@@ -97,7 +97,7 @@ export const firebaseMocks = {
 
     // Firestore
     getFirestore: vi.fn(() => mockFirestore),
-    doc: vi.fn((...args) => ({id: args.at(args.length - 1)})),
+    doc: vi.fn((...args) => ({id: args.at(-1)})),
     setDoc: vi.fn(() => Promise.resolve()),
     getDoc: vi.fn(() => Promise.resolve({exists: () => true, data: () => ({})})),
     addDoc: vi.fn(() => Promise.resolve({id: 'mock-doc-id'})),

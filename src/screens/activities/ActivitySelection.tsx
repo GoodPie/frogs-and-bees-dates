@@ -30,7 +30,7 @@ const ActivitySelection = () => {
     const [currentFilters, setCurrentFilters] = useState({} as IActivityFilters);
     const [activityStep, setActivityStep] = useState(0);
 
-    const [loadingResult, setIsLoadingResult] = useState(false);
+    const [isLoadingResult, setIsLoadingResult] = useState(false);
     const [selectedActivity, setSelectedActivity] = useState({} as IActivityDetails);
 
     const [activities, setActivities] = useState({
@@ -52,9 +52,9 @@ const ActivitySelection = () => {
             const docRef = collection(db, "tags");
             getDocs(docRef).then((querySnapshot) => {
                 const allTags: string[] = [];
-                querySnapshot.forEach((doc) => {
+                for (const doc of querySnapshot.docs) {
                     allTags.push(doc.id as string);
-                })
+                }
                 setAvailableTags(allTags);
             });
 
@@ -82,11 +82,9 @@ const ActivitySelection = () => {
 
             const querySnapshot = await getDocs(activityQuery);
 
-
-            querySnapshot.forEach((doc) => {
+            for (const doc of querySnapshot.docs) {
                 allActivities.push(doc.data() as IActivityDetails);
-            })
-
+            }
             setActivities({
                 allActivities: allActivities,
                 alreadySelectedActivities: []
@@ -149,17 +147,17 @@ const ActivitySelection = () => {
     const RemoveActivity = (name: string) => {
 
         // Alert and ask if we want to remove
-        const remove = window.confirm("Are you sure you want to remove: " + name);
+        const remove = globalThis.window.confirm("Are you sure you want to remove: " + name);
         if (!remove) return;
 
         // Remove the given activity from Firebase
         const activityRef = collection(db, "activities");
         const nameQuery = where("name", "==", name);
 
-        getDocs(query(activityRef, nameQuery)).then((querySnapshot) => {
-            querySnapshot.forEach(async (doc) => {
+        getDocs(query(activityRef, nameQuery)).then(async (querySnapshot) => {
+            for (const doc of querySnapshot.docs) {
                 await deleteDoc(doc.ref);
-            })
+            }
         });
 
         // Clear the activities to force a new load
@@ -288,8 +286,8 @@ const ActivitySelection = () => {
                     </>
                 }
 
-                {activityStep === 1 && loadingResult && <Spinner colorScheme={"green"}/>}
-                {activityStep === 1 && !loadingResult && <>
+                {activityStep === 1 && isLoadingResult && <Spinner colorScheme={"green"}/>}
+                {activityStep === 1 && !isLoadingResult && <>
 
                     <HStack w={"100"}></HStack>
 

@@ -123,5 +123,75 @@ export const RecipeSchema = z.object({
 // Export TypeScript types inferred from Zod schemas
 export type SchemaOrgRecipe = z.infer<typeof SchemaOrgRecipeSchema>;
 export type IRecipeNutrition = z.infer<typeof NutritionalInfoSchema>;
-export type IAggregateRating = z.infer<typeof AggregateRatingSchema>;
 export type IRecipe = z.infer<typeof RecipeSchema>;
+
+/**
+ * State for recipe yield adjustment
+ */
+export interface YieldAdjustmentState {
+    /** Original yield value parsed from a recipe */
+    originalYield: number;
+
+    /** Current yield value set by user */
+    currentYield: number;
+
+    /** Calculated multiplier: currentYield / originalYield */
+    yieldMultiplier: number;
+
+    /** Whether the yield has been adjusted from original */
+    isAdjusted: boolean;
+
+    /** Optional: Original yield string for display (e.g., "4 servings") */
+    originalYieldString?: string;
+}
+
+/**
+ * Ingredient with quantities scaled by yield multiplier
+ */
+export interface ScaledIngredient {
+    /** Original parsed ingredient data */
+    original: ParsedIngredient;
+
+    /** Scaled quantity value (null if not scalable) */
+    scaledQuantity: number | null;
+
+    /** Display string for scaled quantity (includes fraction formatting) */
+    displayQuantity: string;
+
+    /** Whether this ingredient was scaled */
+    wasScaled: boolean;
+
+    /** Optional warning for edge cases (e.g., "Very small amount", "Rounded to nearest whole") */
+    warning?: string;
+}
+
+/**
+ * Representation of a quantity as a fraction
+ */
+export interface FractionDisplay {
+    /** Whole number part (e.g., 1 in "1 1/2") */
+    whole: number;
+
+    /** Numerator of fractional part (e.g., 1 in "1/2") */
+    numerator: number;
+
+    /** Denominator of fractional part (e.g., 2 in "1/2") */
+    denominator: number;
+
+    /** Formatted string (e.g., "1 1/2", "3/4", "2") */
+    formatted: string;
+}
+
+/**
+ * Validation error for yield input
+ */
+export interface YieldValidationError {
+    /** Error type */
+    type: 'below_minimum' | 'above_maximum' | 'invalid_number';
+
+    /** User-friendly error message */
+    message: string;
+
+    /** Suggested corrected value (if applicable) */
+    suggestedValue?: number;
+}

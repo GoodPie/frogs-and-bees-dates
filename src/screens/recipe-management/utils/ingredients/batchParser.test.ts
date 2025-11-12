@@ -241,7 +241,7 @@ describe('batchParser', () => {
     });
 
     it('should reject non-string ingredients', () => {
-      const ingredients = ['2 cups flour', 123 as any, '1 tsp salt'];
+      const ingredients = ['2 cups flour', 123 as number, '1 tsp salt'];
       const result = validateIngredientBatch(ingredients);
       expect(result.valid).toBe(false);
       expect(result.error).toContain('Ingredient at index 1 must be a string');

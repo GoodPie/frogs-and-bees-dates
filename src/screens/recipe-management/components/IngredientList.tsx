@@ -10,6 +10,13 @@
 import {Box, HStack, Text, Badge, VStack} from '@chakra-ui/react';
 import {AiOutlineWarning} from 'react-icons/ai';
 import type {ParsedIngredient} from '@/models/ParsedIngredient.ts';
+import {fractionToDecimal} from "@/services/ingredientParser.ts";
+import convert from 'convert';
+import {
+    isConvertibleWeightUnit,
+    isMetricUnit,
+    smartRound
+} from '@/utils/unitConversions.ts';
 
 export type DisplayMode = 'original' | 'metric' | 'imperial';
 
@@ -22,14 +29,17 @@ export interface IngredientListProps {
 
     /** Optional callback when an ingredient is clicked for editing */
     onEditIngredient?: (index: number, ingredient: ParsedIngredient) => void;
+
+    /** Optional yield multiplier for scaling quantities */
+    yieldMultiplier?: number;
 }
 
 /**
  * Formats an ingredient for display based on the selected mode
+ * Converts units on-the-fly and applies yield scaling
  */
-function formatIngredient(ingredient: ParsedIngredient, mode: DisplayMode): string {
+function formatIngredient(ingredient: ParsedIngredient, mode: DisplayMode, yieldMultiplier: number = 1): string {
     // Helper to clean ingredient name (remove trailing commas/periods)
-    // Using iterative approach to prevent ReDoS vulnerability
     const cleanName = (name: string) => {
         let cleaned = name.trim();
         while (cleaned.length > 0 && /[,.\s]/.test(cleaned[cleaned.length - 1])) {
@@ -39,11 +49,9 @@ function formatIngredient(ingredient: ParsedIngredient, mode: DisplayMode): stri
     };
 
     // Helper to check if preparation notes are meaningful
-    // Using iterative approach to prevent ReDoS vulnerability
     const hasPreparationNotes = (notes: string | null) => {
         if (!notes) return false;
         const trimmed = notes.trim();
-        // Check if there's any character that's not comma, period, or whitespace
         for (let i = 0; i < trimmed.length; i++) {
             if (!/[,.\s]/.test(trimmed[i])) {
                 return true;
@@ -52,35 +60,90 @@ function formatIngredient(ingredient: ParsedIngredient, mode: DisplayMode): stri
         return false;
     };
 
-    switch (mode) {
-        case 'original':
-            return ingredient.originalText;
-
-        case 'metric':
-            if (ingredient.metricQuantity && ingredient.metricUnit) {
-                const cleanedName = cleanName(ingredient.ingredientName);
-                const base = `${ingredient.metricQuantity} ${ingredient.metricUnit} ${cleanedName}`;
-                return hasPreparationNotes(ingredient.preparationNotes)
-                    ? `${base}, ${ingredient.preparationNotes?.trim()}`
-                    : base;
-            }
-            // Fallback to original if no metric conversion available
-            return ingredient.originalText;
-
-        case 'imperial':
-            if (ingredient.quantity && ingredient.unit) {
-                const cleanedName = cleanName(ingredient.ingredientName);
-                const base = `${ingredient.quantity} ${ingredient.unit} ${cleanedName}`;
-                return hasPreparationNotes(ingredient.preparationNotes)
-                    ? `${base}, ${ingredient.preparationNotes?.trim()}`
-                    : base;
-            }
-            // Fallback to original if no quantity/unit
-            return ingredient.originalText;
-
-        default:
-            return ingredient.originalText;
+    // Original mode - no conversion or scaling
+    if (mode === 'original') {
+        return ingredient.originalText;
     }
+
+    // Metric mode: Try to use pre-stored metricQuantity first (backward compatibility)
+    if (mode === 'metric' && ingredient.metricQuantity && ingredient.metricUnit) {
+        const metricQuantityStr = typeof ingredient.metricQuantity === 'string'
+            ? ingredient.metricQuantity
+            : ingredient.metricQuantity.toString();
+        let quantity = fractionToDecimal(metricQuantityStr);
+        if (quantity !== null) {
+            // Apply yield scaling
+            quantity = quantity * yieldMultiplier;
+            const displayQty = Math.round(quantity * 100) / 100;
+            const cleanedName = cleanName(ingredient.ingredientName);
+            const base = `${displayQty} ${ingredient.metricUnit} ${cleanedName}`;
+            return hasPreparationNotes(ingredient.preparationNotes)
+                ? `${base}, ${ingredient.preparationNotes?.trim()}`
+                : base;
+        }
+    }
+
+    // If no quantity/unit, return original
+    if (!ingredient.quantity) {
+        return ingredient.originalText;
+    }
+
+    // Parse quantity (handle both string and number)
+    const quantityStr = typeof ingredient.quantity === 'string'
+        ? ingredient.quantity
+        : ingredient.quantity.toString();
+    let quantity = fractionToDecimal(quantityStr);
+    if (quantity === null) {
+        return ingredient.originalText;
+    }
+
+    let unit = ingredient.unit || "each";
+    const cleanedName = cleanName(ingredient.ingredientName);
+
+    // Convert weight units ONLY (spec 03: volume units stay as-is for both modes)
+    if (mode === 'metric' && isConvertibleWeightUnit(unit) && !isMetricUnit(unit)) {
+        // Imperial weight → Metric (oz → g, lb → kg)
+        try {
+            if (unit.toLowerCase() === 'oz' || unit.toLowerCase() === 'ounce' || unit.toLowerCase() === 'ounces') {
+                quantity = convert(quantity, 'oz').to('g');
+                unit = 'g';
+            } else if (unit.toLowerCase() === 'lb' || unit.toLowerCase() === 'pound' || unit.toLowerCase() === 'pounds' || unit.toLowerCase() === 'lbs') {
+                quantity = convert(quantity, 'lb').to('kg');
+                unit = 'kg';
+            }
+            quantity = smartRound(quantity);
+        } catch (e) {
+            // Conversion failed, keep original
+            console.warn(`Failed to convert ${quantity} ${unit} to metric:`, e);
+        }
+    } else if (mode === 'imperial' && isConvertibleWeightUnit(unit) && isMetricUnit(unit)) {
+        // Metric weight → Imperial (g → oz, kg → lb)
+        try {
+            if (unit.toLowerCase() === 'g' || unit.toLowerCase() === 'gram' || unit.toLowerCase() === 'grams') {
+                quantity = convert(quantity, 'g').to('oz');
+                unit = 'oz';
+            } else if (unit.toLowerCase() === 'kg' || unit.toLowerCase() === 'kilogram' || unit.toLowerCase() === 'kilograms') {
+                quantity = convert(quantity, 'kg').to('lb');
+                unit = 'lb';
+            }
+            quantity = smartRound(quantity);
+        } catch (e) {
+            // Conversion failed, keep original
+            console.warn(`Failed to convert ${quantity} ${unit} to imperial:`, e);
+        }
+    }
+
+    // Apply yield scaling AFTER conversion
+    quantity = quantity * yieldMultiplier;
+
+    // Round to 2 decimal places for display
+    const displayQty = Math.round(quantity * 100) / 100;
+
+    // Format the ingredient
+    const base = `${displayQty} ${unit} ${cleanedName}`;
+    return hasPreparationNotes(ingredient.preparationNotes)
+        ? `${base}, ${ingredient.preparationNotes?.trim()}`
+        : base;
 }
 
 /**
@@ -93,6 +156,7 @@ export function IngredientList({
     ingredients,
     displayMode,
     onEditIngredient,
+    yieldMultiplier = 1,
 }: IngredientListProps) {
     if (!ingredients || ingredients.length === 0) {
         return (
@@ -125,7 +189,7 @@ export function IngredientList({
                     transition="background-color 0.2s"
                 >
                     <Text flex={1} fontSize="sm">
-                        {formatIngredient(ingredient, displayMode)}
+                        {formatIngredient(ingredient, displayMode, yieldMultiplier)}
                     </Text>
 
                     <HStack gap={2}>

@@ -97,7 +97,7 @@ export function IngredientEditForm({
         // Recalculate metric conversions using the conversion utility
         const conversion = convertToMetric(
             quantity.trim() || null,
-            unit || null
+            unit || "each"
         );
 
         // Create updated ingredient with manual edit flags

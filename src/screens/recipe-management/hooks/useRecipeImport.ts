@@ -250,7 +250,6 @@ export function useRecipeImport(): UseRecipeImportReturn {
         ingredientCount: result.recipe?.recipeIngredient?.length || 0,
         parsedCount: ingredientResult.parsedIngredients.length,
         failedCount: ingredientResult.failedIngredients.length,
-        totalBatches: ingredientResult.totalBatches,
       });
 
       // Complete successfully (only if session is still valid)

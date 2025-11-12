@@ -274,7 +274,6 @@ export function isConvertibleWeightUnit(unit: string | null): boolean {
  */
 export function getMetricWeightUnit(unit: string): string {
     const normalized = normalizeUnit(unit);
-    if (!normalized) return unit;
 
     if (normalized === 'oz' || normalized === 'ounce' || normalized === 'ounces') {
         return 'g';

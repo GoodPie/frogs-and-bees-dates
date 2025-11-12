@@ -1,7 +1,17 @@
-import { useState, useMemo, useCallback } from 'react';
-import type { IRecipe, YieldAdjustmentState, ScaledIngredient, YieldValidationError } from '@/screens/recipe-management/types/Recipe';
-import { parseYield, scaleQuantity, validateYield, calculateMultiplier } from '@/screens/recipe-management/utils/yieldCalculations';
-import { decimalToFraction } from '@/screens/recipe-management/utils/fractionFormatter';
+import {useState, useMemo, useCallback} from 'react';
+import type {
+    IRecipe,
+    YieldAdjustmentState,
+    ScaledIngredient,
+    YieldValidationError
+} from '@/screens/recipe-management/types/Recipe';
+import {
+    parseYield,
+    scaleQuantity,
+    validateYield,
+    calculateMultiplier
+} from '@/screens/recipe-management/utils/yieldCalculations';
+import {decimalToFraction} from '@/screens/recipe-management/utils/fractionFormatter';
 import {fractionToDecimal} from "@/services/ingredientParser.ts";
 
 export interface UseYieldAdjustmentReturn {
@@ -106,14 +116,11 @@ export function useYieldAdjustment(recipe: IRecipe): UseYieldAdjustmentReturn {
 
         return recipe.parsedIngredients.map(ingredient => {
             if (!ingredient.quantity) {
-                return { original: ingredient, scaledQuantity: null, displayQuantity: '', wasScaled: false };
+                return {original: ingredient, scaledQuantity: null, displayQuantity: '', wasScaled: false};
             }
 
             // Handle both string and number quantity (for backwards compatibility)
-            const quantityStr = typeof ingredient.quantity === 'string'
-                ? ingredient.quantity
-                : ingredient.quantity.toString();
-            const scaledQty = scaleQuantity(fractionToDecimal(quantityStr), state.yieldMultiplier);
+            const scaledQty = scaleQuantity(fractionToDecimal(ingredient.quantity), state.yieldMultiplier);
             const wasScaled = state.yieldMultiplier !== 1.0 && scaledQty !== null;
 
             // Format display quantity

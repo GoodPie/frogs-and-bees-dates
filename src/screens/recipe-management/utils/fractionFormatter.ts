@@ -65,7 +65,7 @@ export function formatScaledQuantity(scaledIngredient: ScaledIngredient): string
 
     // If no quantity, return just the ingredient name
     if (scaledQuantity === null) {
-        return original.name;
+        return original.ingredientName;
     }
 
     // Convert to fraction for display
@@ -74,5 +74,5 @@ export function formatScaledQuantity(scaledIngredient: ScaledIngredient): string
 
     // Combine with unit and name
     const unit = original.unit || '';
-    return `${quantityStr}${unit ? ' ' + unit : ''} ${original.name}`.trim();
+    return `${quantityStr}${unit ? ' ' + unit : ''} ${original.ingredientName}`.trim();
 }

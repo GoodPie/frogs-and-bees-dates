@@ -65,34 +65,13 @@ function formatIngredient(ingredient: ParsedIngredient, mode: DisplayMode, yield
         return ingredient.originalText;
     }
 
-    // Metric mode: Try to use pre-stored metricQuantity first (backward compatibility)
-    if (mode === 'metric' && ingredient.metricQuantity && ingredient.metricUnit) {
-        const metricQuantityStr = typeof ingredient.metricQuantity === 'string'
-            ? ingredient.metricQuantity
-            : ingredient.metricQuantity.toString();
-        let quantity = fractionToDecimal(metricQuantityStr);
-        if (quantity !== null) {
-            // Apply yield scaling
-            quantity = quantity * yieldMultiplier;
-            const displayQty = Math.round(quantity * 100) / 100;
-            const cleanedName = cleanName(ingredient.ingredientName);
-            const base = `${displayQty} ${ingredient.metricUnit} ${cleanedName}`;
-            return hasPreparationNotes(ingredient.preparationNotes)
-                ? `${base}, ${ingredient.preparationNotes?.trim()}`
-                : base;
-        }
-    }
-
     // If no quantity/unit, return original
     if (!ingredient.quantity) {
         return ingredient.originalText;
     }
 
     // Parse quantity (handle both string and number)
-    const quantityStr = typeof ingredient.quantity === 'string'
-        ? ingredient.quantity
-        : ingredient.quantity.toString();
-    let quantity = fractionToDecimal(quantityStr);
+    let quantity = fractionToDecimal(ingredient.quantity);
     if (quantity === null) {
         return ingredient.originalText;
     }
@@ -100,9 +79,8 @@ function formatIngredient(ingredient: ParsedIngredient, mode: DisplayMode, yield
     let unit = ingredient.unit || "each";
     const cleanedName = cleanName(ingredient.ingredientName);
 
-    // Convert weight units ONLY (spec 03: volume units stay as-is for both modes)
+    // Convert weight units ONLY
     if (mode === 'metric' && isConvertibleWeightUnit(unit) && !isMetricUnit(unit)) {
-        // Imperial weight → Metric (oz → g, lb → kg)
         try {
             if (unit.toLowerCase() === 'oz' || unit.toLowerCase() === 'ounce' || unit.toLowerCase() === 'ounces') {
                 quantity = convert(quantity, 'oz').to('g');

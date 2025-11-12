@@ -36,7 +36,7 @@ export interface RecipeImportProps {
 export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
     const importState = useRecipeImport();
 
-    // T034: Debounced input handling for jsonLdText textarea
+    // Debounced input handling for jsonLdText textarea
     const debounceTimerRef = useRef<number | null>(null);
 
     const debouncedSetJsonLdText = useCallback((text: string) => {
@@ -48,7 +48,7 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
             importState.setJsonLdText(text);
             debounceTimerRef.current = null;
         }, UI_CONFIG.DEBOUNCE_MS);
-    }, [importState.setJsonLdText]);
+    }, [importState]);
 
     // Cleanup timer on unmount
     useEffect(() => {
@@ -59,7 +59,7 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
         };
     }, []);
 
-    // T036: Check input size and show warning if too large
+    // Check input size and show warning if too large
     const inputSizeWarning = useMemo(() => {
         const byteSize = new Blob([importState.jsonLdText]).size;
         const maxSize = JSON_LD_PARSING.MAX_INPUT_SIZE;
@@ -73,13 +73,13 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
         return null;
     }, [importState.jsonLdText]);
 
-    // T032: Memoize JSON-LD extraction instructions to prevent recalculation on every render
+    // Memoize JSON-LD extraction instructions to prevent recalculation on every render
     const jsonLdInstructions = useMemo(
         () => getJsonLdExtractionInstructions(importState.url || undefined),
         [importState.url]
     );
 
-    // T033: Memoize expensive recipe field derivations for preview display
+    // Memoize expensive recipe field derivations for preview display
     const recipePreviewData = useMemo(() => {
         if (importState.state.status !== 'complete' || !importState.state.recipe) {
             return null;
@@ -98,7 +98,7 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
             parsedIngredients: recipe.parsedIngredients,
             hasManualReviewNeeded: recipe.parsedIngredients?.some(ing => ing.requiresManualReview) || false,
         };
-    }, [importState.state.status, importState.state.recipe]);
+    }, [importState.state]);
 
     const handleImport = () => {
         importState.importRecipe();
@@ -266,7 +266,7 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                         </HStack>
 
                                         {/* Warnings */}
-                                        {importState.state.warnings && importState.state.warnings.length > 0 && (
+                                        {importState.state.status === "complete" && importState.state.warnings && importState.state.warnings.length > 0 && (
                                             <Box>
                                                 <HStack mb={1}>
                                                     <AiOutlineWarning color="orange"/>

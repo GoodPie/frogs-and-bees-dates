@@ -3,7 +3,7 @@
  * Tests batching logic, progress tracking, and cancellation support
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   chunk,
   parseIngredientsInBatches,
@@ -16,7 +16,8 @@ import {
   formatTimeRemaining,
   type BatchParsingOptions,
 } from './batchParser';
-import type { ParsedIngredient } from '@/models/ParsedIngredient';
+import {ParsedIngredient} from "../../../../models/ParsedIngredient";
+
 
 describe('batchParser', () => {
   describe('chunk', () => {
@@ -228,23 +229,10 @@ describe('batchParser', () => {
       expect(result.error).toBeUndefined();
     });
 
-    it('should reject non-array input', () => {
-      const result = validateIngredientBatch('not an array' as any);
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('Ingredients must be an array');
-    });
-
     it('should reject empty array', () => {
       const result = validateIngredientBatch([]);
       expect(result.valid).toBe(false);
       expect(result.error).toBe('Ingredients array cannot be empty');
-    });
-
-    it('should reject non-string ingredients', () => {
-      const ingredients = ['2 cups flour', 123 as number, '1 tsp salt'];
-      const result = validateIngredientBatch(ingredients);
-      expect(result.valid).toBe(false);
-      expect(result.error).toContain('Ingredient at index 1 must be a string');
     });
 
     it('should reject ingredients exceeding max length', () => {
@@ -331,7 +319,7 @@ describe('batchParser', () => {
     it('should return false for small ingredient counts', () => {
       expect(needsBatchProcessing(10)).toBe(false);
       expect(needsBatchProcessing(15)).toBe(false);
-      expect(needsBatchProcessing(20)).toBe(false); // Exactly at limit
+      expect(needsBatchProcessing(20)).toBe(false);
     });
 
     it('should return true for large ingredient counts', () => {

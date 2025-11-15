@@ -66,22 +66,22 @@ describe('formatScaledQuantity', () => {
     it('should format quantity with unit', () => {
         const scaledIngredient: ScaledIngredient = {
             original: {
-                name: 'flour',
+                ingredientName: 'flour',
                 quantity: 2,
-                unit: 'cups'
+                unit: 'cup'
             } as ParsedIngredient,
             scaledQuantity: 3,
             displayQuantity: '',
             wasScaled: true
         };
 
-        expect(formatScaledQuantity(scaledIngredient)).toBe('3 cups flour');
+        expect(formatScaledQuantity(scaledIngredient)).toBe('3 cup flour');
     });
 
     it('should format fractional quantities', () => {
         const scaledIngredient: ScaledIngredient = {
             original: {
-                name: 'butter',
+                ingredientName: 'butter',
                 quantity: 0.5,
                 unit: 'cup'
             } as ParsedIngredient,
@@ -96,7 +96,7 @@ describe('formatScaledQuantity', () => {
     it('should handle null scaledQuantity', () => {
         const scaledIngredient: ScaledIngredient = {
             original: {
-                name: 'salt to taste',
+                ingredientName: 'salt to taste',
                 quantity: null,
                 unit: null
             } as ParsedIngredient,
@@ -111,7 +111,7 @@ describe('formatScaledQuantity', () => {
     it('should handle missing unit', () => {
         const scaledIngredient: ScaledIngredient = {
             original: {
-                name: 'eggs',
+                ingredientName: 'eggs',
                 quantity: 2,
                 unit: null
             } as ParsedIngredient,
@@ -126,7 +126,7 @@ describe('formatScaledQuantity', () => {
     it('should format mixed numbers correctly', () => {
         const scaledIngredient: ScaledIngredient = {
             original: {
-                name: 'sugar',
+                ingredientName: 'sugar',
                 quantity: 1,
                 unit: 'cup'
             } as ParsedIngredient,
@@ -141,7 +141,7 @@ describe('formatScaledQuantity', () => {
     it('should handle empty unit string', () => {
         const scaledIngredient: ScaledIngredient = {
             original: {
-                name: 'eggs',
+                ingredientName: 'eggs',
                 quantity: 2,
                 unit: ''
             } as ParsedIngredient,

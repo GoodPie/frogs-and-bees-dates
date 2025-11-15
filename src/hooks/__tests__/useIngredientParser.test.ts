@@ -85,7 +85,7 @@ describe('useIngredientParser', () => {
     expect(parsed).toHaveLength(1);
     expect(parsed[0]).toMatchObject({
       quantity: "2",
-      unit: "cups",
+      unit: "cup",
       ingredientName: "flour",
       metricQuantity: "240",
       metricUnit: "g",

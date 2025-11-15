@@ -99,11 +99,13 @@ export const UNIT_ALIASES: Record<string, Unit> = {
     'teaspoons': 'tsp',
     't': 'tsp',
 
-    // Volume (Imperial) - fluid ounce
-    'fl oz': 'oz',
-    'fluid ounce': 'oz',
-    'fluid ounces': 'oz',
-    'floz': 'oz',
+    // Volume (Imperial) - fluid ounce (removed - fl oz is volume, not weight)
+    // Fl oz should NOT be converted to weight oz, so we don't map it
+    // It will default to 'each' (non-convertible) which prevents metric conversion
+    // 'fl oz': 'oz',  // ❌ Don't alias to weight unit
+    // 'fluid ounce': 'oz',
+    // 'fluid ounces': 'oz',
+    // 'floz': 'oz',
 
     // Volume (Imperial) - other volume units (normalize to ml)
     'pint': 'ml',

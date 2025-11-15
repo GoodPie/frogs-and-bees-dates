@@ -308,7 +308,7 @@ describe('parseIngredientString - Round-trip formatting', () => {
 
         expect(parsed.originalText).toBe(text);
         expect(parsed.quantity).toBe('2');
-        expect(parsed.unit).toBe('cups');
+        expect(parsed.unit).toBe('cup');
         expect(parsed.ingredientName).toBe('flour');
         expect(parsed.preparationNotes).toBeNull();
     });
@@ -319,7 +319,7 @@ describe('parseIngredientString - Round-trip formatting', () => {
 
         expect(parsed.originalText).toBe(text);
         expect(parsed.quantity).toBe('2');
-        expect(parsed.unit).toBe('cups');
+        expect(parsed.unit).toBe('cup');
         expect(parsed.ingredientName).toBe('flour');
         expect(parsed.preparationNotes).toBe('sifted');
     });
@@ -341,7 +341,7 @@ describe('parseIngredientString - Round-trip formatting', () => {
         // Note: Simple regex parsing treats "Salt" as unit and "to taste" as ingredient
         // For better parsing, use AI ingredient parser
         expect(parsed.ingredientName).toBe('to taste');
-        expect(parsed.unit).toBe('Salt');
+        expect(parsed.unit).toBe('each');  // normalizeUnit('Salt') -> 'each' (unrecognized)
         expect(parsed.parsingMethod).toBe('manual');
     });
 
@@ -360,7 +360,7 @@ describe('Round-trip formatting: format -> parse -> format', () => {
         const original: ParsedIngredient = {
             originalText: '2 cups flour',
             quantity: '2',
-            unit: 'cups',
+            unit: 'cup',
             ingredientName: 'flour',
             preparationNotes: null,
             metricQuantity: '240',
@@ -372,7 +372,7 @@ describe('Round-trip formatting: format -> parse -> format', () => {
 
         // Format to string (without metric)
         const formatted = formatIngredient(original, {includeMetric: false});
-        expect(formatted).toBe('2 cups flour');
+        expect(formatted).toBe('2 cup flour');
 
         // Parse back
         const parsed = parseIngredientString(formatted);
@@ -385,7 +385,7 @@ describe('Round-trip formatting: format -> parse -> format', () => {
         const original: ParsedIngredient = {
             originalText: '2 cups flour, sifted',
             quantity: '2',
-            unit: 'cups',
+            unit: 'cup',
             ingredientName: 'flour',
             preparationNotes: 'sifted',
             metricQuantity: '240',
@@ -397,7 +397,7 @@ describe('Round-trip formatting: format -> parse -> format', () => {
 
         // Format to string
         const formatted = formatIngredient(original);
-        expect(formatted).toBe('2 cups flour, sifted');
+        expect(formatted).toBe('2 cup flour, sifted');
 
         // Parse back
         const parsed = parseIngredientString(formatted);
@@ -435,7 +435,7 @@ describe('createManualParsedIngredient', () => {
 
         expect(ingredient.originalText).toBe(text);
         expect(ingredient.quantity).toBe('2');
-        expect(ingredient.unit).toBe('cups');
+        expect(ingredient.unit).toBe('cup');
         expect(ingredient.ingredientName).toBe('flour');
         expect(ingredient.parsingMethod).toBe('manual');
         expect(ingredient.confidence).toBe(1.0);

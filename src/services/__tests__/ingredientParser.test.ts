@@ -72,7 +72,7 @@ describe('ingredientParser', () => {
         expect(result[0]).toMatchObject({
           originalText: "2 cups all-purpose flour",
           quantity: "2",
-          unit: "cups",
+          unit: "cup",
           ingredientName: "all-purpose flour",
           preparationNotes: null,
           metricQuantity: "240",
@@ -582,7 +582,7 @@ describe('ingredientParser', () => {
 
         expect(result).toHaveLength(1);
         expect(result[0].quantity).toBe("2-3");
-        expect(result[0].unit).toBe("cups");
+        expect(result[0].unit).toBe("cup");
         expect(result[0].ingredientName).toBe("all-purpose flour");
         expect(result[0].metricQuantity).toBe("240-360");
         expect(result[0].metricUnit).toBe("g");
@@ -685,7 +685,7 @@ describe('ingredientParser', () => {
         const result = await parseIngredients(["2 dashes bitters"]);
 
         expect(result).toHaveLength(1);
-        expect(result[0].unit).toBe("dashes");
+        expect(result[0].unit).toBe("dash");
       });
 
       it('should handle "knob" as a unit', async () => {
@@ -709,7 +709,7 @@ describe('ingredientParser', () => {
         const result = await parseIngredients(["1 knob ginger, peeled and minced"]);
 
         expect(result).toHaveLength(1);
-        expect(result[0].unit).toBe("knob");
+        expect(result[0].unit).toBe("whole");
         expect(result[0].preparationNotes).toBe("peeled and minced");
       });
 

@@ -88,7 +88,7 @@ export function IngredientForm({
             ingredientName,
             preparationNotes: preparationNotes || null,
             metricQuantity: conversion.metricQuantity,
-            metricUnit: conversion.metricUnit,
+            metricUnit: (conversion.metricUnit ? normalizeUnit(conversion.metricUnit) : null),
             // Set flags for manual edit
             parsingMethod: 'manual',
             confidence: 1.0,
@@ -122,7 +122,7 @@ export function IngredientForm({
                     <NativeSelectRoot>
                         <NativeSelectField
                             value={unit}
-                            onChange={(e) => setUnit(e.target.value)}
+                            onChange={(e) => setUnit(normalizeUnit(e.target.value))}
                         >
                             {CANONICAL_UNITS.map((u) => (
                                 <option key={u} value={u}>

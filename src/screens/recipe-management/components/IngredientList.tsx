@@ -78,7 +78,7 @@ function formatIngredient(ingredient: ParsedIngredient, mode: DisplayMode, yield
     }
 
     // Parse quantity (handle both string and number)
-    let quantity = fractionToDecimal(ingredient.quantity);
+    let quantity = fractionToDecimal(String(ingredient.quantity));
     if (quantity === null) {
         return ingredient.originalText;
     }
@@ -229,9 +229,9 @@ export function IngredientList({
                     variant="outline"
                     colorScheme="blue"
                     onClick={onAddIngredient}
-                    leftIcon={<FiPlus />}
                     mt={2}
                 >
+                    <FiPlus />
                     Add Ingredient
                 </Button>
             )}

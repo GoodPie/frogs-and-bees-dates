@@ -120,7 +120,7 @@ export function useYieldAdjustment(recipe: IRecipe): UseYieldAdjustmentReturn {
             }
 
             // Handle both string and number quantity (for backwards compatibility)
-            const scaledQty = scaleQuantity(fractionToDecimal(ingredient.quantity), state.yieldMultiplier);
+            const scaledQty = scaleQuantity(fractionToDecimal(String(ingredient.quantity)), state.yieldMultiplier);
             const wasScaled = state.yieldMultiplier !== 1.0 && scaledQty !== null;
 
             // Format display quantity

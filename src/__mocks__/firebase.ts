@@ -145,7 +145,7 @@ export const firebaseMocks = {
 
     // Firebase Storage
     getStorage: vi.fn(() => ({})),
-    ref: vi.fn((storage: any, path: string) => ({path, fullPath: path})),
+    ref: vi.fn((_storage: any, path: string) => ({path, fullPath: path})),
     uploadBytes: vi.fn(() => Promise.resolve({
         metadata: {
             fullPath: 'mock/path/to/image.jpg',

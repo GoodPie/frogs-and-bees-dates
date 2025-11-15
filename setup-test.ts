@@ -166,6 +166,13 @@ vi.mock('firebase/ai', () => ({
   GoogleAIBackend: firebaseMocks.GoogleAIBackend,
 }));
 
+vi.mock('firebase/storage', () => ({
+  getStorage: firebaseMocks.getStorage,
+  ref: firebaseMocks.ref,
+  uploadBytes: firebaseMocks.uploadBytes,
+  getDownloadURL: firebaseMocks.getDownloadURL,
+}));
+
 // Mock Notification API
 Object.defineProperty(window, 'Notification', {
   value: {

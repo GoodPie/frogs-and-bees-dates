@@ -21,6 +21,8 @@
 import {ai} from "@/FirebaseConfig";
 import type {ParsedIngredient} from "@/models/ParsedIngredient";
 import {getGenerativeModel, Schema} from "firebase/ai";
+import Fraction from "fraction.js";
+import {normalizeUnit} from "@/constants/units.ts";
 
 /**
  * Schema definition for ingredient parsing using Firebase AI Logic Schema API
@@ -56,6 +58,42 @@ interface GeminiIngredientResponse {
     metricQuantity?: string;
     metricUnit?: string;
     confidence?: number;
+}
+
+/**
+ * Converts a fraction string to a decimal value using fraction.js
+ * Handles simple fractions (1/2), mixed numbers (1 1/2), decimals, and more
+ *
+ * @param fractionStr - The fraction string to convert (e.g., "1/2", "1 1/2", "2.5")
+ * @returns The decimal value, or null if the string cannot be parsed
+ *
+ * @example
+ * ```typescript
+ * fractionToDecimal("1/2");      // 0.5
+ * fractionToDecimal("1 1/2");    // 1.5
+ * fractionToDecimal("2/4");      // 0.5
+ * fractionToDecimal("2.5");      // 2.5
+ * fractionToDecimal("3");        // 3
+ * fractionToDecimal("invalid");  // null
+ * ```
+ */
+export function fractionToDecimal(fractionStr: string): number | null {
+    if (!fractionStr || typeof fractionStr !== 'string') {
+        return null;
+    }
+
+    const trimmed = fractionStr.trim();
+
+    if (trimmed.length === 0) {
+        return null;
+    }
+
+    try {
+        const fraction = new Fraction(trimmed);
+        return fraction.valueOf();
+    } catch {
+        return null;
+    }
 }
 
 /**
@@ -237,14 +275,15 @@ export async function parseIngredients(
         const parsedData = JSON.parse(text);
 
         // Transform API response to ParsedIngredient format
+        // Normalize units to canonical forms
         return parsedData.map((item: GeminiIngredientResponse, index: number) => ({
             originalText: ingredients[index],
             quantity: item.quantity || null,
-            unit: item.unit || null,
+            unit: item.unit ? normalizeUnit(item.unit) : null,
             ingredientName: item.ingredientName,
             preparationNotes: item.preparationNotes || null,
             metricQuantity: item.metricQuantity || null,
-            metricUnit: item.metricUnit || null,
+            metricUnit: item.metricUnit ? normalizeUnit(item.metricUnit) : null,
             confidence: item.confidence || 0.5,
             requiresManualReview: (item.confidence || 0.5) < 0.7,
             parsingMethod: 'ai',

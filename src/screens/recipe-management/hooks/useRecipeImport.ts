@@ -166,6 +166,23 @@ export function useRecipeImport(): UseRecipeImportReturn {
         return;
       }
 
+      // T039: Smart caching - check if ingredients were already parsed
+      const alreadyParsed = result.recipe?.parsedIngredients &&
+                            result.recipe.parsedIngredients.length > 0 &&
+                            result.recipe.ingredientParsingCompleted;
+
+      if (alreadyParsed) {
+        // Ingredients already parsed - skip re-parsing
+        setState({
+          status: 'complete',
+          recipe: result.recipe!,
+          startedAt: parsingStartTime,
+          completedAt: Date.now(),
+          warnings: result.warnings,
+        });
+        return;
+      }
+
       // Start ingredient parsing phase
       setState({
         status: 'parsing-ingredients',
@@ -220,6 +237,20 @@ export function useRecipeImport(): UseRecipeImportReturn {
           severity: 'warning',
         });
       }
+
+      // T040: Performance logging
+      const totalDuration = Date.now() - parsingStartTime;
+      const jsonLdDuration = result.metadata?.parsingDurationMs || 0;
+      const ingredientDuration = ingredientResult.durationMs || 0;
+
+      console.log('[Recipe Import] Performance Metrics:', {
+        totalDurationMs: totalDuration,
+        jsonLdParsingMs: jsonLdDuration,
+        ingredientParsingMs: ingredientDuration,
+        ingredientCount: result.recipe?.recipeIngredient?.length || 0,
+        parsedCount: ingredientResult.parsedIngredients.length,
+        failedCount: ingredientResult.failedIngredients.length,
+      });
 
       // Complete successfully (only if session is still valid)
       if (sessionIdRef.current === currentSessionId) {

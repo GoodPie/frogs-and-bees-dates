@@ -1,6 +1,6 @@
 import {useState} from 'react';
-import {getDownloadURL, getStorage, ref, uploadBytes} from 'firebase/storage';
-import {auth} from '@/FirebaseConfig.ts';
+import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
+import {auth, storage} from '@/FirebaseConfig.ts';
 import {validateImageUrl} from '@/screens/recipe-management/utils/recipeValidation.ts';
 
 /**
@@ -36,7 +36,6 @@ export const useRecipeImage = () => {
             }
 
             // Create storage reference
-            const storage = getStorage();
             const userId = auth.currentUser?.uid || 'anonymous';
             const timestamp = Date.now();
             const fileName = `recipes/${userId}/${timestamp}_${file.name}`;

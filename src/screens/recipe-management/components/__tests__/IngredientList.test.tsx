@@ -21,12 +21,12 @@ describe('IngredientList', () => {
 
     const mockIngredients: ParsedIngredient[] = [
         {
-            originalText: '2 cups all-purpose flour',
-            quantity: 2,
-            unit: 'cups',
+            originalText: '8 oz all-purpose flour',
+            quantity: 8,
+            unit: 'oz',
             ingredientName: 'all-purpose flour',
             preparationNotes: null,
-            metricQuantity: '240',
+            metricQuantity: '225',
             metricUnit: 'g',
             confidence: 0.95,
             parsingMethod: 'ai',
@@ -38,8 +38,8 @@ describe('IngredientList', () => {
             unit: 'tsp',
             ingredientName: 'salt',
             preparationNotes: null,
-            metricQuantity: '5',
-            metricUnit: 'ml',
+            metricQuantity: null,
+            metricUnit: null,
             confidence: 1.0,
             parsingMethod: 'ai',
             requiresManualReview: false,
@@ -64,7 +64,7 @@ describe('IngredientList', () => {
                 <IngredientList ingredients={mockIngredients} displayMode="original" />
             );
 
-            expect(screen.getByText('2 cups all-purpose flour')).toBeInTheDocument();
+            expect(screen.getByText('8 oz all-purpose flour')).toBeInTheDocument();
             expect(screen.getByText('1 tsp salt')).toBeInTheDocument();
             expect(screen.getByText('Salt to taste')).toBeInTheDocument();
         });
@@ -74,8 +74,9 @@ describe('IngredientList', () => {
                 <IngredientList ingredients={mockIngredients} displayMode="metric" />
             );
 
-            expect(screen.getByText('240 g all-purpose flour')).toBeInTheDocument();
-            expect(screen.getByText('5 ml salt')).toBeInTheDocument();
+            expect(screen.getByText('225 g all-purpose flour')).toBeInTheDocument();
+            // Volume units (tsp) don't convert to metric, falls back to original
+            expect(screen.getByText('1 tsp salt')).toBeInTheDocument();
             // Falls back to original for ingredients without metric conversion
             expect(screen.getByText('Salt to taste')).toBeInTheDocument();
         });
@@ -85,7 +86,7 @@ describe('IngredientList', () => {
                 <IngredientList ingredients={mockIngredients} displayMode="imperial" />
             );
 
-            expect(screen.getByText('2 cups all-purpose flour')).toBeInTheDocument();
+            expect(screen.getByText('8 oz all-purpose flour')).toBeInTheDocument();
             expect(screen.getByText('1 tsp salt')).toBeInTheDocument();
             // Falls back to original for ingredients without quantity/unit
             expect(screen.getByText('Salt to taste')).toBeInTheDocument();
@@ -93,12 +94,12 @@ describe('IngredientList', () => {
 
         it('should include preparation notes in formatted display', () => {
             const ingredientWithNotes: ParsedIngredient = {
-                originalText: '1 cup butter, softened',
-                quantity: 1,
-                unit: 'cup',
+                originalText: '8 oz butter, softened',
+                quantity: 8,
+                unit: 'oz',
                 ingredientName: 'butter',
                 preparationNotes: 'softened',
-                metricQuantity: '227',
+                metricQuantity: '225',
                 metricUnit: 'g',
                 confidence: 0.9,
                 parsingMethod: 'ai',
@@ -109,7 +110,7 @@ describe('IngredientList', () => {
                 <IngredientList ingredients={[ingredientWithNotes]} displayMode="metric" />
             );
 
-            expect(screen.getByText('227 g butter, softened')).toBeInTheDocument();
+            expect(screen.getByText('225 g butter, softened')).toBeInTheDocument();
         });
     });
 
@@ -149,7 +150,7 @@ describe('IngredientList', () => {
         it('should show empty message when no ingredients provided', () => {
             renderWithChakra(<IngredientList ingredients={[]} displayMode="original" />);
 
-            expect(screen.getByText('No ingredients to display')).toBeInTheDocument();
+            expect(screen.getByText(/No ingredients yet/i)).toBeInTheDocument();
         });
     });
 
@@ -166,7 +167,7 @@ describe('IngredientList', () => {
                 />
             );
 
-            const firstIngredient = screen.getByText('2 cups all-purpose flour');
+            const firstIngredient = screen.getByText('8 oz all-purpose flour');
             await user.click(firstIngredient);
 
             expect(mockOnEdit).toHaveBeenCalledWith(0, mockIngredients[0]);
@@ -229,25 +230,25 @@ describe('IngredientList', () => {
         it('should correctly clean ingredient names with trailing punctuation', () => {
             const testCases: ParsedIngredient[] = [
                 {
-                    originalText: '1 cup flour, , ,',
-                    quantity: 1,
-                    unit: 'cup',
+                    originalText: '4 oz flour, , ,',
+                    quantity: 4,
+                    unit: 'oz',
                     ingredientName: 'flour, , ,',
                     preparationNotes: null,
-                    metricQuantity: '120',
+                    metricQuantity: '125',
                     metricUnit: 'g',
                     confidence: 0.9,
                     parsingMethod: 'ai',
                     requiresManualReview: false,
                 },
                 {
-                    originalText: '1 tsp salt...',
+                    originalText: '1 oz salt...',
                     quantity: 1,
-                    unit: 'tsp',
+                    unit: 'oz',
                     ingredientName: 'salt...',
                     preparationNotes: null,
-                    metricQuantity: '5',
-                    metricUnit: 'ml',
+                    metricQuantity: '30',
+                    metricUnit: 'g',
                     confidence: 0.9,
                     parsingMethod: 'ai',
                     requiresManualReview: false,
@@ -255,11 +256,11 @@ describe('IngredientList', () => {
                 {
                     originalText: '2 eggs   ',
                     quantity: 2,
-                    unit: 'pieces',
+                    unit: 'each',
                     ingredientName: 'eggs   ',
                     preparationNotes: null,
-                    metricQuantity: '2',
-                    metricUnit: 'pieces',
+                    metricQuantity: null,
+                    metricUnit: null,
                     confidence: 0.9,
                     parsingMethod: 'ai',
                     requiresManualReview: false,
@@ -271,19 +272,19 @@ describe('IngredientList', () => {
             );
 
             // Should clean trailing punctuation/spaces
-            expect(screen.getByText('120 g flour')).toBeInTheDocument();
-            expect(screen.getByText('5 ml salt')).toBeInTheDocument();
-            expect(screen.getByText('2 pieces eggs')).toBeInTheDocument();
+            expect(screen.getByText('125 g flour')).toBeInTheDocument();
+            expect(screen.getByText('30 g salt')).toBeInTheDocument();
+            expect(screen.getByText('2 each eggs')).toBeInTheDocument();
         });
 
         it('should handle preparation notes with only punctuation/spaces', () => {
             const edgeCase: ParsedIngredient = {
-                originalText: '1 cup flour',
-                quantity: 1,
-                unit: 'cup',
+                originalText: '4 oz flour',
+                quantity: 4,
+                unit: 'oz',
                 ingredientName: 'flour',
                 preparationNotes: '  , . , . ',
-                metricQuantity: '120',
+                metricQuantity: '125',
                 metricUnit: 'g',
                 confidence: 0.9,
                 parsingMethod: 'ai',
@@ -295,8 +296,76 @@ describe('IngredientList', () => {
             );
 
             // Should not add comma for meaningless notes
-            expect(screen.getByText('120 g flour')).toBeInTheDocument();
+            expect(screen.getByText('125 g flour')).toBeInTheDocument();
             expect(screen.queryByText(/, \s*,/)).not.toBeInTheDocument();
+        });
+    });
+
+    describe('Delete Functionality', () => {
+        it('should render delete button when onDeleteIngredient is provided', () => {
+            const mockOnDelete = vi.fn();
+
+            renderWithChakra(
+                <IngredientList
+                    ingredients={mockIngredients}
+                    displayMode="original"
+                    onDeleteIngredient={mockOnDelete}
+                />
+            );
+
+            const deleteButtons = screen.getAllByLabelText('Delete ingredient');
+            expect(deleteButtons).toHaveLength(3);
+        });
+
+        it('should not render delete button when onDeleteIngredient is not provided', () => {
+            renderWithChakra(
+                <IngredientList
+                    ingredients={mockIngredients}
+                    displayMode="original"
+                />
+            );
+
+            const deleteButtons = screen.queryAllByLabelText('Delete ingredient');
+            expect(deleteButtons).toHaveLength(0);
+        });
+
+        it('should call onDeleteIngredient with correct index when delete button is clicked', async () => {
+            const user = userEvent.setup();
+            const mockOnDelete = vi.fn();
+
+            renderWithChakra(
+                <IngredientList
+                    ingredients={mockIngredients}
+                    displayMode="original"
+                    onDeleteIngredient={mockOnDelete}
+                />
+            );
+
+            const deleteButtons = screen.getAllByLabelText('Delete ingredient');
+            await user.click(deleteButtons[1]); // Delete second ingredient
+
+            expect(mockOnDelete).toHaveBeenCalledWith(1);
+        });
+
+        it('should not trigger edit when delete button is clicked', async () => {
+            const user = userEvent.setup();
+            const mockOnDelete = vi.fn();
+            const mockOnEdit = vi.fn();
+
+            renderWithChakra(
+                <IngredientList
+                    ingredients={mockIngredients}
+                    displayMode="original"
+                    onDeleteIngredient={mockOnDelete}
+                    onEditIngredient={mockOnEdit}
+                />
+            );
+
+            const deleteButtons = screen.getAllByLabelText('Delete ingredient');
+            await user.click(deleteButtons[0]);
+
+            expect(mockOnDelete).toHaveBeenCalled();
+            expect(mockOnEdit).not.toHaveBeenCalled();
         });
     });
 });

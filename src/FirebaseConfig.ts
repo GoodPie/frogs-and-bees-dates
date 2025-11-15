@@ -5,6 +5,7 @@ import {getAuth} from "firebase/auth";
 import {getMessaging, getToken} from "firebase/messaging";
 import {doc, getFirestore, setDoc} from "firebase/firestore";
 import {getAI, GoogleAIBackend} from "firebase/ai";
+import {getStorage} from "firebase/storage";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -34,6 +35,11 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 export const cloudMessaging = getMessaging(app);
+
+/**
+ * Firebase Storage instance for file uploads (e.g., recipe images)
+ */
+export const storage = getStorage(app);
 
 /**
  * Firebase AI Logic instance for Gemini API access

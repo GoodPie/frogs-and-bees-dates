@@ -1,3 +1,4 @@
+import {useMemo, useCallback, useEffect, useRef} from 'react';
 import {
     Box,
     Button,
@@ -22,6 +23,7 @@ import {RecipeParseError} from './RecipeParseError';
 import {IngredientParsingProgress} from './IngredientParsingProgress';
 import {RecipeImportErrorBoundary} from './RecipeImportErrorBoundary';
 import {LuChevronDown} from "react-icons/lu";
+import {UI_CONFIG, JSON_LD_PARSING} from '@/screens/recipe-management/config/importConfig';
 
 export interface RecipeImportProps {
     isOpen: boolean;
@@ -33,6 +35,70 @@ export interface RecipeImportProps {
  */
 export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
     const importState = useRecipeImport();
+
+    // Debounced input handling for jsonLdText textarea
+    const debounceTimerRef = useRef<number | null>(null);
+
+    const debouncedSetJsonLdText = useCallback((text: string) => {
+        if (debounceTimerRef.current !== null) {
+            clearTimeout(debounceTimerRef.current);
+        }
+
+        debounceTimerRef.current = window.setTimeout(() => {
+            importState.setJsonLdText(text);
+            debounceTimerRef.current = null;
+        }, UI_CONFIG.DEBOUNCE_MS);
+    }, [importState]);
+
+    // Cleanup timer on unmount
+    useEffect(() => {
+        return () => {
+            if (debounceTimerRef.current !== null) {
+                clearTimeout(debounceTimerRef.current);
+            }
+        };
+    }, []);
+
+    // Check input size and show warning if too large
+    const inputSizeWarning = useMemo(() => {
+        const byteSize = new Blob([importState.jsonLdText]).size;
+        const maxSize = JSON_LD_PARSING.MAX_INPUT_SIZE;
+
+        if (byteSize > maxSize) {
+            const sizeMB = (byteSize / (1024 * 1024)).toFixed(2);
+            const maxSizeMB = (maxSize / (1024 * 1024)).toFixed(0);
+            return `Input too large (${sizeMB}MB). Maximum allowed: ${maxSizeMB}MB`;
+        }
+
+        return null;
+    }, [importState.jsonLdText]);
+
+    // Memoize JSON-LD extraction instructions to prevent recalculation on every render
+    const jsonLdInstructions = useMemo(
+        () => getJsonLdExtractionInstructions(importState.url || undefined),
+        [importState.url]
+    );
+
+    // Memoize expensive recipe field derivations for preview display
+    const recipePreviewData = useMemo(() => {
+        if (importState.state.status !== 'complete' || !importState.state.recipe) {
+            return null;
+        }
+
+        const recipe = importState.state.recipe;
+
+        return {
+            name: recipe.name,
+            description: recipe.description,
+            ingredientCount: recipe.recipeIngredient?.length || 0,
+            ingredientParsingCompleted: recipe.ingredientParsingCompleted || false,
+            instructionCount: recipe.recipeInstructions?.length || 0,
+            prepTime: recipe.prepTime,
+            cookTime: recipe.cookTime,
+            parsedIngredients: recipe.parsedIngredients,
+            hasManualReviewNeeded: recipe.parsedIngredients?.some(ing => ing.requiresManualReview) || false,
+        };
+    }, [importState.state]);
 
     const handleImport = () => {
         importState.importRecipe();
@@ -118,7 +184,7 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                     <Collapsible.Content>
                                         <Text fontSize={{base: "xs", md: "sm"}} whiteSpace="pre-line"
                                               fontFamily="monospace">
-                                            {getJsonLdExtractionInstructions(importState.url || undefined)}
+                                            {jsonLdInstructions}
                                         </Text>
                                     </Collapsible.Content>
                                 </Collapsible.Root>
@@ -131,12 +197,19 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                 </Text>
                                 <Textarea
                                     placeholder='{"@context": "https://schema.org", "@type": "Recipe", ...}'
-                                    value={importState.jsonLdText}
-                                    onChange={(e) => importState.setJsonLdText(e.target.value)}
+                                    defaultValue={importState.jsonLdText}
+                                    onChange={(e) => debouncedSetJsonLdText(e.target.value)}
                                     minH={{base: "150px", md: "200px"}}
                                     fontFamily="monospace"
                                     fontSize={{base: "xs", md: "sm"}}
                                 />
+                                {/* T036: Input size warning */}
+                                {inputSizeWarning && (
+                                    <Text fontSize="sm" color="red.600" _dark={{color: 'red.300'}} mt={1}>
+                                        <AiOutlineWarning style={{display: 'inline', marginRight: '4px'}}/>
+                                        {inputSizeWarning}
+                                    </Text>
+                                )}
                             </Box>
 
                             {/* Parse Button */}
@@ -144,7 +217,7 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                 colorScheme="blue"
                                 onClick={importState.parseJsonLd}
                                 loading={importState.state.status === 'parsing-json'}
-                                disabled={!importState.jsonLdText.trim() || importState.state.status === 'parsing-json'}
+                                disabled={!importState.jsonLdText.trim() || importState.state.status === 'parsing-json' || !!inputSizeWarning}
                                 size={{base: "md", md: "md"}}
                                 minH="44px"
                             >
@@ -172,7 +245,7 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                             )}
 
                             {/* Success Results */}
-                            {importState.state.status === 'complete' && importState.state.recipe && (
+                            {recipePreviewData && (
                                 <Box
                                     p={4}
                                     borderRadius="md"
@@ -193,7 +266,7 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                         </HStack>
 
                                         {/* Warnings */}
-                                        {importState.state.warnings && importState.state.warnings.length > 0 && (
+                                        {importState.state.status === "complete" && importState.state.warnings && importState.state.warnings.length > 0 && (
                                             <Box>
                                                 <HStack mb={1}>
                                                     <AiOutlineWarning color="orange"/>
@@ -221,20 +294,20 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                             <VStack align="stretch" gap={2} fontSize="sm">
                                                 <HStack>
                                                     <Text fontWeight="bold" minW="100px">Name:</Text>
-                                                    <Text>{importState.state.recipe.name}</Text>
+                                                    <Text>{recipePreviewData.name}</Text>
                                                 </HStack>
-                                                {importState.state.recipe.description && (
+                                                {recipePreviewData.description && (
                                                     <HStack align="start">
                                                         <Text fontWeight="bold" minW="100px">Description:</Text>
-                                                        <Text maxLines={2}>{importState.state.recipe.description}</Text>
+                                                        <Text maxLines={2}>{recipePreviewData.description}</Text>
                                                     </HStack>
                                                 )}
                                                 <HStack>
                                                     <Text fontWeight="bold" minW="100px">Ingredients:</Text>
                                                     <Badge colorScheme="blue">
-                                                        {importState.state.recipe.recipeIngredient?.length || 0} items
+                                                        {recipePreviewData.ingredientCount} items
                                                     </Badge>
-                                                    {importState.state.recipe.ingredientParsingCompleted && (
+                                                    {recipePreviewData.ingredientParsingCompleted && (
                                                         <Badge colorScheme="green" variant="subtle">
                                                             ✓ Parsed
                                                         </Badge>
@@ -243,34 +316,34 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                                 <HStack>
                                                     <Text fontWeight="bold" minW="100px">Instructions:</Text>
                                                     <Badge colorScheme="green">
-                                                        {importState.state.recipe.recipeInstructions?.length || 0} steps
+                                                        {recipePreviewData.instructionCount} steps
                                                     </Badge>
                                                 </HStack>
-                                                {importState.state.recipe.prepTime && (
+                                                {recipePreviewData.prepTime && (
                                                     <HStack>
                                                         <Text fontWeight="bold" minW="100px">Prep Time:</Text>
-                                                        <Code>{importState.state.recipe.prepTime}</Code>
+                                                        <Code>{recipePreviewData.prepTime}</Code>
                                                     </HStack>
                                                 )}
-                                                {importState.state.recipe.cookTime && (
+                                                {recipePreviewData.cookTime && (
                                                     <HStack>
                                                         <Text fontWeight="bold" minW="100px">Cook Time:</Text>
-                                                        <Code>{importState.state.recipe.cookTime}</Code>
+                                                        <Code>{recipePreviewData.cookTime}</Code>
                                                     </HStack>
                                                 )}
                                             </VStack>
                                         </Box>
 
                                         {/* Parsed Ingredients Preview */}
-                                        {importState.state.recipe.parsedIngredients && (
+                                        {recipePreviewData.parsedIngredients && (
                                             <Box mt={3}>
                                                 <Text fontWeight="bold" fontSize="sm" mb={2}>
                                                     Parsed Ingredients
-                                                    ({importState.state.recipe.parsedIngredients.length}):
+                                                    ({recipePreviewData.parsedIngredients.length}):
                                                 </Text>
                                                 <VStack align="stretch" gap={1} maxH="200px" overflowY="auto" p={2}
                                                         bg="gray.50" _dark={{bg: 'gray.800'}} borderRadius="md">
-                                                    {importState.state.recipe.parsedIngredients.map((ing, index) => (
+                                                    {recipePreviewData.parsedIngredients.map((ing, index) => (
                                                         <HStack key={index} justify="space-between" fontSize="sm">
                                                             <Text flex={1}>
                                                                 {ing.metricQuantity && ing.metricUnit
@@ -286,7 +359,7 @@ export const RecipeImportModal = ({isOpen, onClose}: RecipeImportProps) => {
                                                         </HStack>
                                                     ))}
                                                 </VStack>
-                                                {importState.state.recipe.parsedIngredients.some(ing => ing.requiresManualReview) && (
+                                                {recipePreviewData.hasManualReviewNeeded && (
                                                     <Text fontSize="xs" color="orange.600" _dark={{color: 'orange.300'}}
                                                           mt={1}>
                                                         <AiOutlineWarning

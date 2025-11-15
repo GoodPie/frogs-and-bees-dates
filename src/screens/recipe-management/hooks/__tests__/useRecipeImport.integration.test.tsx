@@ -16,6 +16,7 @@ import * as ingredientParserService from '@/services/ingredientParser';
 // Mock the ingredient parser service
 vi.mock('@/services/ingredientParser', () => ({
   parseIngredients: vi.fn(),
+  parseIngredientsWithProgress: vi.fn(),
 }));
 
 describe.skip('useRecipeImport', () => {
@@ -569,5 +570,211 @@ describe.skip('useRecipeImport', () => {
       expect(result.current.parseResult?.success).toBe(true);
       expect(result.current.parseResult?.recipe?.name).toBe('Valid Recipe');
     });
+  });
+});
+
+/**
+ * Performance Tests - Verify No Artificial Delays
+ * These tests ensure the import flow completes quickly without setTimeout delays
+ */
+describe('useRecipeImport - No setTimeout Delays', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    // Mock ingredient parser to return immediately with progress callback
+    vi.mocked(ingredientParserService.parseIngredientsWithProgress).mockImplementation(
+      async (ingredients, options = {}) => {
+        // Simulate progress callback if provided
+        if (options.onProgress) {
+          options.onProgress(ingredients.length, ingredients.length);
+        }
+
+        // Return parsed ingredients immediately
+        return {
+          parsedIngredients: ingredients.map((text) => ({
+            originalText: text,
+            ingredientName: text.split(' ').pop() || text,
+            quantity: '1',
+            unit: 'unit',
+            preparationNotes: null,
+            metricQuantity: null,
+            metricUnit: null,
+            confidence: 0.9,
+            parsingMethod: 'ai' as const,
+            requiresManualReview: false,
+          })),
+          failedIngredients: [],
+          totalBatches: 1,
+          durationMs: 10,
+        };
+      }
+    );
+  });
+
+  it('should parse recipe quickly without artificial delays', async () => {
+    const { result } = renderHook(() => useRecipeImport());
+
+    const validJsonLd = JSON.stringify({
+      '@type': 'Recipe',
+      name: 'Quick Recipe',
+      image: 'https://example.com/image.jpg',
+      recipeIngredient: ['2 cups flour', '1 tsp salt'],
+      recipeInstructions: ['Mix and bake'],
+    });
+
+    act(() => {
+      result.current.setJsonLdText(validJsonLd);
+    });
+
+    const startTime = performance.now();
+
+    await act(async () => {
+      await result.current.parseJsonLd();
+    });
+
+    const duration = performance.now() - startTime;
+
+    // Verify parsing completed successfully
+    expect(result.current.state.status).toBe('complete');
+    expect(result.current.state.recipe).toBeDefined();
+
+    // Verify no artificial delays (should complete in < 500ms)
+    // If there were setTimeout(1000) delays, this would fail
+    expect(duration).toBeLessThan(500);
+  });
+
+  it('should complete full import flow without setTimeout delays', async () => {
+    const { result } = renderHook(() => useRecipeImport());
+
+    const validJsonLd = JSON.stringify({
+      '@type': 'Recipe',
+      name: 'Test Recipe',
+      image: 'https://example.com/image.jpg',
+      recipeIngredient: ['2 cups flour', '1 tsp salt', '3 eggs'],
+      recipeInstructions: ['Step 1', 'Step 2'],
+    });
+
+    act(() => {
+      result.current.setJsonLdText(validJsonLd);
+    });
+
+    const startTime = performance.now();
+
+    // Execute the full import flow
+    await act(async () => {
+      await result.current.parseJsonLd();
+    });
+
+    const duration = performance.now() - startTime;
+
+    // Verify completed state
+    expect(result.current.state.status).toBe('complete');
+
+    // Full flow should complete quickly without any setTimeout delays
+    // Allowing up to 1000ms for actual work, but no artificial delays
+    expect(duration).toBeLessThan(1000);
+  });
+
+  it('should handle rapid successive parses without delays', async () => {
+    const { result } = renderHook(() => useRecipeImport());
+
+    const recipe1 = JSON.stringify({
+      '@type': 'Recipe',
+      name: 'Recipe 1',
+      image: 'https://example.com/1.jpg',
+      recipeIngredient: ['ingredient 1'],
+    });
+
+    const recipe2 = JSON.stringify({
+      '@type': 'Recipe',
+      name: 'Recipe 2',
+      image: 'https://example.com/2.jpg',
+      recipeIngredient: ['ingredient 2'],
+    });
+
+    // Parse first recipe
+    act(() => {
+      result.current.setJsonLdText(recipe1);
+    });
+
+    await act(async () => {
+      await result.current.parseJsonLd();
+    });
+
+    // Wait for state to be updated
+    await waitFor(() => {
+      expect(result.current.state.status).toBe('complete');
+    });
+
+    expect(result.current.state.recipe?.name).toBe('Recipe 1');
+
+    // Immediately parse second recipe
+    const startTime = performance.now();
+
+    act(() => {
+      result.current.setJsonLdText(recipe2);
+    });
+
+    await act(async () => {
+      await result.current.parseJsonLd();
+    });
+
+    const duration = performance.now() - startTime;
+
+    // Wait for second parse to complete
+    await waitFor(() => {
+      expect(result.current.state.status).toBe('complete');
+    });
+
+    expect(result.current.state.recipe?.name).toBe('Recipe 2');
+
+    // Second parse should also complete quickly
+    expect(duration).toBeLessThan(500);
+  });
+
+  it('should measure actual parsing time vs artificial delays', async () => {
+    const { result } = renderHook(() => useRecipeImport());
+
+    const recipes = [
+      { name: 'Recipe 1', ingredients: ['a', 'b'] },
+      { name: 'Recipe 2', ingredients: ['c', 'd', 'e'] },
+      { name: 'Recipe 3', ingredients: ['f'] },
+    ];
+
+    const durations: number[] = [];
+
+    for (const recipe of recipes) {
+      const jsonLd = JSON.stringify({
+        '@type': 'Recipe',
+        name: recipe.name,
+        image: 'https://example.com/image.jpg',
+        recipeIngredient: recipe.ingredients,
+      });
+
+      act(() => {
+        result.current.setJsonLdText(jsonLd);
+      });
+
+      const startTime = performance.now();
+
+      await act(async () => {
+        await result.current.parseJsonLd();
+      });
+
+      const duration = performance.now() - startTime;
+      durations.push(duration);
+
+      // Wait for parsing to complete
+      await waitFor(() => {
+        expect(result.current.state.status).toBe('complete');
+      });
+    }
+
+    // All parses should complete quickly
+    const maxDuration = Math.max(...durations);
+    const avgDuration = durations.reduce((a, b) => a + b, 0) / durations.length;
+
+    expect(maxDuration).toBeLessThan(500);
+    expect(avgDuration).toBeLessThan(300);
   });
 });

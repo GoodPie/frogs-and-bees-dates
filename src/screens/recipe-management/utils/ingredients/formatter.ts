@@ -5,6 +5,7 @@
  */
 
 import type { ParsedIngredient } from '@/models/ParsedIngredient';
+import { normalizeUnit } from '@/constants/units';
 
 /**
  * Formatting options for ingredient display
@@ -57,7 +58,7 @@ export function formatIngredient(
 
   // Add quantity and unit
   if (ingredient.quantity) {
-    parts.push(ingredient.quantity);
+    parts.push(String(ingredient.quantity));
   }
   if (ingredient.unit) {
     parts.push(ingredient.unit);
@@ -252,7 +253,7 @@ export function parseIngredientString(ingredientText: string): Partial<ParsedIng
     return {
       originalText: ingredientText,
       quantity: quantity?.trim() || null,
-      unit: unit?.trim() || null,
+      unit: normalizeUnit(unit),
       ingredientName: ingredientName.trim(),
       preparationNotes: preparationNotes || null,
       metricQuantity: null,

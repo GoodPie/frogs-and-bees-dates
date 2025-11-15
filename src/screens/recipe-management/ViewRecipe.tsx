@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Box, Button, Heading, Image, Text, VStack, HStack, Badge, Spinner, Grid } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AiOutlineEdit, AiOutlineDelete, AiOutlineArrowLeft } from 'react-icons/ai';
@@ -8,6 +8,17 @@ import { RecipeJsonLd } from '@/screens/recipe-management/components/RecipeJsonL
 import { iso8601ToReadable } from '@/utils/durationFormat';
 import { ROUTES, getRecipeEditRoute } from '@/routing/routes';
 import { IngredientList, type DisplayMode } from '@/screens/recipe-management/components/IngredientList.tsx';
+import { YieldAdjuster } from '@/screens/recipe-management/components/YieldAdjuster.tsx';
+import { useYieldAdjustment } from '@/screens/recipe-management/hooks/useYieldAdjustment.ts';
+import type { IRecipe } from '@/screens/recipe-management/types/Recipe.ts';
+
+// Placeholder recipe for hook initialization
+const PLACEHOLDER_RECIPE: IRecipe = {
+    name: '',
+    image: '',
+    recipeIngredient: [],
+    recipeInstructions: [],
+};
 
 /**
  * View recipe screen showing full recipe details with structured data
@@ -18,6 +29,10 @@ const ViewRecipe = () => {
     const { recipe, loading, error } = useRecipe(id);
     const { deleteRecipe, loading: deleteLoading } = useRecipeOperations();
     const [displayMode, setDisplayMode] = useState<DisplayMode>('metric');
+
+    // Yield adjustment hook - always called (hooks rule) but use placeholder when recipe is null
+    const recipeForHook = useMemo(() => recipe || PLACEHOLDER_RECIPE, [recipe]);
+    const yieldAdjustment = useYieldAdjustment(recipeForHook);
 
     const handleDelete = async () => {
         if (!id) return;
@@ -156,8 +171,14 @@ const ViewRecipe = () => {
                         )}
                         {recipe.recipeYield && (
                             <Box>
-                                <Text fontWeight="bold">Yield</Text>
-                                <Text>{recipe.recipeYield}</Text>
+                                <YieldAdjuster
+                                    yieldState={yieldAdjustment.yieldState}
+                                    onIncrement={yieldAdjustment.increment}
+                                    onDecrement={yieldAdjustment.decrement}
+                                    onReset={yieldAdjustment.reset}
+                                    onDirectInput={yieldAdjustment.adjustYield}
+                                    error={yieldAdjustment.error}
+                                />
                             </Box>
                         )}
                     </Grid>
@@ -197,6 +218,7 @@ const ViewRecipe = () => {
                             <IngredientList
                                 ingredients={recipe.parsedIngredients}
                                 displayMode={displayMode}
+                                yieldMultiplier={yieldAdjustment.yieldState.yieldMultiplier}
                             />
                         ) : (
                             <VStack align="stretch" gap={2}>

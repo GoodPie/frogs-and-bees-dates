@@ -1,8 +1,12 @@
 /**
- * IngredientEditForm Component
+ * IngredientForm Component
  *
- * Provides a form interface for manually editing parsed ingredient data.
- * When a user edits an ingredient:
+ * Provides a form interface for creating or editing parsed ingredient data.
+ * Supports two modes:
+ * - create: Creating a new ingredient from scratch
+ * - edit: Editing an existing parsed ingredient
+ *
+ * When a user saves an ingredient:
  * - parsingMethod is set to 'manual'
  * - confidence is set to 1.0
  * - requiresManualReview is set to false
@@ -21,75 +25,50 @@ import {
 } from '@chakra-ui/react';
 import type {ParsedIngredient} from '@/models/ParsedIngredient.ts';
 import {convertToMetric} from '@/utils/unitConversions.ts';
+import {CANONICAL_UNITS, getUnitDisplayLabel, normalizeUnit} from '@/constants/units.ts';
 
-export interface IngredientEditFormProps {
-    /** The ingredient to edit */
-    ingredient: ParsedIngredient;
+export interface IngredientFormProps {
+    /** The ingredient to edit (optional - if not provided, creates new ingredient) */
+    ingredient?: ParsedIngredient;
 
     /** Callback when save is clicked */
     onSave: (updatedIngredient: ParsedIngredient) => void;
 
     /** Callback when cancel is clicked */
     onCancel: () => void;
+
+    /** Mode: 'create' for new ingredient, 'edit' for existing */
+    mode?: 'create' | 'edit';
 }
 
 /**
- * Common measurement units for ingredient selection
- */
-const COMMON_UNITS = [
-    'cup',
-    'cups',
-    'tbsp',
-    'tablespoon',
-    'tablespoons',
-    'tsp',
-    'teaspoon',
-    'teaspoons',
-    'oz',
-    'ounce',
-    'ounces',
-    'lb',
-    'pound',
-    'pounds',
-    'g',
-    'gram',
-    'grams',
-    'kg',
-    'kilogram',
-    'kilograms',
-    'ml',
-    'milliliter',
-    'milliliters',
-    'l',
-    'liter',
-    'liters',
-    'pinch',
-    'dash',
-    'clove',
-    'cloves',
-];
-
-/**
- * IngredientEditForm Component
+ * IngredientForm Component
  *
- * Form for manually editing parsed ingredient data with validation
+ * Form for creating or editing parsed ingredient data with validation
  * and automatic confidence/review flag updates.
  */
-export function IngredientEditForm({
-    ingredient,
-    onSave,
-    onCancel,
-}: IngredientEditFormProps) {
-    const [quantity, setQuantity] = useState(ingredient.quantity?.toString() || '');
-    const [unit, setUnit] = useState(ingredient.unit || '');
-    const [ingredientName, setIngredientName] = useState(ingredient.ingredientName);
-    const [preparationNotes, setPreparationNotes] = useState(ingredient.preparationNotes || '');
+export function IngredientForm({
+                                   ingredient,
+                                   onSave,
+                                   onCancel,
+                                   mode = 'edit',
+                               }: IngredientFormProps) {
+    const [quantity, setQuantity] = useState(ingredient?.quantity?.toString() || '');
+    const [unit, setUnit] = useState(ingredient?.unit || 'each'); // Default to 'each'
+    const [ingredientName, setIngredientName] = useState(ingredient?.ingredientName || '');
+    const [preparationNotes, setPreparationNotes] = useState(ingredient?.preparationNotes || '');
 
     const handleSave = () => {
-        // Reconstruct originalText from edited fields
+        // Normalize unit to canonical form (always has a value, defaults to 'each')
+        const normalizedUnit = normalizeUnit(unit);
+
+        // Reconstruct originalText from edited fields (use display label for unit)
         const parts: string[] = [];
         if (quantity.trim()) parts.push(quantity.trim());
-        if (unit) parts.push(unit);
+        // Only include unit in text if it's not 'each' (the default/implicit unit)
+        if (normalizedUnit !== 'each') {
+            parts.push(getUnitDisplayLabel(normalizedUnit));
+        }
         parts.push(ingredientName);
         if (preparationNotes) parts.push(`(${preparationNotes})`);
         const reconstructedOriginalText = parts.join(' ');
@@ -97,19 +76,19 @@ export function IngredientEditForm({
         // Recalculate metric conversions using the conversion utility
         const conversion = convertToMetric(
             quantity.trim() || null,
-            unit || null
+            normalizedUnit
         );
 
         // Create updated ingredient with manual edit flags
         const updatedIngredient: ParsedIngredient = {
-            ...ingredient,
+            ...(ingredient || {}),
             originalText: reconstructedOriginalText,
             quantity: quantity.trim() || null,
-            unit: unit || null,
+            unit: normalizedUnit,
             ingredientName,
             preparationNotes: preparationNotes || null,
             metricQuantity: conversion.metricQuantity,
-            metricUnit: conversion.metricUnit,
+            metricUnit: (conversion.metricUnit ? normalizeUnit(conversion.metricUnit) : null),
             // Set flags for manual edit
             parsingMethod: 'manual',
             confidence: 1.0,
@@ -143,19 +122,17 @@ export function IngredientEditForm({
                     <NativeSelectRoot>
                         <NativeSelectField
                             value={unit}
-                            onChange={(e) => setUnit(e.target.value)}
-                            placeholder="Select unit"
+                            onChange={(e) => setUnit(normalizeUnit(e.target.value))}
                         >
-                            <option value="">None</option>
-                            {COMMON_UNITS.map((u) => (
+                            {CANONICAL_UNITS.map((u) => (
                                 <option key={u} value={u}>
-                                    {u}
+                                    {getUnitDisplayLabel(u)}
                                 </option>
                             ))}
                         </NativeSelectField>
                     </NativeSelectRoot>
                     <Field.HelperText>
-                        Measurement unit. Can be left empty for items without measurements.
+                        Measurement unit (defaults to "each" for countable items).
                     </Field.HelperText>
                 </Field.Root>
 
@@ -194,7 +171,7 @@ export function IngredientEditForm({
                         Cancel
                     </Button>
                     <Button colorScheme="blue" onClick={handleSave} disabled={!isValid}>
-                        Save Changes
+                        {mode === 'create' ? 'Add Ingredient' : 'Save Changes'}
                     </Button>
                 </HStack>
             </VStack>

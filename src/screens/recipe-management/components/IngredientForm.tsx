@@ -25,7 +25,7 @@ import {
 } from '@chakra-ui/react';
 import type {ParsedIngredient} from '@/models/ParsedIngredient.ts';
 import {convertToMetric} from '@/utils/unitConversions.ts';
-import {CANONICAL_UNITS, getUnitDisplayLabel, normalizeUnit, type Unit} from '@/constants/units.ts';
+import {CANONICAL_UNITS, getUnitDisplayLabel, normalizeUnit} from '@/constants/units.ts';
 
 export interface IngredientFormProps {
     /** The ingredient to edit (optional - if not provided, creates new ingredient) */
@@ -48,11 +48,11 @@ export interface IngredientFormProps {
  * and automatic confidence/review flag updates.
  */
 export function IngredientForm({
-    ingredient,
-    onSave,
-    onCancel,
-    mode = 'edit',
-}: IngredientFormProps) {
+                                   ingredient,
+                                   onSave,
+                                   onCancel,
+                                   mode = 'edit',
+                               }: IngredientFormProps) {
     const [quantity, setQuantity] = useState(ingredient?.quantity?.toString() || '');
     const [unit, setUnit] = useState(ingredient?.unit || 'each'); // Default to 'each'
     const [ingredientName, setIngredientName] = useState(ingredient?.ingredientName || '');

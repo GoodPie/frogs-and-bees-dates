@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {Box, Input, Textarea, VStack, Text, Tabs, HStack, Button, DialogRoot, DialogTrigger, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogActionTrigger, DialogTitle} from '@chakra-ui/react';
+import {Box, Input, Textarea, VStack, Text, Tabs, HStack, Button, DialogRoot, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogActionTrigger, DialogTitle} from '@chakra-ui/react';
 import {InstructionInput} from '@/screens/recipe-management/components/InstructionInput.tsx';
 import {ImageUpload} from '@/screens/recipe-management/components/ImageUpload.tsx';
 import {TimeInputGroup} from '@/components/TimeInputGroup.tsx';

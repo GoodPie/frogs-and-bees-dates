@@ -7,8 +7,9 @@
  * - imperial: Shows structured format with imperial measurements
  */
 
-import {Box, HStack, Text, Badge, VStack} from '@chakra-ui/react';
+import {Box, HStack, Text, Badge, VStack, Button, IconButton} from '@chakra-ui/react';
 import {AiOutlineWarning} from 'react-icons/ai';
+import {FiPlus, FiTrash2} from 'react-icons/fi';
 import type {ParsedIngredient} from '@/models/ParsedIngredient.ts';
 import {fractionToDecimal} from "@/services/ingredientParser.ts";
 import convert from 'convert';
@@ -29,6 +30,12 @@ export interface IngredientListProps {
 
     /** Optional callback when an ingredient is clicked for editing */
     onEditIngredient?: (index: number, ingredient: ParsedIngredient) => void;
+
+    /** Optional callback when add new ingredient is clicked */
+    onAddIngredient?: () => void;
+
+    /** Optional callback when delete ingredient is clicked */
+    onDeleteIngredient?: (index: number) => void;
 
     /** Optional yield multiplier for scaling quantities */
     yieldMultiplier?: number;
@@ -134,19 +141,19 @@ export function IngredientList({
     ingredients,
     displayMode,
     onEditIngredient,
+    onAddIngredient,
+    onDeleteIngredient,
     yieldMultiplier = 1,
 }: IngredientListProps) {
-    if (!ingredients || ingredients.length === 0) {
-        return (
-            <Box p={4} textAlign="center" color="gray.500">
-                <Text>No ingredients to display</Text>
-            </Box>
-        );
-    }
-
     return (
         <VStack align="stretch" gap={2}>
-            {ingredients.map((ingredient, index) => (
+            {(!ingredients || ingredients.length === 0) && (
+                <Box p={4} textAlign="center" color="gray.500">
+                    <Text>No ingredients yet. Click "Add Ingredient" to get started.</Text>
+                </Box>
+            )}
+
+            {ingredients && ingredients.map((ingredient, index) => (
                 <HStack
                     key={index}
                     justify="space-between"
@@ -156,17 +163,17 @@ export function IngredientList({
                     _dark={{
                         bg: ingredient.requiresManualReview ? 'orange.900' : 'gray.800',
                     }}
-                    cursor={onEditIngredient ? 'pointer' : 'default'}
-                    onClick={() => onEditIngredient?.(index, ingredient)}
-                    _hover={onEditIngredient ? {
-                        bg: ingredient.requiresManualReview ? 'orange.100' : 'gray.100',
-                        _dark: {
-                            bg: ingredient.requiresManualReview ? 'orange.800' : 'gray.700',
-                        }
-                    } : undefined}
                     transition="background-color 0.2s"
                 >
-                    <Text flex={1} fontSize="sm">
+                    <Text
+                        flex={1}
+                        fontSize="sm"
+                        cursor={onEditIngredient ? 'pointer' : 'default'}
+                        onClick={() => onEditIngredient?.(index, ingredient)}
+                        _hover={onEditIngredient ? {
+                            textDecoration: 'underline'
+                        } : undefined}
+                    >
                         {formatIngredient(ingredient, displayMode, yieldMultiplier)}
                     </Text>
 
@@ -198,9 +205,36 @@ export function IngredientList({
                                 Metric
                             </Badge>
                         )}
+
+                        {onDeleteIngredient && (
+                            <IconButton
+                                aria-label="Delete ingredient"
+                                size="sm"
+                                variant="ghost"
+                                colorScheme="red"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDeleteIngredient(index);
+                                }}
+                            >
+                                <FiTrash2 />
+                            </IconButton>
+                        )}
                     </HStack>
                 </HStack>
             ))}
+
+            {onAddIngredient && (
+                <Button
+                    variant="outline"
+                    colorScheme="blue"
+                    onClick={onAddIngredient}
+                    leftIcon={<FiPlus />}
+                    mt={2}
+                >
+                    Add Ingredient
+                </Button>
+            )}
         </VStack>
     );
 }

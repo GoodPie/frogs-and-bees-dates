@@ -71,7 +71,6 @@ export const setMockAuthUser = (user: User | null) => {
     }
 };
 
-// Firebase v9 modular SDK mocks
 export const firebaseMocks = {
     // Firebase App
     initializeApp: vi.fn(() => ({})),
@@ -143,6 +142,18 @@ export const firebaseMocks = {
         number: vi.fn(() => 'number'),
     },
     GoogleAIBackend: vi.fn(() => ({})),
+
+    // Firebase Storage
+    getStorage: vi.fn(() => ({})),
+    ref: vi.fn((storage: any, path: string) => ({path, fullPath: path})),
+    uploadBytes: vi.fn(() => Promise.resolve({
+        metadata: {
+            fullPath: 'mock/path/to/image.jpg',
+            name: 'image.jpg',
+            bucket: 'test-bucket',
+        },
+    })),
+    getDownloadURL: vi.fn(() => Promise.resolve('https://firebasestorage.googleapis.com/mock-image-url.jpg')),
 };
 
 // Reset all mocks to initial state (defaults to unauthenticated)

@@ -1,3 +1,5 @@
+import type {Unit} from '@/constants/units.ts';
+
 /**
  * Parsed ingredient with structured components and metric conversion
  *
@@ -5,16 +7,19 @@
  * string into structured components (quantity, unit, name) with automatic metric conversion
  * for imperial measurements.
  *
+ * Units are normalized to canonical forms (e.g., "cups" → "cup", "tablespoon" → "tbsp")
+ * for consistent storage and processing.
+ *
  * @example
  * ```typescript
  * const ingredient: ParsedIngredient = {
  *   originalText: "2 cups all-purpose flour, sifted",
  *   quantity: "2",
- *   unit: "cups",
+ *   unit: "cup",  // Canonical form
  *   ingredientName: "all-purpose flour",
  *   preparationNotes: "sifted",
  *   metricQuantity: "240",
- *   metricUnit: "g",
+ *   metricUnit: "g",  // Canonical form
  *   confidence: 0.95,
  *   requiresManualReview: false
  * };
@@ -33,14 +38,15 @@ export interface ParsedIngredient {
      * @example "2", "1/2", "2-3"
      * @nullable No quantity specified (e.g., "Salt to taste")
      */
-    quantity: string | null;
+    quantity: string | number | null;
 
     /**
-     * Measurement unit
+     * Measurement unit in canonical form
+     * All units are normalized (e.g., "cups" → "cup", "tablespoon" → "tbsp")
      * @example "cup", "tsp", "oz", "g", "ml"
      * @nullable No unit specified
      */
-    unit: string | null;
+    unit: Unit | null;
 
     /**
      * The ingredient name without quantity/unit
@@ -64,11 +70,12 @@ export interface ParsedIngredient {
     metricQuantity: string | null;
 
     /**
-     * Converted metric unit
+     * Converted metric unit in canonical form
+     * All units are normalized (e.g., "grams" → "g", "milliliters" → "ml")
      * @example "ml", "g", "kg", "l"
      * @nullable Already metric or conversion not applicable
      */
-    metricUnit: string | null;
+    metricUnit: Unit | null;
 
     /**
      * Parsing confidence score from 0-1

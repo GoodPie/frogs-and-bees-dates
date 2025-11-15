@@ -149,7 +149,7 @@ describe('IngredientList', () => {
         it('should show empty message when no ingredients provided', () => {
             renderWithChakra(<IngredientList ingredients={[]} displayMode="original" />);
 
-            expect(screen.getByText('No ingredients to display')).toBeInTheDocument();
+            expect(screen.getByText(/No ingredients yet/i)).toBeInTheDocument();
         });
     });
 
@@ -297,6 +297,74 @@ describe('IngredientList', () => {
             // Should not add comma for meaningless notes
             expect(screen.getByText('120 g flour')).toBeInTheDocument();
             expect(screen.queryByText(/, \s*,/)).not.toBeInTheDocument();
+        });
+    });
+
+    describe('Delete Functionality', () => {
+        it('should render delete button when onDeleteIngredient is provided', () => {
+            const mockOnDelete = vi.fn();
+
+            renderWithChakra(
+                <IngredientList
+                    ingredients={mockIngredients}
+                    displayMode="original"
+                    onDeleteIngredient={mockOnDelete}
+                />
+            );
+
+            const deleteButtons = screen.getAllByLabelText('Delete ingredient');
+            expect(deleteButtons).toHaveLength(3);
+        });
+
+        it('should not render delete button when onDeleteIngredient is not provided', () => {
+            renderWithChakra(
+                <IngredientList
+                    ingredients={mockIngredients}
+                    displayMode="original"
+                />
+            );
+
+            const deleteButtons = screen.queryAllByLabelText('Delete ingredient');
+            expect(deleteButtons).toHaveLength(0);
+        });
+
+        it('should call onDeleteIngredient with correct index when delete button is clicked', async () => {
+            const user = userEvent.setup();
+            const mockOnDelete = vi.fn();
+
+            renderWithChakra(
+                <IngredientList
+                    ingredients={mockIngredients}
+                    displayMode="original"
+                    onDeleteIngredient={mockOnDelete}
+                />
+            );
+
+            const deleteButtons = screen.getAllByLabelText('Delete ingredient');
+            await user.click(deleteButtons[1]); // Delete second ingredient
+
+            expect(mockOnDelete).toHaveBeenCalledWith(1);
+        });
+
+        it('should not trigger edit when delete button is clicked', async () => {
+            const user = userEvent.setup();
+            const mockOnDelete = vi.fn();
+            const mockOnEdit = vi.fn();
+
+            renderWithChakra(
+                <IngredientList
+                    ingredients={mockIngredients}
+                    displayMode="original"
+                    onDeleteIngredient={mockOnDelete}
+                    onEditIngredient={mockOnEdit}
+                />
+            );
+
+            const deleteButtons = screen.getAllByLabelText('Delete ingredient');
+            await user.click(deleteButtons[0]);
+
+            expect(mockOnDelete).toHaveBeenCalled();
+            expect(mockOnEdit).not.toHaveBeenCalled();
         });
     });
 });

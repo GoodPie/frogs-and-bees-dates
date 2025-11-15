@@ -6,7 +6,6 @@ export const YIELD_MAX_MULTIPLIER = 10; // 10x original
 
 // Rounding precision
 export const QUANTITY_DECIMAL_PLACES = 2; // Round quantities to 2 decimals
-export const MULTIPLIER_DECIMAL_PLACES = 4; // Round multipliers to 4 decimals
 
 /**
  * Parse yield from recipe yield field

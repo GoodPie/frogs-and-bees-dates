@@ -22,6 +22,7 @@ import {ai} from "@/FirebaseConfig";
 import type {ParsedIngredient} from "@/models/ParsedIngredient";
 import {getGenerativeModel, Schema} from "firebase/ai";
 import Fraction from "fraction.js";
+import {normalizeUnit} from "@/constants/units.ts";
 
 /**
  * Schema definition for ingredient parsing using Firebase AI Logic Schema API
@@ -274,14 +275,15 @@ export async function parseIngredients(
         const parsedData = JSON.parse(text);
 
         // Transform API response to ParsedIngredient format
+        // Normalize units to canonical forms
         return parsedData.map((item: GeminiIngredientResponse, index: number) => ({
             originalText: ingredients[index],
             quantity: item.quantity || null,
-            unit: item.unit || null,
+            unit: item.unit ? normalizeUnit(item.unit) : null,
             ingredientName: item.ingredientName,
             preparationNotes: item.preparationNotes || null,
             metricQuantity: item.metricQuantity || null,
-            metricUnit: item.metricUnit || null,
+            metricUnit: item.metricUnit ? normalizeUnit(item.metricUnit) : null,
             confidence: item.confidence || 0.5,
             requiresManualReview: (item.confidence || 0.5) < 0.7,
             parsingMethod: 'ai',

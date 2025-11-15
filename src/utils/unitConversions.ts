@@ -6,43 +6,39 @@
  */
 
 import convert from 'convert';
+import {normalizeUnit as canonicalNormalizeUnit, UNITS, type Unit} from '@/constants/units.ts';
 
 /**
  * Units that cannot be converted (unusual/non-standard measurements)
+ * Uses canonical unit forms only
  */
-const NON_CONVERTIBLE_UNITS = new Set([
-    'pinch', 'dash', 'knob', 'sprig', 'bunch', 'clove', 'cloves',
-    'head', 'stalk', 'leaf', 'leaves', 'slice', 'slices',
-    'piece', 'pieces', 'whole', 'can', 'cans', 'package', 'packages',
+const NON_CONVERTIBLE_UNITS = new Set<Unit>([
+    ...UNITS.NON_CONVERTIBLE,
 ]);
 
 /**
  * Metric units (no conversion needed)
+ * Uses canonical unit forms only
  */
-const METRIC_UNITS = new Set([
-    'each', 'g', 'gram', 'grams', 'kg', 'kilogram', 'kilograms',
-    'ml', 'milliliter', 'milliliters', 'l', 'liter', 'liters',
+const METRIC_UNITS = new Set<Unit>([
+    ...UNITS.VOLUME_METRIC,
+    ...UNITS.WEIGHT_METRIC,
 ]);
 
 /**
  * Imperial volume units
+ * Uses canonical unit forms only
  */
-const IMPERIAL_VOLUME_UNITS = new Set([
-    'cup', 'cups', 'c',
-    'tbsp', 'tablespoon', 'tablespoons', 'T',
-    'tsp', 'teaspoon', 'teaspoons', 't',
-    'fl oz', 'fluid ounce', 'fluid ounces',
-    'pint', 'pints', 'pt',
-    'quart', 'quarts', 'qt',
-    'gallon', 'gallons', 'gal',
+const IMPERIAL_VOLUME_UNITS = new Set<Unit>([
+    ...UNITS.VOLUME_IMPERIAL,
 ]);
 
 /**
  * Imperial weight units
+ * Uses canonical unit forms only
  */
-const IMPERIAL_WEIGHT_UNITS = new Set([
-    'each', 'oz', 'ounce', 'ounces',
-    'lb', 'pound', 'pounds', 'lbs',
+const IMPERIAL_WEIGHT_UNITS = new Set<Unit>([
+    ...UNITS.WEIGHT_IMPERIAL,
 ]);
 
 /**
@@ -99,11 +95,11 @@ function parseQuantity(quantityStr: string | null): number | null {
 }
 
 /**
- * Normalize unit string to lowercase and handle common variations
+ * Normalize unit string to canonical form
+ * Re-exports from constants/units.ts for backward compatibility
  */
-function normalizeUnit(unit: string | null): string {
-    if (!unit) return "each";
-    return unit.toLowerCase().trim();
+function normalizeUnit(unit: string | null): Unit {
+    return canonicalNormalizeUnit(unit);
 }
 
 /**
@@ -180,13 +176,14 @@ export function convertToMetric(
     }
 
     // Weight conversions (oz, lb → g) with smart rounding
+    // Units are now canonical, so we only need to check 'oz' and 'lb'
     if (IMPERIAL_WEIGHT_UNITS.has(normalizedUnit)) {
         try {
             let grams: number;
 
-            if (normalizedUnit === 'oz' || normalizedUnit === 'ounce' || normalizedUnit === 'ounces') {
+            if (normalizedUnit === 'oz') {
                 grams = convert(numericQuantity, 'oz').to('g');
-            } else if (normalizedUnit === 'lb' || normalizedUnit === 'pound' || normalizedUnit === 'pounds' || normalizedUnit === 'lbs') {
+            } else if (normalizedUnit === 'lb') {
                 grams = convert(numericQuantity, 'lb').to('g');
             } else {
                 return {metricQuantity: null, metricUnit: null};
@@ -268,6 +265,7 @@ export function isConvertibleWeightUnit(unit: string | null): boolean {
 
 /**
  * Get the metric equivalent of an imperial weight unit
+ * Units are now canonical, so only need to check 'oz' and 'lb'
  *
  * @param unit - Imperial unit (oz, lb)
  * @returns Metric equivalent (g, kg)
@@ -275,10 +273,10 @@ export function isConvertibleWeightUnit(unit: string | null): boolean {
 export function getMetricWeightUnit(unit: string): string {
     const normalized = normalizeUnit(unit);
 
-    if (normalized === 'oz' || normalized === 'ounce' || normalized === 'ounces') {
+    if (normalized === 'oz') {
         return 'g';
     }
-    if (normalized === 'lb' || normalized === 'pound' || normalized === 'pounds' || normalized === 'lbs') {
+    if (normalized === 'lb') {
         return 'kg';
     }
     return unit; // Already metric or unknown
@@ -286,6 +284,7 @@ export function getMetricWeightUnit(unit: string): string {
 
 /**
  * Get the imperial equivalent of a metric weight unit
+ * Units are now canonical, so only need to check 'g' and 'kg'
  *
  * @param unit - Metric unit (g, kg)
  * @returns Imperial equivalent (oz, lb)
@@ -294,10 +293,10 @@ export function getImperialWeightUnit(unit: string): string {
     const normalized = normalizeUnit(unit);
     if (!normalized) return unit;
 
-    if (normalized === 'g' || normalized === 'gram' || normalized === 'grams') {
+    if (normalized === 'g') {
         return 'oz';
     }
-    if (normalized === 'kg' || normalized === 'kilogram' || normalized === 'kilograms') {
+    if (normalized === 'kg') {
         return 'lb';
     }
     return unit; // Already imperial or unknown

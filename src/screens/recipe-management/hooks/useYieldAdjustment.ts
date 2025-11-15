@@ -71,9 +71,9 @@ export function useYieldAdjustment(recipe: IRecipe): UseYieldAdjustmentReturn {
         });
     }, [state]);
 
-    // Increment yield by 1
+    // Increment yield by 1 or 0.5 if 1
     const increment = useCallback(() => {
-        const newYield = state.currentYield + 1;
+        const newYield = state.currentYield < 1 ? 1 : state.currentYield + 1;
         const validationError = validateYield(newYield, state.originalYield);
 
         // If at maximum, no-op (don't show error)
@@ -84,9 +84,9 @@ export function useYieldAdjustment(recipe: IRecipe): UseYieldAdjustmentReturn {
         adjustYield(newYield);
     }, [state.currentYield, state.originalYield, adjustYield]);
 
-    // Decrement yield by 1
+    // Decrement yield by 1 or 0.5 if < 1
     const decrement = useCallback(() => {
-        const newYield = state.currentYield - 1;
+        const newYield = state.currentYield === 1 ? 0.5 : state.currentYield - 1;
         const validationError = validateYield(newYield, state.originalYield);
 
         // If at minimum, no-op (don't show error)

@@ -39,7 +39,7 @@
 ### Excluded Files
 The following files are excluded from coverage requirements as they are:
 - Type definitions only (`src/interfaces/**`)
-- Simple UI wrapper components (`src/components/ui/tooltip.tsx`, `src/components/ui/toaster.tsx`, `src/components/ui/color-mode.ts`)
+- Simple UI wrapper components (`src/components/ui/tooltip.tsx`, `src/components/ui/Toaster.tsx`, `src/components/ui/color-mode.ts`)
 - Basic wrapper components (`src/ColorModeSwitcher.tsx`)
 - Build/config files
 - Test files and mocks

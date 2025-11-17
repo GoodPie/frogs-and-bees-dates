@@ -1,6 +1,6 @@
 import {useState, useCallback} from 'react';
 import {auth} from "@/FirebaseConfig.ts";
-import {toaster} from "@/components/ui/toaster.tsx";
+import {toaster} from "@/components/ui/useToaster.tsx";
 import {GoogleAuthProvider, signInWithPopup, type User} from 'firebase/auth';
 import type {FirebaseError} from "firebase/app";
 

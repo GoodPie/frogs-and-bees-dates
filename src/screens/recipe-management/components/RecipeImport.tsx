@@ -14,7 +14,7 @@ import {
     useDisclosure,
     Collapsible,
 } from '@chakra-ui/react';
-import {toaster} from "@/components/ui/toaster"
+import {toaster} from "@/components/ui/useToaster.tsx"
 import {AiOutlineImport, AiOutlineClose, AiOutlineCheckCircle, AiOutlineWarning} from 'react-icons/ai';
 import {executeRecaptchaV3} from '@/utils/recaptchaV3';
 import {useRecipeImport} from '@/screens/recipe-management/hooks/useRecipeImport.ts';

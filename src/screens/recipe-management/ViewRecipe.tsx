@@ -9,6 +9,7 @@ import { iso8601ToReadable } from '@/utils/durationFormat';
 import { ROUTES, getRecipeEditRoute } from '@/routing/routes';
 import { IngredientList, type DisplayMode } from '@/screens/recipe-management/components/IngredientList.tsx';
 import { YieldAdjuster } from '@/screens/recipe-management/components/YieldAdjuster.tsx';
+import { ScaledInstructionDisplay } from '@/screens/recipe-management/components/ScaledInstructionDisplay.tsx';
 import { useYieldAdjustment } from '@/screens/recipe-management/hooks/useYieldAdjustment.ts';
 import type { IRecipe } from '@/screens/recipe-management/types/Recipe.ts';
 
@@ -216,9 +217,13 @@ const ViewRecipe = () => {
 
                         {recipe.parsedIngredients && recipe.parsedIngredients.length > 0 ? (
                             <IngredientList
-                                ingredients={recipe.parsedIngredients}
+                                ingredients={
+                                    yieldAdjustment.scaledIngredients?.map(si => ({
+                                        ...si.original,
+                                        quantity: si.scaledQuantity ?? si.original.quantity,
+                                    })) || recipe.parsedIngredients
+                                }
                                 displayMode={displayMode}
-                                yieldMultiplier={yieldAdjustment.yieldState.yieldMultiplier}
                             />
                         ) : (
                             <VStack align="stretch" gap={2}>
@@ -243,23 +248,15 @@ const ViewRecipe = () => {
                                 references: [],
                                 warnings: [],
                             }))).map((instruction, index) => (
-                                <Box
-                                    key={`step${index}`}
-                                    borderLeft={instruction.wasScaled ? "3px solid" : undefined}
-                                    borderColor={instruction.wasScaled ? "blue.400" : undefined}
-                                    bg={instruction.wasScaled ? "blue.50" : undefined}
-                                    p={instruction.wasScaled ? 3 : 0}
-                                    borderRadius={instruction.wasScaled ? "md" : undefined}
-                                >
+                                <Box key={`step${index}`}>
                                     <Text fontWeight="bold" fontSize={{base: "md", md: "lg"}} mb={1}>
                                         Step {index + 1}
-                                        {instruction.wasScaled && (
-                                            <Badge ml={2} colorScheme="blue" size="sm">
-                                                Scaled
-                                            </Badge>
-                                        )}
                                     </Text>
-                                    <Text fontSize={{base: "md", md: "lg"}}>{instruction.scaled}</Text>
+                                    <ScaledInstructionDisplay
+                                        instruction={instruction}
+                                        scaledIngredients={yieldAdjustment.scaledIngredients || []}
+                                        fontSize={{base: "md", md: "lg"}}
+                                    />
                                 </Box>
                             ))}
                         </VStack>

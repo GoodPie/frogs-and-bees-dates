@@ -235,12 +235,31 @@ const ViewRecipe = () => {
                     <Box>
                         <Heading size={{base: "lg", md: "xl"}} mb={{base: 3, md: 4}}>Instructions</Heading>
                         <VStack align="stretch" gap={{base: 3, md: 4}}>
-                            {recipe.recipeInstructions.map((instruction, index) => (
-                                <Box key={`step${index}`}>
+                            {(yieldAdjustment.scaledInstructions || recipe.recipeInstructions.map((instruction) => ({
+                                original: instruction,
+                                scaled: instruction,
+                                wasScaled: false,
+                                referenceCount: 0,
+                                references: [],
+                                warnings: [],
+                            }))).map((instruction, index) => (
+                                <Box
+                                    key={`step${index}`}
+                                    borderLeft={instruction.wasScaled ? "3px solid" : undefined}
+                                    borderColor={instruction.wasScaled ? "blue.400" : undefined}
+                                    bg={instruction.wasScaled ? "blue.50" : undefined}
+                                    p={instruction.wasScaled ? 3 : 0}
+                                    borderRadius={instruction.wasScaled ? "md" : undefined}
+                                >
                                     <Text fontWeight="bold" fontSize={{base: "md", md: "lg"}} mb={1}>
                                         Step {index + 1}
+                                        {instruction.wasScaled && (
+                                            <Badge ml={2} colorScheme="blue" size="sm">
+                                                Scaled
+                                            </Badge>
+                                        )}
                                     </Text>
-                                    <Text fontSize={{base: "md", md: "lg"}}>{instruction}</Text>
+                                    <Text fontSize={{base: "md", md: "lg"}}>{instruction.scaled}</Text>
                                 </Box>
                             ))}
                         </VStack>

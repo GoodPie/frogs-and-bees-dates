@@ -3,6 +3,7 @@ import type {
     IRecipe,
     YieldAdjustmentState,
     ScaledIngredient,
+    ScaledInstruction,
     YieldValidationError
 } from '@/screens/recipe-management/types/Recipe';
 import {
@@ -13,6 +14,7 @@ import {
 } from '@/screens/recipe-management/utils/yieldCalculations';
 import {decimalToFraction} from '@/screens/recipe-management/utils/fractionFormatter';
 import {fractionToDecimal} from "@/services/ingredientParser.ts";
+import {scaleInstructions} from '@/screens/recipe-management/utils/instructionScaling';
 
 export interface UseYieldAdjustmentReturn {
     /** Current yield adjustment state */
@@ -35,6 +37,18 @@ export interface UseYieldAdjustmentReturn {
 
     /** Current validation error (if any) */
     error: YieldValidationError | null;
+
+    /** Instructions with scaled ingredient quantities (undefined if recipe has no instructions) */
+    scaledInstructions: ScaledInstruction[] | undefined;
+
+    /** Total number of ingredient references found across all instructions */
+    totalReferences: number;
+
+    /** Whether instruction scaling is currently enabled */
+    scalingEnabled: boolean;
+
+    /** Toggle instruction scaling on/off */
+    toggleScaling: () => void;
 }
 
 export function useYieldAdjustment(recipe: IRecipe): UseYieldAdjustmentReturn {
@@ -51,6 +65,7 @@ export function useYieldAdjustment(recipe: IRecipe): UseYieldAdjustmentReturn {
     });
 
     const [error, setError] = useState<YieldValidationError | null>(null);
+    const [scalingEnabled, setScalingEnabled] = useState(true);
 
     // Adjust yield to specific value
     const adjustYield = useCallback((newYield: number) => {
@@ -146,6 +161,39 @@ export function useYieldAdjustment(recipe: IRecipe): UseYieldAdjustmentReturn {
         });
     }, [recipe.parsedIngredients, state.yieldMultiplier]);
 
+    // Calculate scaled instructions (memoized)
+    const scaledInstructions = useMemo<ScaledInstruction[] | undefined>(() => {
+        if (
+            !recipe.recipeInstructions ||
+            !scaledIngredients ||
+            !scalingEnabled
+        ) {
+            return undefined;
+        }
+
+        return scaleInstructions(
+            recipe.recipeInstructions,
+            scaledIngredients
+        );
+    }, [
+        recipe.recipeInstructions,
+        scaledIngredients,
+        scalingEnabled,
+    ]);
+
+    // Calculate total references
+    const totalReferences = useMemo(() => {
+        return scaledInstructions?.reduce(
+            (sum, inst) => sum + inst.referenceCount,
+            0
+        ) ?? 0;
+    }, [scaledInstructions]);
+
+    // Toggle scaling on/off
+    const toggleScaling = useCallback(() => {
+        setScalingEnabled(prev => !prev);
+    }, []);
+
     return {
         yieldState: state,
         scaledIngredients,
@@ -154,5 +202,9 @@ export function useYieldAdjustment(recipe: IRecipe): UseYieldAdjustmentReturn {
         decrement,
         reset,
         error,
+        scaledInstructions,
+        totalReferences,
+        scalingEnabled,
+        toggleScaling,
     };
 }

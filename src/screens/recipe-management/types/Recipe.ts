@@ -118,6 +118,12 @@ export const RecipeSchema = z.object({
     parsedIngredients: z.custom<ParsedIngredient[]>().optional(),
     ingredientParsingCompleted: z.boolean().optional(),
     ingredientParsingDate: z.date().optional(),
+
+    // Instruction scaling metadata (new fields for instruction scaling feature)
+    /** Parsed instructions with segments for precise scaling control */
+    parsedInstructions: z.custom<StructuredInstruction[]>().optional(),
+    /** User's manual exclusions of specific ingredient references from scaling */
+    scalingExclusions: z.custom<ScalingExclusion[]>().optional(),
 });
 
 // Export TypeScript types inferred from Zod schemas
@@ -194,4 +200,158 @@ export interface YieldValidationError {
 
     /** Suggested corrected value (if applicable) */
     suggestedValue?: number;
+}
+
+/**
+ * A reference to an ingredient within instruction text
+ */
+export interface IngredientReference {
+    /** The full matched text (e.g., "**2 eggs**") */
+    fullMatch: string;
+
+    /** The ingredient name as it appears in text (e.g., "eggs") */
+    ingredientName: string;
+
+    /** The quantity as it appears in text (e.g., "2", "1.5", "1/2") */
+    originalQuantity: string;
+
+    /** The unit if present (e.g., "cups", "tbsp", null for count items) */
+    unit: string | null;
+
+    /** Formatting markers before quantity (e.g., "**") */
+    preFormat: string;
+
+    /** Formatting markers after ingredient (e.g., "**") */
+    postFormat: string;
+
+    /** Start index in the instruction string */
+    startIndex: number;
+
+    /** End index in the instruction string */
+    endIndex: number;
+
+    /** Whether this reference matched an ingredient from the recipe's ingredient list */
+    isMatched: boolean;
+
+    /** The matched ParsedIngredient from recipe (if isMatched = true) */
+    matchedIngredient?: ParsedIngredient;
+}
+
+/**
+ * Result of scaling a single instruction with ingredient quantities
+ */
+export interface ScaledInstruction {
+    /** Original instruction text */
+    original: string;
+
+    /** Scaled instruction text with updated quantities */
+    scaled: string;
+
+    /** Whether any scaling occurred in this instruction */
+    wasScaled: boolean;
+
+    /** Number of ingredient references found */
+    referenceCount: number;
+
+    /** Ingredient references that were found and processed */
+    references: IngredientReference[];
+
+    /** Warnings for edge cases (e.g., "Ambiguous reference: multiple flours found") */
+    warnings: string[];
+}
+
+/**
+ * Options for customizing instruction scaling behavior
+ */
+export interface InstructionScalingOptions {
+    /** Whether to preserve markdown formatting (default: true) */
+    preserveFormatting: boolean;
+
+    /** Whether to use fraction symbols (½, ⅓) instead of decimals (default: true) */
+    useFractionSymbols: boolean;
+
+    /** Whether to scale "to taste" ingredients (default: false) */
+    scaleToTaste: boolean;
+
+    /** Minimum confidence threshold for ingredient matching (0-1, default: 0.7) */
+    matchConfidenceThreshold: number;
+
+    /** Whether to log warnings for ambiguous matches (default: true in dev) */
+    logWarnings: boolean;
+
+    /** Maximum number of references to process per instruction (default: 20) */
+    maxReferencesPerInstruction: number;
+}
+
+/**
+ * Segment-based instruction data model
+ * Instructions are parsed into segments for precise control over scaling
+ */
+
+/**
+ * Text segment - plain text with no scaling
+ */
+export interface TextSegment {
+    type: 'text';
+    content: string;
+}
+
+/**
+ * Ingredient reference segment - contains a scalable ingredient reference
+ */
+export interface IngredientRefSegment {
+    type: 'ingredient_ref';
+    /** The matched text (e.g., "2 cups flour") */
+    originalText: string;
+    /** The ingredient name from the recipe ingredient list */
+    ingredientName: string;
+    /** Original quantity as string (e.g., "2", "1.5", "1/2") */
+    originalQuantity: string;
+    /** Optional unit (e.g., "cup", "tbsp", null) */
+    unit: string | null;
+    /** Preposition if present (e.g., "of", "with", null) */
+    preposition: string | null;
+    /** Index in the original ingredient list for lookup */
+    ingredientIndex: number;
+    /** Whether scaling is disabled by user for this specific reference */
+    scalingDisabled: boolean;
+    /** Text before ingredient (for formatting) */
+    preFormat?: string;
+    /** Text after ingredient (for formatting) */
+    postFormat?: string;
+}
+
+/**
+ * Discriminated union of all segment types
+ */
+export type InstructionSegment = TextSegment | IngredientRefSegment;
+
+/**
+ * Structured instruction with segments
+ */
+export interface StructuredInstruction {
+    /** Unique identifier for this instruction */
+    id: string;
+    /** Original full instruction text (for rebuilding) */
+    originalText: string;
+    /** Parsed segments */
+    segments: InstructionSegment[];
+    /** Step number (1-based) */
+    stepNumber: number;
+}
+
+/**
+ * User's manual exclusion of a specific ingredient reference from scaling
+ */
+export interface ScalingExclusion {
+    /** Unique identifier for this exclusion */
+    id: string;
+    /** Instruction step number (1-based) */
+    stepNumber: number;
+    /** The exact text that was excluded (for matching during rebuilds) */
+    excludedText: string;
+    /** The ingredient name that was excluded */
+    ingredientName: string;
+    /** Timestamp when exclusion was created */
+    createdAt: number;
 }

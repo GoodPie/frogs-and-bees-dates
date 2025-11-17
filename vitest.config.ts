@@ -1,33 +1,49 @@
-import { defineConfig } from 'vitest/config'
+import path from 'node:path'
+
 import react from '@vitejs/plugin-react-swc'
+import { defineConfig } from 'vitest/config'
 
-import { fileURLToPath } from 'node:url'
-import path from "node:path";
+import { rootDir, viteAliases } from './config/paths'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const testInclude = [
+    'tests/**/*.{test,spec}.{ts,tsx}',
+    'src/**/*.{test,spec}.{ts,tsx}',
+]
+
+const testExclude = ['**/node_modules/**', '**/dist/**', '**/build/**']
+
+const setupFiles = [path.join(rootDir, 'setup-test.ts')]
 
 export default defineConfig({
     plugins: [react()],
     resolve: {
-        alias: {
-            '@': path.resolve(__dirname, './src')
-        }
+        alias: viteAliases,
     },
     test: {
         environment: 'jsdom',
-        setupFiles: './setup-test.ts',
-        include: ['**/*.{test,spec}.{ts,tsx}'],
-        exclude: ['**/node_modules/**', '**/dist/**', '**/build/**'],
+        setupFiles,
+        include: testInclude,
+        exclude: testExclude,
         coverage: {
             provider: 'v8',
-            reporter: ['text', 'json', 'html', 'lcov'],
+            reporter: ['text', 'json', 'json-summary', 'html', 'lcov'],
+            reportsDirectory: 'coverage',
+            include: ['src/**/*.{ts,tsx}', 'tests/**/*.{ts,tsx}'],
             exclude: [
-                'node_modules/',
+                'node_modules/**',
+                'coverage/**',
+                'dist/**',
+                'build/**',
                 'setup-test.ts',
                 '**/*.d.ts',
                 '**/*.config.*',
-                '**/dist/**',
                 '**/__mocks__/**',
+                'config/**',
+                'functions/**',
+                'public/**',
+                'specs/**',
+                'docs/**',
+                'scripts/**',
             ],
             thresholds: {
                 statements: 85,

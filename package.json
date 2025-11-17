@@ -26,17 +26,20 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint src/ vite.config.ts --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "eslint src/ vite.config.ts --ext .js,.jsx,.ts,.tsx --fix",
-    "lint:coverage": "eslint . --ext .js,.jsx,.ts,.tsx && npm run test:coverage:validate",
+    "typecheck": "tsc -b --pretty false",
+    "build": "npm run typecheck && vite build",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:ci": "CI=1 eslint . --max-warnings=0",
+    "lint:coverage": "eslint . && npm run validate:coverage",
     "preview": "vite preview",
-    "test": "vitest",
-    "test:coverage": "vitest --coverage",
-    "test:coverage:validate": "vitest --coverage --run --reporter=verbose",
-    "test:coverage:ci": "vitest --coverage --run --reporter=json --outputFile=coverage/coverage-summary.json",
-    "validate:coverage": "node scripts/validate-coverage.js",
-    "test:ui": "vitest --ui"
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage --reporter=default --reporter=json --outputFile=coverage/vitest-report.json",
+    "test:coverage:ci": "vitest run --coverage --reporter=json --outputFile=coverage/vitest-report.json",
+    "validate:coverage": "npm run test:coverage && node scripts/validate-coverage.js",
+    "test:ui": "vitest --ui",
+    "verify:tooling": "tsx scripts/verify-tooling.ts",
+    "validate:tooling": "npm run lint && npm run build && npm run test:coverage"
   },
   "browserslist": {
     "production": [
@@ -62,15 +65,16 @@
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react-swc": "^4.1.0",
     "@vitest/coverage-v8": "^3.2.4",
-    "eslint": "^9.38.0",
+    "eslint": "9.38.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
     "globals": "^16.4.0",
     "jsdom": "^27.0.1",
     "resize-observer-polyfill": "^1.5.1",
-    "typescript": "~5.9.3",
-    "typescript-eslint": "^8.45.0",
+    "tsx": "^4.20.6",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.46.1",
     "vite": "npm:rolldown-vite@7.1.14",
-    "vitest": "^3.2.4"
+    "vitest": "3.2.4"
   }
 }

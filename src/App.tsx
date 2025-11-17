@@ -1,5 +1,5 @@
 import {Box, ChakraProvider, defaultSystem, HStack} from "@chakra-ui/react"
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/Toaster.tsx"
 import {BrowserRouter} from "react-router-dom"
 
 import "./main.css";

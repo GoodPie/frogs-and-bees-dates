@@ -4,6 +4,9 @@ import { vi, beforeEach, expect } from "vitest"
 import { firebaseMocks, resetFirebaseMocks } from "@/__mocks__/firebase"
 import * as matchers from '@testing-library/jest-dom/matchers'
 
+const TEST_SUITE_DIRECTORIES = Object.freeze(['tests/unit', 'tests/integration', 'src'])
+const TEST_SETUP_FILES = Object.freeze(['setup-test.ts'])
+
 const { JSDOM } = jsdom;
 
 // Extend Vitest's expect with jest-dom matchers
@@ -196,9 +199,12 @@ Object.assign(globalThis, {
   window,
   document: window.document,
   __firebaseMocks: firebaseMocks,
+  __TEST_SUITE_DIRECTORIES: TEST_SUITE_DIRECTORIES,
+  __TEST_SETUP_FILES: TEST_SETUP_FILES,
 });
 
 // Reset Firebase mocks before each test
 beforeEach(() => {
+  vi.clearAllMocks();
   resetFirebaseMocks();
 });

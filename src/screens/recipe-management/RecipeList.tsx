@@ -19,7 +19,7 @@ import {useRecipes} from '@/screens/recipe-management/hooks/useRecipes.ts';
 import {RecipeCard} from '@/screens/recipe-management/components/RecipeCard.tsx';
 import {RecipeImportButton} from '@/screens/recipe-management/components/RecipeImport.tsx';
 import {ROUTES} from '@/routing/routes';
-import {toaster} from "@/components/ui/toaster.tsx";
+import {toaster} from "@/components/ui/useToaster.tsx";
 
 /**
  * Recipe list screen showing all recipes with filtering and search
